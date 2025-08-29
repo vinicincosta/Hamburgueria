@@ -1,8 +1,10 @@
 import flet as ft
 from flet import AppBar, Text, View
+from flet.core.alignment import top_left
+from flet.core.border_radius import horizontal
 from flet.core.colors import Colors
 from flet.core.icons import Icons
-from api.routes import *
+
 
 
 def main(page: ft.Page):
@@ -42,27 +44,37 @@ def main(page: ft.Page):
 
     def gerencia_rotas(e):
         page.views.clear()
+        # page.padding = 0
         page.views.append(
             View(
                 "/login",
                 [
-                    ft.Column(
-                        [
-                            ft.Text("Bem-vindo à Biblioteca", size=24, weight=ft.FontWeight.BOLD),
-                            ft.Container(height=10),  # Espaçamento
-                            input_email,
-                            input_senha,
-                            ft.Container(height=10),  # Espaçamento
-                            loading_indicator,
-                            spacing,
-                            btn_login,
-                        ],
-                        # Alinha a coluna de login no centro horizontal da página
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+
+                    ft.Container(
+                        width=page.window.width,
                         height=page.window.height,
-                        alignment=ft.MainAxisAlignment.CENTER,
-                    )
-                ]
+                        image=ft.DecorationImage(
+                            src="assets/fundo.jpg",
+                        )
+                    ),
+
+                    # ft.Column(
+                    #     [
+                    #         ft.Text("Bem-vindo à Biblioteca", size=24, weight=ft.FontWeight.BOLD),
+                    #         ft.Container(height=10),  # Espaçamento
+                    #         input_email,
+                    #         input_senha,
+                    #         ft.Container(height=10),  # Espaçamento
+                    #         loading_indicator,
+                    #         spacing,
+                    #         btn_login,
+                    #     ],
+                    #     # Alinha a coluna de login no centro horizontal da página
+                    #     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    #     height=page.window.height,
+                    #     alignment=ft.MainAxisAlignment.CENTER,
+                    # )
+                ],bgcolor=Colors.BLACK,floating_action_button=usuario,
             )
         )
 
@@ -155,7 +167,8 @@ def main(page: ft.Page):
         width=300,
         height=45,
     )
-
+    usuario = ft.TextButton(icon=Icons.LOGIN, text="cadastrar", icon_color=Colors.RED_700,
+                                              on_click=lambda _: page.go('/usuarios'))
     btn_logout = ft.TextButton(
         icon=Icons.LOGOUT,
         scale=1.5,
@@ -168,6 +181,15 @@ def main(page: ft.Page):
         width=page.window.width,
         height=45,
     )
+
+    # container = ft.Container(
+    #     width=800,
+    #     height=600,
+    #     image_src="assets/fundo.jpg",  # URL ou caminho local
+    #     image_fit=ft.ImageFit.COVER,  # Ajusta a imagem para cobrir o fundo
+    #     content=ft.Text("Texto sobre a imagem", size=30, color="white"),
+    #     alignment=ft.alignment.center
+    # )
 
     btn_cancelar = ft.OutlinedButton(
         text="Cancelar",
