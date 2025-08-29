@@ -1,0 +1,35 @@
+*, body{
+    margin: 0;
+    padding: 0;
+}
+header{
+    width: 100vw;
+    height: 10vh;
+    background-color: red;
+    /*#161E25*/
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.menu-button{
+    color: #F2D43D;
+    font-size: 32px;
+    cursor: pointer;
+}
+.logo-img{
+    height: 6vh;
+    width: 6vh;
+    border-radius: 6vh;
+    background-color: #a13df2;
+}
+.container-start{
+    display: flex;
+    justify-content: space-evenly;
+    /*padding: 3vh;*/
+}
+.perfil-img{
+    height: 6vh;
+    width: 6vh;
+    border-radius: 6vh;
+    background-color: aqua;
+}
