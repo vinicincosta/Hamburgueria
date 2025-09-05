@@ -1,10 +1,13 @@
+from tkinter.constants import CENTER
+
 import flet as ft
 from flet import AppBar, Text, View
-from flet.core.alignment import top_left
+from flet.core.alignment import top_left, bottom_center
 from flet.core.border_radius import horizontal
+from flet.core.box import BoxDecoration
 from flet.core.colors import Colors
 from flet.core.icons import Icons
-
+from flet.core.text_style import TextStyle
 
 
 def main(page: ft.Page):
@@ -74,44 +77,29 @@ def main(page: ft.Page):
                     #     height=page.window.height,
                     #     alignment=ft.MainAxisAlignment.CENTER,
                     # )
-                ],bgcolor=Colors.BLACK,floating_action_button=usuario,
+                ],bgcolor=Colors.BLACK,floating_action_button=usuario,horizontal_alignment=ft.CrossAxisAlignment.CENTER,vertical_alignment=ft.MainAxisAlignment.CENTER
             )
         )
-
-        if page.route == "/usuarios":
-            fab_add_usuario.visible = page.client_storage.get("papel") == "admin"
-
-
+        if page.route == "/login":
             page.views.append(
                 View(
-                    "/",
+                    "/login",
                     [
-                        AppBar(title=Text("Usuarios"), center_title=True, bgcolor=Colors.PRIMARY_CONTAINER,
-                               leading=ft.Icon(), actions=[btn_logout]),
-                        lv_usuarios
-                    ],
-                    floating_action_button=fab_add_usuario,
-                    horizontal_alignment=ft.CrossAxisAlignment.END,
-                    scroll=ft.ScrollMode.HIDDEN,
-                )
-            )
-
-        if page.route == "/add_usuario":
-            page.views.append(
-                View(
-                    "/add_usuario",
-                    [
-                        AppBar(title=Text("Novo Usuario"), center_title=True, bgcolor=Colors.PRIMARY_CONTAINER,
-                               leading=ft.Icon(), actions=[btn_logout]),
-                        input_nome,
-                        input_email,
-                        input_senha,
-                        input_papel,
-                        btn_salvar,
-                        btn_cancelar,
-                        loading_indicator
-                    ],
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER
+                        AppBar(title=Text('login',),center_title=True,bgcolor=Colors.BLACK,color=Colors.PURPLE,leading=logo),
+                        ft.Container(
+                            width=page.window.width,
+                            height=page.window.height,
+                            image=ft.DecorationImage(
+                                src="assets/fundo.jpg",opacity=0.8
+                            ),
+                            content=ft.Column([
+                                ft.TextField(label=Text('email',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800),
+                                ft.TextField(label=Text('senha',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,password=True,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800,can_reveal_password=True),
+                                ft.ElevatedButton(text='logar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE),
+                                ft.ElevatedButton(text='cadastrar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE),
+                            ])
+                        ),
+                    ],bgcolor=Colors.BLACK,horizontal_alignment=ft.CrossAxisAlignment.CENTER,padding=11,vertical_alignment=ft.MainAxisAlignment.CENTER
                 )
             )
 
@@ -167,8 +155,19 @@ def main(page: ft.Page):
         width=300,
         height=45,
     )
-    usuario = ft.TextButton(icon=Icons.LOGIN, text="cadastrar", icon_color=Colors.RED_700,
-                                              on_click=lambda _: page.go('/usuarios'))
+
+    logo = ft.GestureDetector(
+        on_tap=lambda e: page.go("/"),  # substitua "/inicio" pela rota que quiser
+        content=ft.Image(
+            src="/assets/logoDois.png",  # troque para o caminho da sua imagem local ou URL
+
+            color=Colors.WHITE,
+            fit=ft.ImageFit.CONTAIN
+        )
+    )
+
+    usuario = ft.TextButton(icon=Icons.LOGIN, text="Entrar", icon_color=Colors.RED_700,
+                                              on_click=lambda _: page.go('/login'))
     btn_logout = ft.TextButton(
         icon=Icons.LOGOUT,
         scale=1.5,
