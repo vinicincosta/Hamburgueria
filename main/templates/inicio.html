@@ -7,13 +7,30 @@
     <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
+    <nav id="nav">
+        <div class="container-nav">
+            <div class="header-nav">
+<!--                <img onclick="closeNav()" id="close-menu" src="https://images.emojiterra.com/openmoji/v14.0/512px/2716.png" alt="Fechar">-->
+                <p onclick="closeNav()">X</p>
+            </div>
+            <div class="content-nav">
+                <ul>
+                    <li>FUNC<ul><li>TABELA</li><li>CARDS</li></ul></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
     <header>
         <div class="container-start">
-            <div class="menu-button">&#9776</div>
+            <div class="menu-button" onclick="openNav()">&#9776</div>
             <div class="logo-img"></div>
         </div>
         <h1>ROYAL BURGER</h1>
-        <div class="perfil-img"></div>
+        <div class="perfil-img" onclick="alert('PERFIL')"></div>
     </header>
+    <main>
+
+    </main>
+    <script src="/main.js"></script>
 </body>
 </html>
