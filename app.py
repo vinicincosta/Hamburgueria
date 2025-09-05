@@ -8,6 +8,7 @@ from flet.core.box import BoxDecoration
 from flet.core.colors import Colors
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle
+from flet.core.types import FontWeight
 
 
 def main(page: ft.Page):
@@ -50,7 +51,7 @@ def main(page: ft.Page):
         # page.padding = 0
         page.views.append(
             View(
-                "/login",
+                "/",
                 [
 
                     ft.Container(
@@ -85,7 +86,8 @@ def main(page: ft.Page):
                 View(
                     "/login",
                     [
-                        AppBar(title=Text('login',),center_title=True,bgcolor=Colors.BLACK,color=Colors.PURPLE,leading=logo),
+                        AppBar(title=logo,center_title=True,bgcolor=Colors.BLACK,color=Colors.PURPLE,title_spacing=5
+                              ),
                         ft.Container(
                             width=page.window.width,
                             height=page.window.height,
@@ -93,19 +95,43 @@ def main(page: ft.Page):
                                 src="assets/fundo.jpg",opacity=0.8
                             ),
                             content=ft.Column([
+
                                 ft.TextField(label=Text('email',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800),
                                 ft.TextField(label=Text('senha',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,password=True,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800,can_reveal_password=True),
-                                ft.ElevatedButton(text='logar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE),
+                                ft.ElevatedButton(text='logar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE,on_click=lambda _: page.go("/mesa")),
                                 ft.ElevatedButton(text='cadastrar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE),
-                            ])
+                            ],horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         ),
                     ],bgcolor=Colors.BLACK,horizontal_alignment=ft.CrossAxisAlignment.CENTER,padding=11,vertical_alignment=ft.MainAxisAlignment.CENTER
                 )
             )
+        if page.route == "/mesa":
+            page.views.append(
+                View(
+                    "/mesa",
+                    [
+                        AppBar(title=Text('teste'),leading=fundo,bgcolor=Colors.DEEP_PURPLE)
 
+
+
+
+
+
+
+
+
+
+
+
+                        ,
+                    ],bgcolor=Colors.BLACK,
+                )
+            )
         page.update()
 
     # Componentes
+
+
 
     fab_add_usuario = ft.FloatingActionButton(
         icon=Icons.ADD,
@@ -156,12 +182,17 @@ def main(page: ft.Page):
         height=45,
     )
 
-    logo = ft.GestureDetector(
+
+    logo = ft.Image(
+            src="assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+            fit=ft.ImageFit.CONTAIN,
+        width=80,opacity=0.7
+        )
+
+    fundo = ft.GestureDetector(
         on_tap=lambda e: page.go("/"),  # substitua "/inicio" pela rota que quiser
         content=ft.Image(
-            src="/assets/logoDois.png",  # troque para o caminho da sua imagem local ou URL
-
-            color=Colors.WHITE,
+            src="assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
             fit=ft.ImageFit.CONTAIN
         )
     )
