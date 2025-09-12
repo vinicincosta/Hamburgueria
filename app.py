@@ -6,6 +6,7 @@ from flet.core.alignment import top_left, bottom_center
 from flet.core.border_radius import horizontal
 from flet.core.box import BoxDecoration
 from flet.core.colors import Colors
+from flet.core.dropdown import Option
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle
 from flet.core.types import FontWeight
@@ -58,6 +59,8 @@ def main(page: ft.Page):
                 page.go("/primeira_user")  # Redireciona para a rota do usuário
             elif papel == "garcom":
                 page.go("/mesa")  # Redireciona para a rota garçom
+            elif papel == "admin":
+                page.go("/mesa")
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
         else:
@@ -72,7 +75,6 @@ def main(page: ft.Page):
         papel = input_papel.value
         salario = slider_salario.value
         cpf = input_cpf.value
-
 
         if nome and email and senha and papel:
             loading_indicator.visible = True
@@ -118,7 +120,6 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
 
-
     def gerencia_rotas(e):
         page.views.clear()
         # page.padding = 0
@@ -151,7 +152,8 @@ def main(page: ft.Page):
                     #     height=page.window.height,
                     #     alignment=ft.MainAxisAlignment.CENTER,
                     # )
-                ],bgcolor=Colors.BLACK,floating_action_button=usuario,horizontal_alignment=ft.CrossAxisAlignment.CENTER,vertical_alignment=ft.MainAxisAlignment.CENTER
+                ], bgcolor=Colors.BLACK, floating_action_button=usuario,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER, vertical_alignment=ft.MainAxisAlignment.CENTER
             )
         )
 
@@ -160,32 +162,50 @@ def main(page: ft.Page):
                 View(
                     "/login",
                     [
-                        AppBar(title=logo,center_title=True,bgcolor=Colors.BLACK,color=Colors.PURPLE,title_spacing=5
-                              ),
+                        AppBar(title=logo, center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE, title_spacing=5
+                               ),
                         ft.Container(
                             width=page.window.width,
                             height=page.window.height,
                             image=ft.DecorationImage(
-                                src="assets/fundo.jpg",opacity=0.8
+                                src="assets/imagem1.png ", opacity=0.8
                             ),
                             content=ft.Column([
                                 input_email,
                                 input_senha,
                                 btn_login,
                                 btn_cadastro_login
-                            ],horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         ),
-                    ],bgcolor=Colors.BLACK,horizontal_alignment=ft.CrossAxisAlignment.CENTER,padding=11,vertical_alignment=ft.MainAxisAlignment.CENTER
+                    ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
+                    vertical_alignment=ft.MainAxisAlignment.CENTER
                 )
             )
+
+        if page.route == "/cadastrar_pessoa":
+            page.views.append(
+                View(
+                    "/cadastrar_pessoa",
+                    [
+                        AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.DEEP_PURPLE),
+                        input_email,
+                        input_senha,
+                        input_papel_user,
+                        input_status_user_usuario
+
+                    ]
+                )
+            )
+
+
         if page.route == "/mesa":
             page.views.append(
                 View(
                     "/mesa",
                     [
-                        AppBar(title=Text('teste'),leading=fundo,bgcolor=Colors.DEEP_PURPLE)
+                        AppBar(title=Text('teste'), leading=fundo, bgcolor=Colors.DEEP_PURPLE)
                         ,
-                    ],bgcolor=Colors.BLACK,
+                    ], bgcolor=Colors.BLACK,
                 )
             )
         page.update()
@@ -195,7 +215,7 @@ def main(page: ft.Page):
 
     fab_add_usuario = ft.FloatingActionButton(
         icon=Icons.ADD,
-        on_click= lambda _: page.go("/add_usuario")
+        on_click=lambda _: page.go("/add_usuario")
     )
 
     lv_usuarios = ft.ListView(expand=True)
@@ -223,18 +243,12 @@ def main(page: ft.Page):
         can_reveal_password=True
     )
 
-
     input_nome = ft.TextField(
         label="Nome",
         width=300,
         prefix_icon=Icons.PERSON,
     )
 
-    input_papel = ft.TextField(
-        label="Papel",
-        width=300,
-        prefix_icon=Icons.SECURITY,
-    )
 
     # Indicador de carregamento
     loading_indicator = ft.ProgressRing(visible=False, width=20, height=20, stroke_width=2)
@@ -245,13 +259,14 @@ def main(page: ft.Page):
     btn_cadastro_login = ft.ElevatedButton(
         text="Cadastrar",
         icon=Icons.LOGIN,
-        bgcolor = Colors.DEEP_PURPLE,
-        color = Colors.BLACK,
-        width = page.window.width,
-        height = 30,
-        icon_color = Colors.WHITE,
+        bgcolor=Colors.DEEP_PURPLE,
+        color=Colors.BLACK,
+        width=page.window.width,
+        height=30,
+        icon_color=Colors.WHITE,
         on_click=click_salvar_usuario
     )
+
 
     btn_login = ft.ElevatedButton(
         text="Logar",
@@ -273,24 +288,22 @@ def main(page: ft.Page):
         height=45,
     )
 
-
-
     logo = ft.Image(
-            src="assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
-            fit=ft.ImageFit.CONTAIN,
-        width=80,opacity=0.7
-        )
+        src="/assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+        fit=ft.ImageFit.CONTAIN,
+        width=80, opacity=0.7
+    )
 
     fundo = ft.GestureDetector(
         on_tap=lambda e: page.go("/"),  # substitua "/inicio" pela rota que quiser
         content=ft.Image(
-            src="assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+            src="/assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
             fit=ft.ImageFit.CONTAIN
         )
     )
 
     usuario = ft.TextButton(icon=Icons.LOGIN, text="Entrar", icon_color=Colors.RED_700,
-                                              on_click=lambda _: page.go('/login'))
+                            on_click=lambda _: page.go('/login'))
     btn_logout = ft.TextButton(
         icon=Icons.LOGOUT,
         scale=1.5,
@@ -317,13 +330,31 @@ def main(page: ft.Page):
         text="Cancelar",
         style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)),
         width=page.window.width,
-        on_click= lambda _: page.go("/usuarios"),
+        on_click=lambda _: page.go("/usuarios"),
         height=45,
     )
 
-
     # Pessoas
     input_cpf = ft.TextField(label='Cpf', hint_text='insira cpf', col=4, hover_color=Colors.BLUE)
+
+    input_status_user_usuario = ft.Dropdown(
+        label="Status",
+        width=300,
+        fill_color=Colors.RED,
+        options=[
+            Option(key="Ativo", text="Ativo")
+
+        ]
+    )
+
+    input_papel_user = ft.Dropdown(
+        label = "Papel",
+        width = 300,
+        fill_color = Colors.PURPLE,
+        options = [
+            Option(key="Usuario", text="Usuario")
+        ]
+    )
 
     def display_slider_salario(e):
         txt_salario.value = f'SALÁRIO: {int(e.control.value)}'
@@ -335,7 +366,6 @@ def main(page: ft.Page):
                                )
 
     txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.BLACK, animate_size=20)
-
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
