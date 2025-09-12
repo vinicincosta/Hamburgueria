@@ -132,7 +132,7 @@ def main(page: ft.Page):
                         width=page.window.width,
                         height=page.window.height,
                         image=ft.DecorationImage(
-                            src="assets/fundo.jpg",
+                            src="imagem1.png",fit=ft.ImageFit.COVER
                         )
                     ),
 
@@ -168,7 +168,7 @@ def main(page: ft.Page):
                             width=page.window.width,
                             height=page.window.height,
                             image=ft.DecorationImage(
-                                src="assets/imagem1.png ", opacity=0.8
+                                src="fundo.jpg", opacity=0.8
                             ),
                             content=ft.Column([
                                 input_email,
@@ -289,7 +289,7 @@ def main(page: ft.Page):
     )
 
     logo = ft.Image(
-        src="/assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+        src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
         fit=ft.ImageFit.CONTAIN,
         width=80, opacity=0.7
     )
@@ -297,7 +297,7 @@ def main(page: ft.Page):
     fundo = ft.GestureDetector(
         on_tap=lambda e: page.go("/"),  # substitua "/inicio" pela rota que quiser
         content=ft.Image(
-            src="/assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+            src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
             fit=ft.ImageFit.CONTAIN
         )
     )
