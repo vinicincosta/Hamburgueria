@@ -11,8 +11,9 @@ from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle
 from flet.core.types import FontWeight
+from sqlalchemy.dialects.oracle import NUMBER
 
-from routes import post_login, post_pessoas, listar_pessoas
+from routes import *
 
 
 def main(page: ft.Page):
@@ -69,40 +70,39 @@ def main(page: ft.Page):
 
         page.update()
 
-    def click_salvar_usuario(e):
-        nome = input_nome.value
-        email = input_email.value
-        senha = input_senha.value
-        papel = input_papel_user.value
-        salario = slider_salario.value
-        cpf = input_cpf.value
+    def cadastro_click_user(e):
+        pessoa, error = post_pessoas(
+            input_nome.value,
+            input_email.value,
+            input_status_user_usuario.value,
+            input_senha.value,
+            input_cpf.value,
+            slider_salario.value,
+            input_papel_user.value
 
-        if nome and email and senha and papel:
-            loading_indicator.visible = True
-            page.update()
+        )
 
-            token = page.client_storage.get("access_token")
+        print("aaaaaaaaa")
+        if pessoa:
+            print("aaaaaa")
+            snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
+            input_nome.value = ""
+            input_cpf.value = ""
+            input_email.value = ""
+            input_senha.value = ""
+            input_status_user_usuario.value = ""
+            slider_salario.value = ""
+            input_papel_user.value = ""
 
-            response = post_pessoas(nome, email, senha, papel, cpf, salario, token)
+        else:
+            snack_error(f'Erro: {error}')
+        page.update()
 
-            if response == 201:
-                snack_sucesso("Usuario cadastrado com sucesso!")
-                input_nome.value = ""
-                input_email.value = ""
-                input_senha.value = ""
-                input_cpf.value = ""
 
-                page.update()
-            else:
-                snack_error("Erro ao cadastrar usuario")
-
-            loading_indicator.visible = False
-            page.update()
-
-    def clicklogout(e):
+    def click_logout(e):
         page.client_storage.remove("access_token")
-        snack_sucesso("logout efetuado!")
-        page.go('/login')
+        snack_sucesso("logout realizado com sucesso")
+        page.go("/")
 
     def snack_sucesso(texto: str):
         page.snack_bar = ft.SnackBar(
@@ -183,6 +183,9 @@ def main(page: ft.Page):
             )
 
         if page.route == "/cadastrar_pessoa":
+            input_email.value = ""
+            input_senha.value = ""
+
             page.views.append(
                 View(
                     "/cadastrar_pessoa",
@@ -195,7 +198,7 @@ def main(page: ft.Page):
 
                         ElevatedButton(
                             "Cadastrar",
-                            on_click=lambda e: click_salvar_usuario(e),
+                            on_click=lambda e: cadastro_click_user(e),
                             bgcolor=Colors.BLUE_900,
                             color=Colors.WHITE,
                         ),
@@ -216,8 +219,14 @@ def main(page: ft.Page):
                 View(
                     "/mesa",
                     [
-                        AppBar(title=Text('teste'), leading=fundo, bgcolor=Colors.DEEP_PURPLE)
-                        ,
+                        AppBar(title=ft.Image(src="imgdois.png",width=90), center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE,
+                               title_spacing=5,leading=logo, actions=[btn_logout]
+                               ),
+                                icone_mesa,
+                                mesa
+
+
+
                     ], bgcolor=Colors.BLACK,
                 )
             )
@@ -233,13 +242,14 @@ def main(page: ft.Page):
 
     lv_usuarios = ft.ListView(expand=True)
 
+    icone_mesa = ft.Icon(Icons.PERSON,color=Colors.GREEN)
     # Campos
     input_email = ft.TextField(
         label="Email",
         bgcolor=Colors.RED_900,
         color=Colors.BLACK,
         opacity=0.9,
-        fill_color=Colors.DEEP_PURPLE,
+        fill_color=Colors.ORANGE_800,
         label_style=TextStyle(color=ft.Colors.WHITE),
         border_color=Colors.DEEP_PURPLE_800
     )
@@ -249,7 +259,7 @@ def main(page: ft.Page):
         bgcolor=Colors.RED_900,
         color=Colors.BLACK,
         opacity=0.9,
-        fill_color=Colors.DEEP_PURPLE,
+        fill_color=Colors.ORANGE_800,
         password=True,
         label_style=TextStyle(color=ft.Colors.WHITE),
         border_color=Colors.DEEP_PURPLE_800,
@@ -272,19 +282,20 @@ def main(page: ft.Page):
     btn_cadastro_login = ft.ElevatedButton(
         text="Cadastrar",
         icon=Icons.LOGIN,
-        bgcolor=Colors.DEEP_PURPLE,
+        bgcolor=Colors.ORANGE_800,
         color=Colors.BLACK,
         width=page.window.width,
         height=30,
         icon_color=Colors.WHITE,
-        on_click=click_salvar_usuario
+        on_click=lambda _: page.go('/cadastrar_pessoa'),
+
     )
 
 
     btn_login = ft.ElevatedButton(
         text="Logar",
         icon=Icons.VERIFIED_USER,
-        bgcolor=Colors.DEEP_PURPLE,
+        bgcolor=Colors.ORANGE_800,
         color=Colors.BLACK,
         width=page.window.width,
         height=30,
@@ -301,10 +312,13 @@ def main(page: ft.Page):
         height=45,
     )
 
+
+
     logo = ft.Image(
         src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
         fit=ft.ImageFit.CONTAIN,
-        width=80, opacity=0.7
+        width=80, opacity=0.7,
+
     )
 
     fundo = ft.GestureDetector(
@@ -321,7 +335,9 @@ def main(page: ft.Page):
         icon=Icons.LOGOUT,
         scale=1.5,
         icon_color=Colors.RED_700,
+        on_click=click_logout
     )
+
 
     btn_salvar = ft.FilledButton(
         text="Salvar",
@@ -359,13 +375,15 @@ def main(page: ft.Page):
 
         ]
     )
-
+    mesa = ft.TextField(keyboard_type=ft.Number,color=Colors.ORANGE_800,
+                        bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
+                        border_color=Colors.DEEP_PURPLE_800,label_style=TextStyle(color=Colors.WHITE))
     input_papel_user = ft.Dropdown(
         label = "Papel",
         width = 300,
         fill_color = Colors.PURPLE,
         options = [
-            Option(key="Usuario", text="Usuario")
+            Option(key="Cliente", text="Cliente")
         ]
     )
 

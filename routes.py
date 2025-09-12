@@ -43,24 +43,28 @@ def post_login(email, senha):
     except Exception as e:
         return None, None, None, f"Erro inesperado: {str(e)}"
 
-def post_pessoas(nome, email, senha, papel, cpf, salario, token):
+def post_pessoas(nome_pessoa, cpf, papel, senha, salario, email, status_pessoa):
+    url = f"{base_url}/cadastro_pessoas_login"
+    nova_pessoa = {
+        'nome_pessoa': nome_pessoa,
+        'cpf': cpf,
+        'papel': papel,  # O papel pode ser 'Admin' ou 'usuario', conforme a API
+        'senha': senha,
+        'salario': salario,
+        'status_pessoa': status_pessoa,
+        'email': email,
+    }
+
     try:
-        url = f"{base_url}/pessoas"
-        dados = {
-            "nome": nome,
-            "email": email,
-            "senha": senha,
-            "papel": papel,
-            "cpf": cpf,
-            "salario": salario,
-        }
-        response = requests.post(url, json=dados, headers={"Authorization": f"Bearer {token}"})
-        return response.status_code
-    except Exception as e:
-        print(e)
-        return {
-            "error": f"{e}",
-        }
+        response = requests.post(url, json=nova_pessoa)
+
+        if response.status_code == 201:
+            return response.json(), None  # Cadastro bem-sucedido
+        else:
+            return None, response.json().get('msg', 'Erro desconhecido')  # Mensagem de erro da API
+    except requests.exceptions.RequestException as e:
+        return None, f'Erro de conexão: {str(e)}'
+
 
 def cadastrar_lanche_post(novo_lanche):
     url = f"{base_url}/lanches"
