@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Royal Burger</title>
+    <title>Início</title>
     <link rel="stylesheet" href="../static/style.css">
+    <link rel="icon" href="../../assets/logoDois.png" type="image/png">
+
 </head>
 <body>
     <nav id="nav">
         <div class="container-nav">
             <div class="header-nav">
-<!--                <img onclick="closeNav()" id="close-menu" src="https://images.emojiterra.com/openmoji/v14.0/512px/2716.png" alt="Fechar">-->
-                <p onclick="closeNav()">X</p>
+                <img onclick="closeNav()" id="close-menu" src="https://images.icon-icons.com/2518/PNG/512/x_icon_150997.png" alt="Fechar">
             </div>
             <div class="content-nav">
                 <ul>
@@ -21,16 +22,23 @@
         </div>
     </nav>
     <header>
-        <div class="container-start">
-            <div class="menu-button" onclick="openNav()">&#9776</div>
-            <div class="logo-img"></div>
+        <div  class="header-content">
+            <div id="menu-button" onclick="openNav()">&#9776</div>
+<!--            <div id="logo"></div>-->
+            <img id="logo" src="../../assets/logoDois.png" alt="Royal Burger">
         </div>
-        <h1>ROYAL BURGER</h1>
-        <div class="perfil-img" onclick="alert('PERFIL')"></div>
+        <div>
+            <h1>ROYAL BURGER</h1>
+        </div>
+        <div id="img-user"></div>
     </header>
+    {% block content %}
     <main>
-
+        <a href="{{url_for('cards', valor=False)}}">CARDS</a>
     </main>
-    <script src="/main.js"></script>
+    {% endblock %}
+
+    <script src="../static/script.js"></script>
+
 </body>
 </html>
