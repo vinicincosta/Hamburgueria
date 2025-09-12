@@ -34,6 +34,7 @@ def main(page: ft.Page):
             snack_error('Email e senha são obrigatórios.')
             page.update()
             return
+        page.update()
 
         # Chama a função de login
         token, papel, nome, error = post_login(input_email.value, input_senha.value)
@@ -42,8 +43,8 @@ def main(page: ft.Page):
 
         # Verifica se o usuário está inativo
         for pessoa in resultado_pessoas:
-            if pessoa['cpf'] == input_email.value:  # Verifica se o CPF corresponde
-                if pessoa['status_user'] == "Inativo":
+            if pessoa['email'] == input_email.value:  # Verifica se o CPF corresponde
+                if pessoa['status_pessoa'] == "Inativo":
                     snack_error('Erro: usuário inativo.')
                     page.update()
                     return  # Sai da função se o usuário estiver inativo
@@ -55,8 +56,8 @@ def main(page: ft.Page):
 
             if papel == "cliente":
                 page.go("/primeira_user")  # Redireciona para a rota do usuário
-            elif papel == "admin":
-                page.go("/primeira")  # Redireciona para a rota do admin
+            elif papel == "garcom":
+                page.go("/mesa")  # Redireciona para a rota garçom
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
         else:
@@ -168,11 +169,8 @@ def main(page: ft.Page):
                                 src="assets/fundo.jpg",opacity=0.8
                             ),
                             content=ft.Column([
-
-                                ft.TextField(label=Text('email',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800),
-                                ft.TextField(label=Text('senha',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,password=True,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800,can_reveal_password=True),
-                                # ft.ElevatedButton(text='logar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE,on_click=lambda _: page.go("/mesa")),
-                                # ft.ElevatedButton(text='cadastrar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE),
+                                input_email,
+                                input_senha,
                                 btn_login,
                                 btn_cadastro_login
                             ],horizontal_alignment=ft.CrossAxisAlignment.CENTER)
@@ -204,20 +202,27 @@ def main(page: ft.Page):
 
     # Campos
     input_email = ft.TextField(
-        label="E-mail",
-        width=300,
-        prefix_icon=Icons.EMAIL_OUTLINED,
-        keyboard_type=ft.KeyboardType.EMAIL,
-        autofocus=True,
+        label="Email",
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.DEEP_PURPLE,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800
     )
 
     input_senha = ft.TextField(
         label="Senha",
-        width=300,
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.DEEP_PURPLE,
         password=True,
-        can_reveal_password=True,  # Ícone para mostrar/ocultar senha
-        prefix_icon=Icons.LOCK_OUTLINE,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800,
+        can_reveal_password=True
     )
+
 
     input_nome = ft.TextField(
         label="Nome",

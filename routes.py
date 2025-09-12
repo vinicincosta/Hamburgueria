@@ -4,17 +4,18 @@ base_url = "http://10.135.235.29:5000"
 
 # LOGIN
 def post_login(email, senha):
+    url = f"{base_url}/login"
     try:
-        url = f"{base_url}/login"
         # Verifica se os campos estão preenchidos
         if not email or not senha:
             return None, None, None, "Email e senha são obrigatórios"
 
-        dados = {
-            "email": email,
-            "senha": senha,
-        }
-        response = requests.post(url, json=dados)
+
+        response = requests.post(
+            url,
+            json={'email': email, 'senha': senha},
+            timeout=10  # Timeout de 10 segundos
+        )
 
         # Tratamento dos códigos de status
         if response.status_code == 200:
@@ -41,7 +42,6 @@ def post_login(email, senha):
         return None, None, None, f"Erro de conexão: {str(e)}"
     except Exception as e:
         return None, None, None, f"Erro inesperado: {str(e)}"
-
 
 def post_pessoas(nome, email, senha, papel, cpf, salario, token):
     try:
@@ -104,3 +104,4 @@ def listar_pessoas():
         return response.json()
 
 
+listar_pessoas()
