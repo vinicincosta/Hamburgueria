@@ -6,9 +6,14 @@ from flet.core.alignment import top_left, bottom_center
 from flet.core.border_radius import horizontal
 from flet.core.box import BoxDecoration
 from flet.core.colors import Colors
+from flet.core.dropdown import Option
+from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle
 from flet.core.types import FontWeight
+from sqlalchemy.dialects.oracle import NUMBER
+
+from routes import *
 
 
 def main(page: ft.Page):
@@ -20,13 +25,84 @@ def main(page: ft.Page):
 
     # Funções
 
+    def click_login(e):
+        loading_indicator.visible = True
+        page.update()
 
-    def clicklogout(e):
+        resultado_pessoas = listar_pessoas()
+        print(f'Resultado: {resultado_pessoas}')
+
+        # Verifica se os campos estão preenchidos
+        if not input_email.value or not input_senha.value:
+            snack_error('Email e senha são obrigatórios.')
+            page.update()
+            return
+        page.update()
+
+        # Chama a função de login
+        token, papel, nome, error = post_login(input_email.value, input_senha.value)
+
+        print(f"Token: {token}, Papel: {papel}, Nome: {nome}, Erro: {error}")
+
+        # Verifica se o usuário está inativo
+        for pessoa in resultado_pessoas:
+            if pessoa['email'] == input_email.value:  # Verifica se o CPF corresponde
+                if pessoa['status_pessoa'] == "Inativo":
+                    snack_error('Erro: usuário inativo.')
+                    page.update()
+                    return  # Sai da função se o usuário estiver inativo
+
+        # Se o login foi bem-sucedido e o usuário está ativo
+        if token:
+            snack_sucesso(f'Login bem-sucedido, {nome} ({papel})!')
+            print(f"Papel do usuário: {papel}, Nome: {nome}")
+
+            if papel == "cliente":
+                page.go("/primeira_user")  # Redireciona para a rota do usuário
+            elif papel == "garcom":
+                page.go("/mesa")  # Redireciona para a rota garçom
+            elif papel == "admin":
+                page.go("/mesa")
+            else:
+                snack_error('Erro: Papel do usuário desconhecido.')
+        else:
+            snack_error(f'Erro: {error}')
+
+        page.update()
+
+    def cadastro_click_user(e):
+        pessoa, error = post_pessoas(
+            input_nome.value,
+            input_email.value,
+            input_status_user_usuario.value,
+            input_senha.value,
+            input_cpf.value,
+            slider_salario.value,
+            input_papel_user.value
+
+        )
+
+        print("aaaaaaaaa")
+        if pessoa:
+            print("aaaaaa")
+            snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
+            input_nome.value = ""
+            input_cpf.value = ""
+            input_email.value = ""
+            input_senha.value = ""
+            input_status_user_usuario.value = ""
+            slider_salario.value = ""
+            input_papel_user.value = ""
+
+        else:
+            snack_error(f'Erro: {error}')
+        page.update()
+
+
+    def click_logout(e):
         page.client_storage.remove("access_token")
-        snack_sucesso("logout efetuado!")
-        page.go('/login')
-
-
+        snack_sucesso("logout realizado com sucesso")
+        page.go("/")
 
     def snack_sucesso(texto: str):
         page.snack_bar = ft.SnackBar(
@@ -44,8 +120,6 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
 
-
-
     def gerencia_rotas(e):
         page.views.clear()
         # page.padding = 0
@@ -58,7 +132,7 @@ def main(page: ft.Page):
                         width=page.window.width,
                         height=page.window.height,
                         image=ft.DecorationImage(
-                            src="assets/fundo.jpg",
+                            src="imagem1.png",fit=ft.ImageFit.COVER
                         )
                     ),
 
@@ -78,83 +152,118 @@ def main(page: ft.Page):
                     #     height=page.window.height,
                     #     alignment=ft.MainAxisAlignment.CENTER,
                     # )
-                ],bgcolor=Colors.BLACK,floating_action_button=usuario,horizontal_alignment=ft.CrossAxisAlignment.CENTER,vertical_alignment=ft.MainAxisAlignment.CENTER
+                ], bgcolor=Colors.BLACK, floating_action_button=usuario,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER, vertical_alignment=ft.MainAxisAlignment.CENTER
             )
         )
+
         if page.route == "/login":
             page.views.append(
                 View(
                     "/login",
                     [
-                        AppBar(title=logo,center_title=True,bgcolor=Colors.BLACK,color=Colors.PURPLE,title_spacing=5
-                              ),
+                        AppBar(title=logo, center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE, title_spacing=5
+                               ),
                         ft.Container(
                             width=page.window.width,
                             height=page.window.height,
                             image=ft.DecorationImage(
-                                src="assets/fundo.jpg",opacity=0.8
+                                src="fundo.jpg", opacity=0.8
                             ),
                             content=ft.Column([
-
-                                ft.TextField(label=Text('email',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800),
-                                ft.TextField(label=Text('senha',),bgcolor=Colors.RED_900,color=Colors.BLACK,opacity=0.9,fill_color=Colors.DEEP_PURPLE,password=True,label_style=TextStyle(color=ft.Colors.WHITE),border_color=Colors.DEEP_PURPLE_800,can_reveal_password=True),
-                                ft.ElevatedButton(text='logar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE,on_click=lambda _: page.go("/mesa")),
-                                ft.ElevatedButton(text='cadastrar',icon=Icons.VERIFIED_USER,bgcolor=Colors.DEEP_PURPLE,color=Colors.BLACK,width=page.window.width,height=30,icon_color=Colors.WHITE),
-                            ],horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                                input_email,
+                                input_senha,
+                                btn_login,
+                                btn_cadastro_login
+                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         ),
-                    ],bgcolor=Colors.BLACK,horizontal_alignment=ft.CrossAxisAlignment.CENTER,padding=11,vertical_alignment=ft.MainAxisAlignment.CENTER
+                    ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
+                    vertical_alignment=ft.MainAxisAlignment.CENTER
                 )
             )
+
+        if page.route == "/cadastrar_pessoa":
+            input_email.value = ""
+            input_senha.value = ""
+
+            page.views.append(
+                View(
+                    "/cadastrar_pessoa",
+                    [
+                        AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.DEEP_PURPLE),
+                        input_email,
+                        input_senha,
+                        input_papel_user,
+                        input_status_user_usuario,
+
+                        ElevatedButton(
+                            "Cadastrar",
+                            on_click=lambda e: cadastro_click_user(e),
+                            bgcolor=Colors.BLUE_900,
+                            color=Colors.WHITE,
+                        ),
+                        ElevatedButton(
+                            "Voltar",
+                            on_click=lambda e: page.go("/login"),
+                            bgcolor=Colors.BLUE_900,
+                            color=Colors.WHITE,
+                        ),
+                    ],
+
+                )
+            )
+
+
         if page.route == "/mesa":
             page.views.append(
                 View(
                     "/mesa",
                     [
-                        AppBar(title=Text('teste'),leading=fundo,bgcolor=Colors.DEEP_PURPLE)
+                        AppBar(title=ft.Image(src="imgdois.png",width=90), center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE,
+                               title_spacing=5,leading=logo, actions=[btn_logout]
+                               ),
+                                icone_mesa,
+                                mesa
 
 
 
-
-
-
-
-
-
-
-
-
-                        ,
-                    ],bgcolor=Colors.BLACK,
+                    ], bgcolor=Colors.BLACK,
                 )
             )
         page.update()
 
     # Componentes
-
-
+    loading_indicator = ft.ProgressRing(visible=False, width=20, height=20, stroke_width=2)
 
     fab_add_usuario = ft.FloatingActionButton(
         icon=Icons.ADD,
-        on_click= lambda _: page.go("/add_usuario")
+        on_click=lambda _: page.go("/add_usuario")
     )
 
     lv_usuarios = ft.ListView(expand=True)
 
+    icone_mesa = ft.Icon(Icons.PERSON,color=Colors.GREEN)
     # Campos
     input_email = ft.TextField(
-        label="E-mail",
-        width=300,
-        prefix_icon=Icons.EMAIL_OUTLINED,
-        keyboard_type=ft.KeyboardType.EMAIL,
-        autofocus=True,
+        label="Email",
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.ORANGE_800,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800
     )
 
     input_senha = ft.TextField(
         label="Senha",
-        width=300,
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.ORANGE_800,
         password=True,
-        can_reveal_password=True,  # Ícone para mostrar/ocultar senha
-        prefix_icon=Icons.LOCK_OUTLINE,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800,
+        can_reveal_password=True
     )
 
     input_nome = ft.TextField(
@@ -163,11 +272,6 @@ def main(page: ft.Page):
         prefix_icon=Icons.PERSON,
     )
 
-    input_papel = ft.TextField(
-        label="Papel",
-        width=300,
-        prefix_icon=Icons.SECURITY,
-    )
 
     # Indicador de carregamento
     loading_indicator = ft.ProgressRing(visible=False, width=20, height=20, stroke_width=2)
@@ -175,35 +279,65 @@ def main(page: ft.Page):
     spacing = ft.Container(visible=False, height=10)
 
     # Botões
-    btn_login = ft.ElevatedButton(
-        text="Login",
+    btn_cadastro_login = ft.ElevatedButton(
+        text="Cadastrar",
         icon=Icons.LOGIN,
-        width=300,
+        bgcolor=Colors.ORANGE_800,
+        color=Colors.BLACK,
+        width=page.window.width,
+        height=30,
+        icon_color=Colors.WHITE,
+        on_click=lambda _: page.go('/cadastrar_pessoa'),
+
+    )
+
+
+    btn_login = ft.ElevatedButton(
+        text="Logar",
+        icon=Icons.VERIFIED_USER,
+        bgcolor=Colors.ORANGE_800,
+        color=Colors.BLACK,
+        width=page.window.width,
+        height=30,
+        icon_color=Colors.WHITE,
+        on_click=click_login
+
+    )
+
+    btn_cancelar = ft.OutlinedButton(
+        text="Cancelar",
+        style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)),
+        width=page.window.width,
+        on_click=lambda _: page.go("/usuarios"),
         height=45,
     )
 
 
+
     logo = ft.Image(
-            src="assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
-            fit=ft.ImageFit.CONTAIN,
-        width=80,opacity=0.7
-        )
+        src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+        fit=ft.ImageFit.CONTAIN,
+        width=80, opacity=0.7,
+
+    )
 
     fundo = ft.GestureDetector(
         on_tap=lambda e: page.go("/"),  # substitua "/inicio" pela rota que quiser
         content=ft.Image(
-            src="assets/fundo.jpg",  # troque para o caminho da sua imagem local ou URL
+            src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
             fit=ft.ImageFit.CONTAIN
         )
     )
 
     usuario = ft.TextButton(icon=Icons.LOGIN, text="Entrar", icon_color=Colors.RED_700,
-                                              on_click=lambda _: page.go('/login'))
+                            on_click=lambda _: page.go('/login'))
     btn_logout = ft.TextButton(
         icon=Icons.LOGOUT,
         scale=1.5,
         icon_color=Colors.RED_700,
+        on_click=click_logout
     )
+
 
     btn_salvar = ft.FilledButton(
         text="Salvar",
@@ -225,10 +359,44 @@ def main(page: ft.Page):
         text="Cancelar",
         style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)),
         width=page.window.width,
-        on_click= lambda _: page.go("/usuarios"),
+        on_click=lambda _: page.go("/usuarios"),
         height=45,
     )
 
+    # Pessoas
+    input_cpf = ft.TextField(label='Cpf', hint_text='insira cpf', col=4, hover_color=Colors.BLUE)
+
+    input_status_user_usuario = ft.Dropdown(
+        label="Status",
+        width=300,
+        fill_color=Colors.RED,
+        options=[
+            Option(key="Ativo", text="Ativo")
+
+        ]
+    )
+    mesa = ft.TextField(keyboard_type=ft.Number,color=Colors.ORANGE_800,
+                        bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
+                        border_color=Colors.DEEP_PURPLE_800,label_style=TextStyle(color=Colors.WHITE))
+    input_papel_user = ft.Dropdown(
+        label = "Papel",
+        width = 300,
+        fill_color = Colors.PURPLE,
+        options = [
+            Option(key="Cliente", text="Cliente")
+        ]
+    )
+
+    def display_slider_salario(e):
+        txt_salario.value = f'SALÁRIO: {int(e.control.value)}'
+        page.update()
+
+    slider_salario = ft.Slider(min=1500, max=50000, divisions=485, label="{value}",
+                               active_color="cyan",
+                               inactive_color="grey", on_change=display_slider_salario,
+                               )
+
+    txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.BLACK, animate_size=20)
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
