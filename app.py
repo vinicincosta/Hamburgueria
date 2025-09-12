@@ -7,6 +7,7 @@ from flet.core.border_radius import horizontal
 from flet.core.box import BoxDecoration
 from flet.core.colors import Colors
 from flet.core.dropdown import Option
+from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle
 from flet.core.types import FontWeight
@@ -72,7 +73,7 @@ def main(page: ft.Page):
         nome = input_nome.value
         email = input_email.value
         senha = input_senha.value
-        papel = input_papel.value
+        papel = input_papel_user.value
         salario = slider_salario.value
         cpf = input_cpf.value
 
@@ -89,7 +90,6 @@ def main(page: ft.Page):
                 input_nome.value = ""
                 input_email.value = ""
                 input_senha.value = ""
-                input_papel.value = ""
                 input_cpf.value = ""
 
                 page.update()
@@ -191,9 +191,22 @@ def main(page: ft.Page):
                         input_email,
                         input_senha,
                         input_papel_user,
-                        input_status_user_usuario
+                        input_status_user_usuario,
 
-                    ]
+                        ElevatedButton(
+                            "Cadastrar",
+                            on_click=lambda e: click_salvar_usuario(e),
+                            bgcolor=Colors.BLUE_900,
+                            color=Colors.WHITE,
+                        ),
+                        ElevatedButton(
+                            "Voltar",
+                            on_click=lambda e: page.go("/login"),
+                            bgcolor=Colors.BLUE_900,
+                            color=Colors.WHITE,
+                        ),
+                    ],
+
                 )
             )
 
