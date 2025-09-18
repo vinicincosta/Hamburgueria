@@ -73,12 +73,12 @@ def main(page: ft.Page):
     def cadastro_click_user(e):
         pessoa, error = post_pessoas(
             input_nome.value,
-            input_email.value,
-            input_status_user_usuario.value,
-            input_senha.value,
             input_cpf.value,
+            input_papel_user.value,
+            input_senha_cadastro.value,
             slider_salario.value,
-            input_papel_user.value
+            input_email_cadastrado.value,
+            input_status_user_usuario.value,
 
         )
 
@@ -88,8 +88,8 @@ def main(page: ft.Page):
             snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
             input_nome.value = ""
             input_cpf.value = ""
-            input_email.value = ""
-            input_senha.value = ""
+            input_email_cadastrado.value = ""
+            input_senha_cadastro.value = ""
             input_status_user_usuario.value = ""
             slider_salario.value = ""
             input_papel_user.value = ""
@@ -191,10 +191,15 @@ def main(page: ft.Page):
                     "/cadastrar_pessoa",
                     [
                         AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.DEEP_PURPLE),
-                        input_email,
-                        input_senha,
+                        input_nome,
+                        input_email_cadastrado,
+                        input_senha_cadastro,
+                        input_cpf,
                         input_papel_user,
                         input_status_user_usuario,
+
+                        slider_salario,
+                        txt_salario,
 
                         ElevatedButton(
                             "Cadastrar",
@@ -208,11 +213,10 @@ def main(page: ft.Page):
                             bgcolor=Colors.BLUE_900,
                             color=Colors.WHITE,
                         ),
-                    ],
+                    ],bgcolor=Colors.BLACK
 
                 )
             )
-
 
         if page.route == "/mesa":
             page.views.append(
@@ -267,9 +271,42 @@ def main(page: ft.Page):
     )
 
     input_nome = ft.TextField(
-        label="Nome",
+        label="Email",
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.ORANGE_800,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800
+    )
+
+    input_email_cadastrado = ft.TextField(
+        hint_text='Insira seu email',
+        col=4,
         width=300,
-        prefix_icon=Icons.PERSON,
+        label="Email",
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.ORANGE_800,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800
+    )
+
+    input_senha_cadastro = ft.TextField(
+        hint_text='Insira sua senha',
+        col=4,
+
+
+        width=300,
+        label="Senha",
+        password=True,
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.ORANGE_800,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800
     )
 
 
@@ -364,7 +401,18 @@ def main(page: ft.Page):
     )
 
     # Pessoas
-    input_cpf = ft.TextField(label='Cpf', hint_text='insira cpf', col=4, hover_color=Colors.BLUE)
+    input_cpf = ft.TextField(
+        label='Cpf',
+        hint_text='insira cpf',
+        col=4,
+        bgcolor=Colors.RED_900,
+        color=Colors.BLACK,
+        opacity=0.9,
+        fill_color=Colors.ORANGE_800,
+        label_style=TextStyle(color=ft.Colors.WHITE),
+        border_color=Colors.DEEP_PURPLE_800
+
+    )
 
     input_status_user_usuario = ft.Dropdown(
         label="Status",
