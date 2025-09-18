@@ -74,33 +74,40 @@ def main(page: ft.Page):
         page.update()
 
     def cadastro_click_user(e):
-        pessoa, error = post_pessoas(
-            input_nome.value,
-            input_cpf.value,
-            input_papel_user.value,
-            input_senha_cadastro.value,
-            slider_salario.value,
-            input_email_cadastrado.value,
-            input_status_user_usuario.value,
+        try:
+            # Se não for admin, define como cliente
+            papel = input_papel.value
+            if papel != "admin":
+                papel = "cliente"
 
-        )
+            pessoa, error = post_pessoas(
+                input_nome.value,
+                input_cpf.value,
+                papel,  # papel já validado
+                input_senha_cadastro.value,
+                float(slider_salario.value or 0),  # garante valor numérico
+                input_email_cadastrado.value,
+                input_status_user_usuario.value,
+            )
 
-        print("aaaaaaaaa")
-        if pessoa:
-            print("aaaaaa")
-            snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
-            input_nome.value = ""
-            input_cpf.value = ""
-            input_email_cadastrado.value = ""
-            input_senha_cadastro.value = ""
-            input_status_user_usuario.value = ""
-            slider_salario.value = ""
-            input_papel_user.value = ""
+            if pessoa:
+                snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
+                # Resetar os campos
+                input_nome.value = ""
+                input_cpf.value = ""
+                input_email_cadastrado.value = ""
+                input_senha_cadastro.value = ""
+                input_status_user_usuario.value = None
+                input_papel.value = None
+                slider_salario.value = 0  # volta para o mínimo
+                txt_salario.value = "SALÁRIO: 0"
+            else:
+                snack_error(f'Erro: {error}')
 
-        else:
-            snack_error(f'Erro: {error}')
+        except Exception as ex:
+            snack_error(f"Erro inesperado: {ex}")
+
         page.update()
-
 
     def click_logout(e):
         page.client_storage.remove("access_token")
@@ -177,7 +184,9 @@ def main(page: ft.Page):
                                 input_email,
                                 input_senha,
                                 btn_login,
-                                btn_cadastro_login
+                                btn_cadastro_login,
+                                ir_para_mesa
+
                             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         ),
                     ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
@@ -197,13 +206,13 @@ def main(page: ft.Page):
                         input_nome,
                         input_email_cadastrado,
                         input_senha_cadastro,
-                        input_cpf,
-                        input_papel_user,
-                        input_status_user_usuario,
+                        # input_cpf,
+                        # input_papel_user,
+                        # input_status_user_usuario,
 
-                        slider_salario,
+                        # slider_salario,
 
-                        txt_salario,
+                        # txt_salario,
 
 
                         ElevatedButton(
@@ -231,8 +240,17 @@ def main(page: ft.Page):
                         AppBar(title=ft.Image(src="imgdois.png",width=90), center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE,
                                title_spacing=5,leading=logo, actions=[btn_logout]
                                ),
-                                icone_mesa,
-                                mesa
+                                ft.Row([
+                                    icone_mesa,
+                                    mesa,
+
+                                ]),
+                                ft.Row([
+                                    icone_pedido,
+                                    item,
+                                ]),
+
+
 
 
 
@@ -251,8 +269,9 @@ def main(page: ft.Page):
 
     lv_usuarios = ft.ListView(expand=True)
 
-    icone_mesa = ft.Icon(Icons.PERSON,color=Colors.GREEN)
-    # Campos
+    icone_mesa = ft.Icon(Icons.TABLE_BAR,color=Colors.ORANGE_800)
+    icone_pedido = ft.Icon(Icons.CHECKLIST)
+
     input_email = ft.TextField(
         label="Email",
         bgcolor=Colors.RED_900,
@@ -276,7 +295,7 @@ def main(page: ft.Page):
     )
 
     input_nome = ft.TextField(
-        label="Email",
+        label="Insira seu nome",
         bgcolor=Colors.RED_900,
         color=Colors.BLACK,
         opacity=0.9,
@@ -330,6 +349,17 @@ def main(page: ft.Page):
         height=30,
         icon_color=Colors.WHITE,
         on_click=lambda _: page.go('/cadastrar_pessoa'),
+
+    )
+    ir_para_mesa = ft.ElevatedButton(
+        text="mesa",
+        icon=Icons.LOGIN,
+        bgcolor=Colors.ORANGE_800,
+        color=Colors.BLACK,
+        width=page.window.width,
+        height=30,
+        icon_color=Colors.WHITE,
+        on_click=lambda _: page.go('/mesa'),
 
     )
 
@@ -419,31 +449,24 @@ def main(page: ft.Page):
 
     )
 
-    input_status_user_usuario = ft.Dropdown(
 
-
-
-
-
-
-    label = "Papel",
-    width = 300, bgcolor = Colors.ORANGE_800,
-    fill_color = Colors.ORANGE_800, color = Colors.ORANGE_800, text_style = TextStyle(color=Colors.WHITE),
-    options = [
-        Option(key="Ativo", text="Ativo", )
-    ]
-
-    )
     mesa = ft.TextField(keyboard_type=ft.Number,color=Colors.ORANGE_800,
                         bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
                         border_color=Colors.DEEP_PURPLE_800,label_style=TextStyle(color=Colors.WHITE))
-    input_papel_user = ft.Dropdown(
+
+    item = ft.TextField(keyboard_type=ft.Number, color=Colors.ORANGE_800,
+                        bgcolor=Colors.RED_900, fill_color=Colors.ORANGE_800, label="Pedido",
+                        border_color=Colors.DEEP_PURPLE_800, label_style=TextStyle(color=Colors.WHITE))
+
+    input_papel = ft.Dropdown(
 
         label = "Papel",
         width = 300,bgcolor=Colors.ORANGE_800,
         fill_color = Colors.ORANGE_800,color=Colors.ORANGE_800,text_style=TextStyle(color=Colors.WHITE),
         options = [
-            Option(key="Cliente", text="Cliente",)
+            Option(key="Cliente", text="Cliente"),
+            Option(key= "garcom", text="Garçom"),
+
         ]
     )
 
@@ -453,12 +476,12 @@ def main(page: ft.Page):
 
 
 
-    slider_salario = ft.Slider(min=1500, max=50000, divisions=485, label="{value}",
+    slider_salario = ft.Slider(min=0, max=50000, divisions=485, label="{value}",
                                active_color=Colors.ORANGE_800,
                                inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,thumb_color=Colors.RED
                                )
 
-    txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
+    txt_salario = ft.Text(value='SALÁRIO: 0', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
