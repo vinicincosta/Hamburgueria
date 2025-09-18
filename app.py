@@ -9,7 +9,8 @@ from flet.core.colors import Colors
 from flet.core.dropdown import Option
 from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
-from flet.core.text_style import TextStyle
+from flet.core.text_style import TextStyle, TextThemeStyle
+from flet.core.theme import TextTheme
 from flet.core.types import FontWeight
 from sqlalchemy.dialects.oracle import NUMBER
 
@@ -190,7 +191,7 @@ def main(page: ft.Page):
                 View(
                     "/cadastrar_pessoa",
                     [
-                        AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.DEEP_PURPLE),
+                        AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.ORANGE_800),
                         input_nome,
                         input_email_cadastrado,
                         input_senha_cadastro,
@@ -204,14 +205,14 @@ def main(page: ft.Page):
                         ElevatedButton(
                             "Cadastrar",
                             on_click=lambda e: cadastro_click_user(e),
-                            bgcolor=Colors.BLUE_900,
-                            color=Colors.WHITE,
+                            bgcolor=Colors.ORANGE_800,
+                            color=Colors.BLACK,
                         ),
                         ElevatedButton(
                             "Voltar",
                             on_click=lambda e: page.go("/login"),
-                            bgcolor=Colors.BLUE_900,
-                            color=Colors.WHITE,
+                            bgcolor=Colors.ORANGE_800,
+                            color=Colors.BLACK,
                         ),
                     ],bgcolor=Colors.BLACK
 
@@ -415,6 +416,7 @@ def main(page: ft.Page):
     )
 
     input_status_user_usuario = ft.Dropdown(
+        bgcolor=Colors.ORANGE_800,
         label="Status",
         width=300,
         fill_color=Colors.RED,
@@ -427,11 +429,12 @@ def main(page: ft.Page):
                         bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
                         border_color=Colors.DEEP_PURPLE_800,label_style=TextStyle(color=Colors.WHITE))
     input_papel_user = ft.Dropdown(
+
         label = "Papel",
-        width = 300,
-        fill_color = Colors.PURPLE,
+        width = 300,bgcolor=Colors.ORANGE_800,
+        fill_color = Colors.ORANGE_800,color=Colors.ORANGE_800,text_style=TextStyle(color=Colors.WHITE),
         options = [
-            Option(key="Cliente", text="Cliente")
+            Option(key="Cliente", text="Cliente",)
         ]
     )
 
@@ -440,11 +443,11 @@ def main(page: ft.Page):
         page.update()
 
     slider_salario = ft.Slider(min=1500, max=50000, divisions=485, label="{value}",
-                               active_color="cyan",
-                               inactive_color="grey", on_change=display_slider_salario,
+                               active_color=Colors.ORANGE_800,
+                               inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,
                                )
 
-    txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.BLACK, animate_size=20)
+    txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
