@@ -23,7 +23,9 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT  # ou ft.ThemeMode.DARK
     page.window.width = 375
     page.window.height = 667
-
+    page.fonts = {
+        "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
+    }
     # Funções
 
     def click_login(e):
@@ -191,7 +193,7 @@ def main(page: ft.Page):
                 View(
                     "/cadastrar_pessoa",
                     [
-                        AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.ORANGE_800),
+                        AppBar(title=Text('Cadastro',color=Colors.YELLOW_900),title_text_style=TextStyle(weight=ft.FontWeight.BOLD,font_family="Playfair Display",size=18), leading=fundo, bgcolor=Colors.BLACK,center_title=True),
                         input_nome,
                         input_email_cadastrado,
                         input_senha_cadastro,
@@ -200,7 +202,9 @@ def main(page: ft.Page):
                         input_status_user_usuario,
 
                         slider_salario,
+
                         txt_salario,
+
 
                         ElevatedButton(
                             "Cadastrar",
@@ -416,14 +420,19 @@ def main(page: ft.Page):
     )
 
     input_status_user_usuario = ft.Dropdown(
-        bgcolor=Colors.ORANGE_800,
-        label="Status",
-        width=300,
-        fill_color=Colors.RED,
-        options=[
-            Option(key="Ativo", text="Ativo")
 
-        ]
+
+
+
+
+
+    label = "Papel",
+    width = 300, bgcolor = Colors.ORANGE_800,
+    fill_color = Colors.ORANGE_800, color = Colors.ORANGE_800, text_style = TextStyle(color=Colors.WHITE),
+    options = [
+        Option(key="Ativo", text="Ativo", )
+    ]
+
     )
     mesa = ft.TextField(keyboard_type=ft.Number,color=Colors.ORANGE_800,
                         bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
@@ -442,9 +451,11 @@ def main(page: ft.Page):
         txt_salario.value = f'SALÁRIO: {int(e.control.value)}'
         page.update()
 
+
+
     slider_salario = ft.Slider(min=1500, max=50000, divisions=485, label="{value}",
                                active_color=Colors.ORANGE_800,
-                               inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,
+                               inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,thumb_color=Colors.RED
                                )
 
     txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
