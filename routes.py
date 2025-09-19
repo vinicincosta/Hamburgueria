@@ -1,6 +1,6 @@
 import requests
 
-base_url = "http://10.135.235.29:5000"
+base_url = "http://10.135.235.23:5000"
 
 
 # LOGIN
@@ -82,9 +82,9 @@ def cadastrar_lanche_post(novo_lanche):
         print(f'Erro: {response.status_code}')
 
 
-def listar_lanche():
+def listar_lanche(token):
     url = f'{base_url}/lanches'
-    response = requests.get(url)
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
 
     if response.status_code == 200:
         dados_get_lanche = response.json()
@@ -94,7 +94,7 @@ def listar_lanche():
         print(f'Erro: {response.status_code}')
         return response.json()
 
-listar_lanche()
+# listar_lanche()
 
 
 def listar_pessoas():
