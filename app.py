@@ -401,9 +401,7 @@ def main(page: ft.Page):
                                 input_senha,
                                 btn_login,
                                 btn_cadastro_login,
-
-
-                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
+                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,spacing=5)
                         ),
                     ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
                     vertical_alignment=ft.MainAxisAlignment.CENTER
@@ -413,7 +411,6 @@ def main(page: ft.Page):
         if page.route == "/cadastrar_pessoa":
             input_email.value = ""
             input_senha.value = ""
-
             page.views.append(
                 View(
                     "/cadastrar_pessoa",
@@ -650,7 +647,7 @@ def main(page: ft.Page):
         opacity=0.9,
         fill_color=Colors.ORANGE_800,
         label_style=TextStyle(color=ft.Colors.WHITE),
-        border_color=Colors.DEEP_PURPLE_800
+        border_color=Colors.DEEP_PURPLE_800,border_radius=5,
     )
 
     input_senha = ft.TextField(
@@ -661,7 +658,7 @@ def main(page: ft.Page):
         fill_color=Colors.ORANGE_800,
         password=True,
         label_style=TextStyle(color=ft.Colors.WHITE),
-        border_color=Colors.DEEP_PURPLE_800,
+        border_color=Colors.DEEP_PURPLE_800,border_radius=5,
         can_reveal_password=True
     )
 
@@ -757,7 +754,7 @@ def main(page: ft.Page):
         width=page.window.width,
         height=30,
         icon_color=Colors.WHITE,
-        on_click=click_login
+        on_click=click_login,
 
     )
 
