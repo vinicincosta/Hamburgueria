@@ -15,6 +15,8 @@ header{
     align-items: center;
     justify-content: space-between;
     font-family: "Arial Black";
+    position: fixed;
+    top: 0;
     /*padding-left: 10px; !*Temporario para teste*!*/
 }
 /*header h1{*/
@@ -39,12 +41,17 @@ main{
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
+    position: fixed;
+    top: 10vh;
 }
 .card{
+    color: white;
+    text-align: center;
     margin: 10px;
     width: 250px;
     height: 200px;
     background-color: #161E25;
+    border-radius: 15px;
 }
 /*#nav-hidden{*/
 /*    height: 100vh;*/
@@ -70,7 +77,7 @@ main{
     opacity: 1;
     flex-direction: column;
     justify-content: flex-start;
-    align-content: center;
+    align-content: flex-start;
     height: 100vh;
     overflow-x: hidden;
     width: 20%;
@@ -92,6 +99,7 @@ main{
     flex-direction: column;
     justify-content: space-around;
     align-items: center;
+    margin-top: 50%;
 }
 #logo{
     /*background-color: aqua;*/
@@ -119,7 +127,29 @@ main{
     height: 80%;
     cursor: pointer;
 }
+.titulo{
+    text-decoration: none;
+    color: #F2D43D;
+}
+.content-nav a{
+    text-align: center;
+    align-content: center;
+    text-decoration: none;
+    font-family: Centaur, sans-serif;
+    color: white;
+    /*margin: 15px;*/
+    display: block;
+    width: 100%;
+    height: 50px;
+}
+.content-nav a:hover{
+    text-align: center;
+    align-content: center;
+    background: #161E25;
+    width: 100%;
+    height: 50px;
 
+}
 @media screen and (max-height: 450px) {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}

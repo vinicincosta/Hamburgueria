@@ -10,37 +10,28 @@ def index():
 def home():
     return render_template('inicio.html')
 
-@app.route('/redirectcards/<valor>')
-def redirect_cards(valor):
-    if valor in ['true', 'True', True, 1, '1']:
-        booleano = True
+@app.route('/cards', methods=['GET'])
+@app.route('/cards/<valor_>', methods=['GET'])
+def cards(valor_=None):
+    if valor_ is None:
+        return render_template('cards.html', valor_=False)
     else:
-        booleano = False
-    print('sss',booleano)
+        if valor_ in ['true', 'True', True, 1, '1']:
+            booleano = True
+            print('wwwTRUE', booleano)
+        else:
+            booleano = False
+            print('wwwFalse', booleano)
 
+        return render_template('cards.html', valor_=not booleano)
+    # print('www',booleano)
     # return render_template('cards.html', valor=booleano)
-    return redirect(url_for('cards', valor=booleano))
-@app.route('/cards/<valor>')
-def cards(valor):
-    print('valor', valor)
-    if valor in ['true', 'True', True, 1, '1']:
-        booleano = True
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'GET':
+        return render_template('login.html')
     else:
-        booleano = False
-    print('www',booleano)
-    # return render_template('cards.html', valor=booleano)
-    return render_template('cards.html', valor=booleano)
-
-# def chama_tabela():
-#     url_for('tabela')
-# @app.route('/tabela')
-# def tabela():
-#     return render_template('tabela.html')
-
-# @app.route('/tabela?<valor>', methods = ['GET'])
-# def tabela_is_true(valor):
-#     print(valor)
-#     render_template('cards.html', valor=valor)
+        return render_template('login.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
