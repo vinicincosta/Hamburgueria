@@ -1,6 +1,6 @@
 import requests
 
-base_url = "http://10.135.235.23:5000"
+base_url = "http://10.135.235.29:5000"
 
 
 # LOGIN
@@ -94,6 +94,7 @@ def listar_lanche():
         print(f'Erro: {response.status_code}')
         return response.json()
 
+listar_lanche()
 
 
 def listar_pessoas():
@@ -109,4 +110,3 @@ def listar_pessoas():
         return response.json()
 
 
-listar_pessoas()
