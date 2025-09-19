@@ -5,13 +5,15 @@ from flet import AppBar, Text, View
 from flet.core.alignment import top_left, bottom_center
 from flet.core.border_radius import horizontal
 from flet.core.box import BoxDecoration
+from flet.core.buttons import ButtonStyle, RoundedRectangleBorder
 from flet.core.colors import Colors
 from flet.core.dropdown import Option
 from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle, TextThemeStyle
 from flet.core.theme import TextTheme
-from flet.core.types import FontWeight
+from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
+from sqlalchemy import Column
 from sqlalchemy.dialects.oracle import NUMBER
 
 from routes import *
@@ -60,7 +62,7 @@ def main(page: ft.Page):
             print(f"Papel do usuário: {papel}, Nome: {nome}")
 
             if papel == "cliente":
-                page.go("/cardapio")  # Redireciona para a rota do usuário
+                page.go("/presencial_delivery")  # Redireciona para a rota do usuário
             elif papel == "garcom":
 
                 page.go("/mesa")  # Redireciona para a rota garçom
@@ -134,37 +136,77 @@ def main(page: ft.Page):
         print(f'Resultado: {resultado_lanches}')
 
         for lanche in resultado_lanches:
-        # Usando ListView para permitir rolagem
+        # Usando ListView para permitir rolage
             lv_lanches.controls.append(
-                ft.ListView(
-                    controls=[
-                        ft.ListTile(
-                            leading=ft.Icon(Icons.FOOD_BANK, color=Colors.BLACK),
-                            title=ft.Text(f'{lanche["nome_lanche"]}', color=Colors.WHITE),
-                            subtitle=ft.Text(f'{lanche["valor_lanche"]}', color=Colors.WHITE),
-                            height=80,  # Definindo uma altura fixa para cada item
+                ft.Card(
+                    content=ft.Container(content=ft.Row(
+                        [
+                            ft.Image(src="imagemdolanche.png",height=100),
+                            ft.Column(
+                                [
+                                    # ft.Text('burguer cheese', color=Colors.ORANGE_900),
+                                    # ft.Text('hamburguer, alface,\n cheedar, bacon, molho especial, cebola caramelizada',
+                                    #         color=Colors.YELLOW_900),
+                                    ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
+                                    ft.Text(f'{lanche["valor_lanche"]} reais', color=Colors.WHITE),
 
-                            trailing=ft.PopupMenuButton(
-                                bgcolor=Colors.BLUE_700,
 
-                                icon=ft.Icons.MORE_VERT,
-                                icon_color=Colors.BLACK,
-                                items=[
-                                    ft.PopupMenuItem(
-                                        text='Detalhes',
-                                        on_click=lambda _, l=lanches: exibir_detalhes_lanches(l)
-                                    ),
-
-                                ],
-                            )
-                        )
-                        for lanches in resultado_lanches
-                    ],
-                    expand=True,  # Permite que o ListView ocupe o espaço disponível
+                                ]
+                            ),
+                            ]
+                    ),bgcolor=Colors.BLACK,height=150,border_radius=10,border=ft.Border(top=ft.BorderSide(2,color=Colors.WHITE),bottom=ft.BorderSide(2,color=Colors.WHITE))),shadow_color=Colors.YELLOW_900
                 )
             )
         page.update()
 
+    dlg_modal = ft.AlertDialog(
+        title=ft.Text("ALERTA‼️", color=Colors.ORANGE_800),
+        content=ft.Text("Você realmente confirma esse pedido, após cadastrado não terá como editar, "
+                        "então já faça suas observações ao graçom",
+
+                        color=Colors.WHITE, font_family='Arial', size=18),
+        actions=[
+            ft.TextButton("OK", on_click=lambda e: fechar_dialogo(e)),
+
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        bgcolor=Colors.BLACK,
+    )
+
+    def fechar_dialogo(e):
+        dlg_modal.open = False
+        page.update()
+
+
+    #
+    # ft.ListView(
+    #     controls=[
+    #         ft.ListTile(
+    #             leading=ft.Image(src="imglanche.png"),
+    #             title=ft.Text(f'{lanche["nome_lanche"]}', color=Colors.WHITE),
+    #             subtitle=ft.Text(f'{lanche["valor_lanche"]}', color=Colors.WHITE),
+    #             height=80,  # Definindo uma altura fixa para cada item
+    #
+    #             trailing=ft.PopupMenuButton(
+    #                 bgcolor=Colors.BLUE_700,
+    #
+    #                 icon=ft.Icons.MORE_VERT,
+    #                 icon_color=Colors.BLACK,
+    #                 items=[
+    #                     ft.PopupMenuItem(
+    #                         text='Detalhes',
+    #                         on_click=lambda _, l=lanches: exibir_detalhes_lanches(l)
+    #                     ),
+    #
+    #                 ],
+    #             )
+    #         )
+    #         for lanches in resultado_lanches
+    #     ],
+    #     expand=True,  # Permite que o ListView ocupe o espaço disponível
+    # )
+    #
 
 
     def exibir_detalhes_lanches(lanche):
@@ -311,7 +353,50 @@ def main(page: ft.Page):
                 )
             )
 
-        if page.route == "/cardapio":
+        if page.route == "/presencial_delivery":
+            cardapio(e)
+            page.views.append(
+                View(
+                    "/presencial_delivery",
+                    [
+                        AppBar(
+                            title=ft.Image(src="imgdois.png", width=90),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            color=Colors.ORANGE_500,
+                            title_spacing=5,
+                            leading=logo,
+                            actions=[btn_logout]
+                        ),
+
+                        ElevatedButton(
+                            "Presencial",
+                            on_click=lambda _: page.go("/cardapio_presencial"),
+                            style=ButtonStyle(
+                                shape={"": RoundedRectangleBorder(radius=15)},
+                                padding=20,
+                                bgcolor=Colors.ORANGE_600,
+                                color=Colors.BLACK
+                            )
+                        ),
+                        ElevatedButton(
+                            "Delivery",
+                            on_click=lambda _: page.go("/cardapio_deliveru"),
+                            style=ButtonStyle(
+                                shape={"": RoundedRectangleBorder(radius=15)},
+                                padding=20,
+                                bgcolor=Colors.BLACK,
+                                color=Colors.ORANGE_400
+                            )
+                        ),
+
+                    ],
+                    bgcolor=Colors.ORANGE_800,
+                    spacing=20  # só define o espaçamento entre eles
+                )
+            )
+
+        if page.route == "/cardapio_presencial":
             cardapio(e)
             page.views.append(
                 View(
@@ -323,7 +408,7 @@ def main(page: ft.Page):
                         lv_lanches
 
                     ],
-                    bgcolor=Colors.ORANGE_800,
+                    bgcolor=Colors.BLACK,
                 )
             )
 
@@ -336,7 +421,17 @@ def main(page: ft.Page):
                         AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
                                color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
 
-                        txt_resultado_lanche
+                        txt_resultado_lanche,
+
+                        ElevatedButton(
+                            "REALIZAR PEDIDO",
+                            on_click=lambda e: page.open(dlg_modal),
+                            style=ButtonStyle(
+                                shape={"": RoundedRectangleBorder(radius=15)},
+                                padding=20,
+                                bgcolor=Colors.BLACK,
+                                color=Colors.ORANGE_400
+                            ))
 
 
 
