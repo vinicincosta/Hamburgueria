@@ -97,9 +97,9 @@ def listar_lanche(token):
 # listar_lanche()
 
 
-def listar_pessoas(token):
+def listar_pessoas():
     url = f'{base_url}/pessoas'
-    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+    response = requests.get(url)
 
     if response.status_code == 200:
         dados_get_pessoa = response.json()
@@ -110,3 +110,20 @@ def listar_pessoas(token):
         return response.json()
 
 
+
+
+def cadastrar_venda(nova_venda):
+
+    url = f"{base_url}/vendas"
+
+    response = requests.post(url, json=nova_venda)
+    print(response.json())
+    if response.status_code == 201:
+        dados_post_venda = response.json()
+
+        print(f'Data venda: {dados_post_venda["data_venda"]}\n'
+              f'Valor: {dados_post_venda["valor_venda"]}\n'
+              f'Lanche: {dados_post_venda["lanche_id"]}\n'
+              f'Pessoa: {dados_post_venda["pessoa_id"]}')
+    else:
+        print(f'Erro: {response.status_code}')
