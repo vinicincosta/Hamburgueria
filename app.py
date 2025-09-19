@@ -5,12 +5,15 @@ from flet import AppBar, Text, View
 from flet.core.alignment import top_left, bottom_center
 from flet.core.border_radius import horizontal
 from flet.core.box import BoxDecoration
+from flet.core.buttons import ButtonStyle, RoundedRectangleBorder
 from flet.core.colors import Colors
 from flet.core.dropdown import Option
 from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
-from flet.core.text_style import TextStyle
-from flet.core.types import FontWeight
+from flet.core.text_style import TextStyle, TextThemeStyle
+from flet.core.theme import TextTheme
+from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
+from sqlalchemy import Column
 from sqlalchemy.dialects.oracle import NUMBER
 
 from routes import *
@@ -22,9 +25,10 @@ def main(page: ft.Page):
     page.theme_mode = ft.ThemeMode.LIGHT  # ou ft.ThemeMode.DARK
     page.window.width = 375
     page.window.height = 667
-
+    page.fonts = {
+        "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
+    }
     # Funções
-
     def click_login(e):
         loading_indicator.visible = True
         page.update()
@@ -58,11 +62,10 @@ def main(page: ft.Page):
             print(f"Papel do usuário: {papel}, Nome: {nome}")
 
             if papel == "cliente":
-                page.go("/primeira_user")  # Redireciona para a rota do usuário
+                page.go("/presencial_delivery")  # Redireciona para a rota do usuário
             elif papel == "garcom":
+
                 page.go("/mesa")  # Redireciona para a rota garçom
-            elif papel == "admin":
-                page.go("/mesa")
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
         else:
@@ -71,33 +74,40 @@ def main(page: ft.Page):
         page.update()
 
     def cadastro_click_user(e):
-        pessoa, error = post_pessoas(
-            input_nome.value,
-            input_cpf.value,
-            input_papel_user.value,
-            input_senha_cadastro.value,
-            slider_salario.value,
-            input_email_cadastrado.value,
-            input_status_user_usuario.value,
+        try:
+            # Se não for admin, define como cliente
+            papel = input_papel.value
+            if papel != "admin":
+                papel = "cliente"
 
-        )
+            pessoa, error = post_pessoas(
+                input_nome.value,
+                input_cpf.value,
+                papel,  # papel já validado
+                input_senha_cadastro.value,
+                float(slider_salario.value or 0),  # garante valor numérico
+                input_email_cadastrado.value,
+                input_status_user.value,
+            )
 
-        print("aaaaaaaaa")
-        if pessoa:
-            print("aaaaaa")
-            snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
-            input_nome.value = ""
-            input_cpf.value = ""
-            input_email_cadastrado.value = ""
-            input_senha_cadastro.value = ""
-            input_status_user_usuario.value = ""
-            slider_salario.value = ""
-            input_papel_user.value = ""
+            if pessoa:
+                snack_sucesso(f'Usuário criado com sucesso! ID: {pessoa["user_id"]}')
+                # Resetar os campos
+                input_nome.value = ""
+                input_cpf.value = ""
+                input_email_cadastrado.value = ""
+                input_senha_cadastro.value = ""
+                input_status_user.value = None
+                input_papel.value = None
+                slider_salario.value = 0  # volta para o mínimo
+                txt_salario.value = "SALÁRIO: 0"
+            else:
+                snack_error(f'Erro: {error}')
 
-        else:
-            snack_error(f'Erro: {error}')
+        except Exception as ex:
+            snack_error(f"Erro inesperado: {ex}")
+
         page.update()
-
 
     def click_logout(e):
         page.client_storage.remove("access_token")
@@ -120,6 +130,97 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
 
+    def cardapio(e):
+        lv_lanches.controls.clear()  # Certifique-se de que está limpando a lista correta
+        resultado_lanches = listar_lanche()
+        print(f'Resultado: {resultado_lanches}')
+
+        for lanche in resultado_lanches:
+        # Usando ListView para permitir rolage
+            lv_lanches.controls.append(
+                ft.Card(
+                    content=ft.Container(content=ft.Row(
+                        [
+                            ft.Image(src="imagemdolanche.png",height=100),
+                            ft.Column(
+                                [
+                                    # ft.Text('burguer cheese', color=Colors.ORANGE_900),
+                                    # ft.Text('hamburguer, alface,\n cheedar, bacon, molho especial, cebola caramelizada',
+                                    #         color=Colors.YELLOW_900),
+                                    ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
+                                    ft.Text(f'{lanche["valor_lanche"]} reais', color=Colors.WHITE),
+
+
+                                ]
+                            ),
+                            ]
+                    ),bgcolor=Colors.BLACK,height=150,border_radius=10,border=ft.Border(top=ft.BorderSide(2,color=Colors.WHITE),bottom=ft.BorderSide(2,color=Colors.WHITE))),shadow_color=Colors.YELLOW_900
+                )
+            )
+        page.update()
+
+    dlg_modal = ft.AlertDialog(
+        title=ft.Text("ALERTA‼️", color=Colors.ORANGE_800),
+        content=ft.Text("Você realmente confirma esse pedido, após cadastrado não terá como editar, "
+                        "então já faça suas observações ao graçom",
+
+                        color=Colors.WHITE, font_family='Arial', size=18),
+        actions=[
+            ft.TextButton("OK", on_click=lambda e: fechar_dialogo(e)),
+
+        ],
+        actions_alignment=ft.MainAxisAlignment.END,
+        on_dismiss=lambda e: print("Modal dialog dismissed!"),
+        bgcolor=Colors.BLACK,
+    )
+
+    def fechar_dialogo(e):
+        dlg_modal.open = False
+        page.update()
+
+
+    #
+    # ft.ListView(
+    #     controls=[
+    #         ft.ListTile(
+    #             leading=ft.Image(src="imglanche.png"),
+    #             title=ft.Text(f'{lanche["nome_lanche"]}', color=Colors.WHITE),
+    #             subtitle=ft.Text(f'{lanche["valor_lanche"]}', color=Colors.WHITE),
+    #             height=80,  # Definindo uma altura fixa para cada item
+    #
+    #             trailing=ft.PopupMenuButton(
+    #                 bgcolor=Colors.BLUE_700,
+    #
+    #                 icon=ft.Icons.MORE_VERT,
+    #                 icon_color=Colors.BLACK,
+    #                 items=[
+    #                     ft.PopupMenuItem(
+    #                         text='Detalhes',
+    #                         on_click=lambda _, l=lanches: exibir_detalhes_lanches(l)
+    #                     ),
+    #
+    #                 ],
+    #             )
+    #         )
+    #         for lanches in resultado_lanches
+    #     ],
+    #     expand=True,  # Permite que o ListView ocupe o espaço disponível
+    # )
+    #
+
+
+    def exibir_detalhes_lanches(lanche):
+        txt_resultado_lanche.value = (f'Nome - {lanche['nome_lanche']}\n'
+                                        f'Valor - {lanche['valor_lanche']}\n'
+                                        f'Descrição - {lanche['descricao_lanche']}\n'
+
+                                        )
+
+        page.go('/exibir_detalhes_lanches')
+
+
+
+    # Rotas
     def gerencia_rotas(e):
         page.views.clear()
         # page.padding = 0
@@ -174,7 +275,9 @@ def main(page: ft.Page):
                                 input_email,
                                 input_senha,
                                 btn_login,
-                                btn_cadastro_login
+                                btn_cadastro_login,
+                                ir_para_mesa
+
                             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         ),
                     ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
@@ -190,28 +293,30 @@ def main(page: ft.Page):
                 View(
                     "/cadastrar_pessoa",
                     [
-                        AppBar(title=Text('Cadastro'), leading=fundo, bgcolor=Colors.DEEP_PURPLE),
+                        AppBar(title=Text('Cadastro',color=Colors.YELLOW_900),title_text_style=TextStyle(weight=ft.FontWeight.BOLD,font_family="Playfair Display",size=18), leading=fundo, bgcolor=Colors.BLACK,center_title=True),
                         input_nome,
                         input_email_cadastrado,
                         input_senha_cadastro,
-                        input_cpf,
-                        input_papel_user,
-                        input_status_user_usuario,
+                        # input_cpf,
+                        # input_papel_user,
+                        # input_status_user_usuario,
 
-                        slider_salario,
-                        txt_salario,
+                        # slider_salario,
+
+                        # txt_salario,
+
 
                         ElevatedButton(
                             "Cadastrar",
                             on_click=lambda e: cadastro_click_user(e),
-                            bgcolor=Colors.BLUE_900,
-                            color=Colors.WHITE,
+                            bgcolor=Colors.ORANGE_800,
+                            color=Colors.BLACK,
                         ),
                         ElevatedButton(
                             "Voltar",
                             on_click=lambda e: page.go("/login"),
-                            bgcolor=Colors.BLUE_900,
-                            color=Colors.WHITE,
+                            bgcolor=Colors.ORANGE_800,
+                            color=Colors.BLACK,
                         ),
                     ],bgcolor=Colors.BLACK
 
@@ -226,12 +331,112 @@ def main(page: ft.Page):
                         AppBar(title=ft.Image(src="imgdois.png",width=90), center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE,
                                title_spacing=5,leading=logo, actions=[btn_logout]
                                ),
-                                icone_mesa,
-                                mesa
+                                ft.Row([
+                                    icone_mesa,
+                                    mesa,
+
+                                ]),
+                                ft.Row([
+                                    icone_pedido,
+                                    item,
+                                ]),
+                                ft.Row([
+                                    btn_pedidos,btn_limpar_tela
+                                ])
+
+
+
 
 
 
                     ], bgcolor=Colors.BLACK,
+                )
+            )
+
+        if page.route == "/presencial_delivery":
+            cardapio(e)
+            page.views.append(
+                View(
+                    "/presencial_delivery",
+                    [
+                        AppBar(
+                            title=ft.Image(src="imgdois.png", width=90),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            color=Colors.ORANGE_500,
+                            title_spacing=5,
+                            leading=logo,
+                            actions=[btn_logout]
+                        ),
+
+                        ElevatedButton(
+                            "Presencial",
+                            on_click=lambda _: page.go("/cardapio_presencial"),
+                            style=ButtonStyle(
+                                shape={"": RoundedRectangleBorder(radius=15)},
+                                padding=20,
+                                bgcolor=Colors.ORANGE_600,
+                                color=Colors.BLACK
+                            )
+                        ),
+                        ElevatedButton(
+                            "Delivery",
+                            on_click=lambda _: page.go("/cardapio_deliveru"),
+                            style=ButtonStyle(
+                                shape={"": RoundedRectangleBorder(radius=15)},
+                                padding=20,
+                                bgcolor=Colors.BLACK,
+                                color=Colors.ORANGE_400
+                            )
+                        ),
+
+                    ],
+                    bgcolor=Colors.ORANGE_800,
+                    spacing=20  # só define o espaçamento entre eles
+                )
+            )
+
+        if page.route == "/cardapio_presencial":
+            cardapio(e)
+            page.views.append(
+                View(
+                    "/cardapio",
+                    [
+                        AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
+                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
+
+                        lv_lanches
+
+                    ],
+                    bgcolor=Colors.BLACK,
+                )
+            )
+
+
+        if page.route == "/exibir_detalhes_lanches":
+            page.views.append(
+                View(
+                    "/exibir_detalhes_lanches",
+                    [
+                        AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
+                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
+
+                        txt_resultado_lanche,
+
+                        ElevatedButton(
+                            "REALIZAR PEDIDO",
+                            on_click=lambda e: page.open(dlg_modal),
+                            style=ButtonStyle(
+                                shape={"": RoundedRectangleBorder(radius=15)},
+                                padding=20,
+                                bgcolor=Colors.BLACK,
+                                color=Colors.ORANGE_400
+                            ))
+
+
+
+                    ],
+                    bgcolor=Colors.ORANGE_800,
                 )
             )
         page.update()
@@ -244,10 +449,11 @@ def main(page: ft.Page):
         on_click=lambda _: page.go("/add_usuario")
     )
 
-    lv_usuarios = ft.ListView(expand=True)
+    lv_lanches = ft.ListView(expand=True)
 
-    icone_mesa = ft.Icon(Icons.PERSON,color=Colors.GREEN)
-    # Campos
+    icone_mesa = ft.Icon(Icons.TABLE_BAR,color=Colors.ORANGE_800)
+    icone_pedido = ft.Icon(Icons.CHECKLIST)
+
     input_email = ft.TextField(
         label="Email",
         bgcolor=Colors.RED_900,
@@ -270,8 +476,11 @@ def main(page: ft.Page):
         can_reveal_password=True
     )
 
+    btn_pedidos = ft.ElevatedButton(text='Ver pedidos',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
+    btn_limpar_tela = ft.ElevatedButton(text='Limpar tela',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
+
     input_nome = ft.TextField(
-        label="Email",
+        label="Insira seu nome",
         bgcolor=Colors.RED_900,
         color=Colors.BLACK,
         opacity=0.9,
@@ -296,8 +505,6 @@ def main(page: ft.Page):
     input_senha_cadastro = ft.TextField(
         hint_text='Insira sua senha',
         col=4,
-
-
         width=300,
         label="Senha",
         password=True,
@@ -308,6 +515,19 @@ def main(page: ft.Page):
         label_style=TextStyle(color=ft.Colors.WHITE),
         border_color=Colors.DEEP_PURPLE_800
     )
+
+    input_status_user = ft.Dropdown(
+        label="Status",
+        width=300, bgcolor=Colors.ORANGE_800,
+        fill_color=Colors.ORANGE_800, color=Colors.ORANGE_800, text_style=TextStyle(color=Colors.WHITE),
+        options=[
+            Option(key="Ativo", text="Ativo"),
+            Option(key="Inativo", text="Inativo"),
+
+        ]
+    )
+
+
 
 
     # Indicador de carregamento
@@ -325,6 +545,17 @@ def main(page: ft.Page):
         height=30,
         icon_color=Colors.WHITE,
         on_click=lambda _: page.go('/cadastrar_pessoa'),
+
+    )
+    ir_para_mesa = ft.ElevatedButton(
+        text="mesa",
+        icon=Icons.LOGIN,
+        bgcolor=Colors.ORANGE_800,
+        color=Colors.BLACK,
+        width=page.window.width,
+        height=30,
+        icon_color=Colors.WHITE,
+        on_click=lambda _: page.go('/mesa'),
 
     )
 
@@ -383,14 +614,6 @@ def main(page: ft.Page):
         height=45,
     )
 
-    # container = ft.Container(
-    #     width=800,
-    #     height=600,
-    #     image_src="assets/fundo.jpg",  # URL ou caminho local
-    #     image_fit=ft.ImageFit.COVER,  # Ajusta a imagem para cobrir o fundo
-    #     content=ft.Text("Texto sobre a imagem", size=30, color="white"),
-    #     alignment=ft.alignment.center
-    # )
 
     btn_cancelar = ft.OutlinedButton(
         text="Cancelar",
@@ -414,24 +637,25 @@ def main(page: ft.Page):
 
     )
 
-    input_status_user_usuario = ft.Dropdown(
-        label="Status",
-        width=300,
-        fill_color=Colors.RED,
-        options=[
-            Option(key="Ativo", text="Ativo")
 
-        ]
-    )
+
     mesa = ft.TextField(keyboard_type=ft.Number,color=Colors.ORANGE_800,
                         bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
                         border_color=Colors.DEEP_PURPLE_800,label_style=TextStyle(color=Colors.WHITE))
-    input_papel_user = ft.Dropdown(
+
+    item = ft.TextField(keyboard_type=ft.Number, color=Colors.ORANGE_800,
+                        bgcolor=Colors.RED_900, fill_color=Colors.ORANGE_800, label="Pedido",
+                        border_color=Colors.DEEP_PURPLE_800, label_style=TextStyle(color=Colors.WHITE))
+
+    input_papel = ft.Dropdown(
+
         label = "Papel",
-        width = 300,
-        fill_color = Colors.PURPLE,
+        width = 300,bgcolor=Colors.ORANGE_800,
+        fill_color = Colors.ORANGE_800,color=Colors.ORANGE_800,text_style=TextStyle(color=Colors.WHITE),
         options = [
-            Option(key="Cliente", text="Cliente")
+            Option(key="Cliente", text="Cliente"),
+            Option(key= "garcom", text="Garçom"),
+
         ]
     )
 
@@ -439,12 +663,16 @@ def main(page: ft.Page):
         txt_salario.value = f'SALÁRIO: {int(e.control.value)}'
         page.update()
 
-    slider_salario = ft.Slider(min=1500, max=50000, divisions=485, label="{value}",
-                               active_color="cyan",
-                               inactive_color="grey", on_change=display_slider_salario,
+
+
+    slider_salario = ft.Slider(min=0, max=50000, divisions=485, label="{value}",
+                               active_color=Colors.ORANGE_800,
+                               inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,thumb_color=Colors.RED
                                )
 
-    txt_salario = ft.Text(value='SALÁRIO: 1500', font_family="Consolas", size=18, color=Colors.BLACK, animate_size=20)
+    txt_salario = ft.Text(value='SALÁRIO: 0', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
+
+    txt_resultado_lanche = ft.Text("", font_family="Arial", color=Colors.BLACK, size=18)
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
