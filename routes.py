@@ -99,9 +99,9 @@ def listar_lanche(token):
 # listar_lanche()
 
 
-def listar_pessoas():
+def listar_pessoas(token):
     url = f'{base_url}/pessoas'
-    response = requests.get(url)
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
 
     if response.status_code == 200:
         dados_get_pessoa = response.json()
