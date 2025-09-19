@@ -47,7 +47,7 @@ def main(page: ft.Page):
         token, papel, nome, error = post_login(input_email.value, input_senha.value)
 
         print(f"Token: {token}, Papel: {papel}, Nome: {nome}, Erro: {error}")
-
+        print(token)
         # Verifica se o usuário está inativo
         for pessoa in resultado_pessoas:
             if pessoa['email'] == input_email.value:  # Verifica se o CPF corresponde
@@ -60,11 +60,14 @@ def main(page: ft.Page):
         if token:
             snack_sucesso(f'Login bem-sucedido, {nome} ({papel})!')
             print(f"Papel do usuário: {papel}, Nome: {nome}")
+            page.client_storage.set('token', token)
+            page.client_storage.set('papel', papel)
+            input_email.value = ''
+            input_senha.value = ''
 
             if papel == "cliente":
                 page.go("/presencial_delivery")  # Redireciona para a rota do usuário
             elif papel == "garcom":
-
                 page.go("/mesa")  # Redireciona para a rota garçom
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
@@ -132,10 +135,12 @@ def main(page: ft.Page):
 
     def cardapio(e):
         lv_lanches.controls.clear()  # Certifique-se de que está limpando a lista correta
-        resultado_lanches = listar_lanche()
-        print(f'Resultado: {resultado_lanches}')
+        token = page.client_storage.get('token')
+        resultado_lanches = listar_lanche(token)
+        print(f'Resultado dos lanches: {resultado_lanches}')
 
         for lanche in resultado_lanches:
+            print(lanche)
         # Usando ListView para permitir rolage
             lv_lanches.controls.append(
                 ft.Card(
@@ -148,7 +153,8 @@ def main(page: ft.Page):
                                     # ft.Text('hamburguer, alface,\n cheedar, bacon, molho especial, cebola caramelizada',
                                     #         color=Colors.YELLOW_900),
                                     ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
-                                    ft.Text(f'{lanche["valor_lanche"]} reais', color=Colors.WHITE),
+                                    ft.Text(f'{lanche["valor_lanche"]} reais', color=Colors.YELLOW_900),
+                                    ft.Text(f'{lanche["descricao_lanche"]}', color=Colors.YELLOW_800,width=200),
 
 
                                 ]
@@ -276,7 +282,7 @@ def main(page: ft.Page):
                                 input_senha,
                                 btn_login,
                                 btn_cadastro_login,
-                                ir_para_mesa
+
 
                             ], horizontal_alignment=ft.CrossAxisAlignment.CENTER)
                         ),
@@ -354,7 +360,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/presencial_delivery":
-            cardapio(e)
+
             page.views.append(
                 View(
                     "/presencial_delivery",
