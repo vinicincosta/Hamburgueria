@@ -27,7 +27,6 @@ def main(page: ft.Page):
         "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
     }
     # Funções
-
     def click_login(e):
         loading_indicator.visible = True
         page.update()
@@ -61,11 +60,9 @@ def main(page: ft.Page):
             print(f"Papel do usuário: {papel}, Nome: {nome}")
 
             if papel == "cliente":
-                page.go("/primeira_user")  # Redireciona para a rota do usuário
+                page.go("/cardapio")  # Redireciona para a rota do usuário
             elif papel == "garcom":
                 page.go("/mesa")  # Redireciona para a rota garçom
-            elif papel == "admin":
-                page.go("/mesa")
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
         else:
@@ -87,7 +84,7 @@ def main(page: ft.Page):
                 input_senha_cadastro.value,
                 float(slider_salario.value or 0),  # garante valor numérico
                 input_email_cadastrado.value,
-                input_status_user_usuario.value,
+                input_status_user.value,
             )
 
             if pessoa:
@@ -97,7 +94,7 @@ def main(page: ft.Page):
                 input_cpf.value = ""
                 input_email_cadastrado.value = ""
                 input_senha_cadastro.value = ""
-                input_status_user_usuario.value = None
+                input_status_user.value = None
                 input_papel.value = None
                 slider_salario.value = 0  # volta para o mínimo
                 txt_salario.value = "SALÁRIO: 0"
@@ -130,6 +127,57 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
 
+    def cardapio(e):
+        lv_lanches.controls.clear()  # Certifique-se de que está limpando a lista correta
+        resultado_lanches = listar_lanche()
+        print(f'Resultado: {resultado_lanches}')
+
+        for lanche in resultado_lanches:
+        # Usando ListView para permitir rolagem
+            lv_lanches.controls.append(
+                ft.ListView(
+                    controls=[
+                        ft.ListTile(
+                            leading=ft.Icon(Icons.FOOD_BANK, color=Colors.BLACK),
+                            title=ft.Text(f'{lanche["nome_lanche"]}', color=Colors.WHITE),
+                            subtitle=ft.Text(f'{lanche["valor_lanche"]}', color=Colors.WHITE),
+                            height=80,  # Definindo uma altura fixa para cada item
+
+                            trailing=ft.PopupMenuButton(
+                                bgcolor=Colors.BLUE_700,
+
+                                icon=ft.Icons.MORE_VERT,
+                                icon_color=Colors.BLACK,
+                                items=[
+                                    ft.PopupMenuItem(
+                                        text='Detalhes',
+                                        on_click=lambda _, l=lanches: exibir_detalhes_lanches(l)
+                                    ),
+
+                                ],
+                            )
+                        )
+                        for lanches in resultado_lanches
+                    ],
+                    expand=True,  # Permite que o ListView ocupe o espaço disponível
+                )
+            )
+        page.update()
+
+
+
+    def exibir_detalhes_lanches(lanche):
+        txt_resultado_lanche.value = (f'Nome - {lanche['nome_lanche']}\n'
+                                        f'Valor - {lanche['valor_lanche']}\n'
+                                        f'Descrição - {lanche['descricao_lanche']}\n'
+
+                                        )
+
+        page.go('/exibir_detalhes_lanches')
+
+
+
+    # Rotas
     def gerencia_rotas(e):
         page.views.clear()
         # page.padding = 0
@@ -257,6 +305,40 @@ def main(page: ft.Page):
                     ], bgcolor=Colors.BLACK,
                 )
             )
+
+        if page.route == "/cardapio":
+            cardapio(e)
+            page.views.append(
+                View(
+                    "/cardapio",
+                    [
+                        AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
+                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
+
+                        lv_lanches
+
+                    ],
+                    bgcolor=Colors.ORANGE_800,
+                )
+            )
+
+
+        if page.route == "/exibir_detalhes_lanches":
+            page.views.append(
+                View(
+                    "/exibir_detalhes_lanches",
+                    [
+                        AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
+                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
+
+                        txt_resultado_lanche
+
+
+
+                    ],
+                    bgcolor=Colors.ORANGE_800,
+                )
+            )
         page.update()
 
     # Componentes
@@ -267,7 +349,7 @@ def main(page: ft.Page):
         on_click=lambda _: page.go("/add_usuario")
     )
 
-    lv_usuarios = ft.ListView(expand=True)
+    lv_lanches = ft.ListView(expand=True)
 
     icone_mesa = ft.Icon(Icons.TABLE_BAR,color=Colors.ORANGE_800)
     icone_pedido = ft.Icon(Icons.CHECKLIST)
@@ -320,8 +402,6 @@ def main(page: ft.Page):
     input_senha_cadastro = ft.TextField(
         hint_text='Insira sua senha',
         col=4,
-
-
         width=300,
         label="Senha",
         password=True,
@@ -332,6 +412,19 @@ def main(page: ft.Page):
         label_style=TextStyle(color=ft.Colors.WHITE),
         border_color=Colors.DEEP_PURPLE_800
     )
+
+    input_status_user = ft.Dropdown(
+        label="Status",
+        width=300, bgcolor=Colors.ORANGE_800,
+        fill_color=Colors.ORANGE_800, color=Colors.ORANGE_800, text_style=TextStyle(color=Colors.WHITE),
+        options=[
+            Option(key="Ativo", text="Ativo"),
+            Option(key="Inativo", text="Inativo"),
+
+        ]
+    )
+
+
 
 
     # Indicador de carregamento
@@ -418,14 +511,6 @@ def main(page: ft.Page):
         height=45,
     )
 
-    # container = ft.Container(
-    #     width=800,
-    #     height=600,
-    #     image_src="assets/fundo.jpg",  # URL ou caminho local
-    #     image_fit=ft.ImageFit.COVER,  # Ajusta a imagem para cobrir o fundo
-    #     content=ft.Text("Texto sobre a imagem", size=30, color="white"),
-    #     alignment=ft.alignment.center
-    # )
 
     btn_cancelar = ft.OutlinedButton(
         text="Cancelar",
@@ -483,6 +568,8 @@ def main(page: ft.Page):
                                )
 
     txt_salario = ft.Text(value='SALÁRIO: 0', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
+
+    txt_resultado_lanche = ft.Text("", font_family="Arial", color=Colors.BLACK, size=18)
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
