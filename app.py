@@ -184,14 +184,11 @@ def main(page: ft.Page):
 
         page.update()
 
-
     def cardapio_delivery(e):
         lv_lanches.controls.clear()  # limpa antes de carregar
         token = page.client_storage.get('token')
         resultado_lanches = listar_lanche(token)
         print(f'Resultado dos lanches: {resultado_lanches}')
-
-
 
         for lanche in resultado_lanches:
             lv_lanches.controls.append(
@@ -207,10 +204,10 @@ def main(page: ft.Page):
                                         ft.Text(f'{lanche["descricao_lanche"]}',
                                                 color=Colors.YELLOW_800, width=200),
 
-                                        # Botão Finalizar Pedido
+                                        # 🔹 Botão Finalizar Pedido -> vai para rota /vendas
                                         ft.ElevatedButton(
                                             "Finalizar Pedido",
-                                            on_click=lambda e: page.open(dlg_modal),
+                                            on_click=lambda e, l=lanche: page.go(f"/vendas/{l['id_lanche']}"),
                                             style=ft.ButtonStyle(
                                                 bgcolor=Colors.ORANGE_700,
                                                 color=Colors.BLACK,
@@ -218,7 +215,6 @@ def main(page: ft.Page):
                                                 shape={"": ft.RoundedRectangleBorder(radius=10)}
                                             )
                                         ),
-                                        ft.ElevatedButton()
                                     ]
                                 ),
                             ]
@@ -236,6 +232,58 @@ def main(page: ft.Page):
             )
 
         page.update()
+
+    # def cardapio_delivery(e):
+    #     lv_lanches.controls.clear()  # limpa antes de carregar
+    #     token = page.client_storage.get('token')
+    #     resultado_lanches = listar_lanche(token)
+    #     print(f'Resultado dos lanches: {resultado_lanches}')
+    #
+    #
+    #
+    #     for lanche in resultado_lanches:
+    #         lv_lanches.controls.append(
+    #             ft.Card(
+    #                 content=ft.Container(
+    #                     content=ft.Row(
+    #                         [
+    #                             ft.Image(src="imagemdolanche.png", height=100),
+    #                             ft.Column(
+    #                                 [
+    #                                     ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
+    #                                     ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
+    #                                     ft.Text(f'{lanche["descricao_lanche"]}',
+    #                                             color=Colors.YELLOW_800, width=200),
+    #
+    #                                     # Botão Finalizar Pedido
+    #                                     ft.ElevatedButton(
+    #                                         "Finalizar Pedido",
+    #                                         on_click=lambda e: page.open(dlg_modal),
+    #                                         style=ft.ButtonStyle(
+    #                                             bgcolor=Colors.ORANGE_700,
+    #                                             color=Colors.BLACK,
+    #                                             padding=15,
+    #                                             shape={"": ft.RoundedRectangleBorder(radius=10)}
+    #                                         )
+    #                                     ),
+    #                                     ft.ElevatedButton()
+    #                                 ]
+    #                             ),
+    #                         ]
+    #                     ),
+    #                     bgcolor=Colors.BLACK,
+    #                     height=180,
+    #                     border_radius=10,
+    #                     border=ft.Border(
+    #                         top=ft.BorderSide(2, color=Colors.WHITE),
+    #                         bottom=ft.BorderSide(2, color=Colors.WHITE)
+    #                     ),
+    #                 ),
+    #                 shadow_color=Colors.YELLOW_900
+    #             )
+    #         )
+    #
+    #     page.update()
 
     # 🔔 Modal de Confirmação
     def fechar_dialogo(e):
@@ -271,6 +319,29 @@ def main(page: ft.Page):
                                         )
 
         page.go('/exibir_detalhes_lanches')
+
+    def confirmar_pedido(lanche, pessoa_id, qtd_field, pagamento_dropdown, endereco_field, page):
+        """Função que cadastra o pedido e exibe mensagem de confirmação."""
+        endereco = endereco_field.value.strip()
+        if not endereco:
+            snack_sucesso("Por favor, informe o endereço!", Colors.RED_700)
+            page.snack_bar.open = True
+            page.update()
+            return
+
+        # Cadastra a venda
+        cadastrar_venda_app(
+            lanche["id_lanche"],
+            pessoa_id,
+            int(qtd_field.value),
+            pagamento_dropdown.value,
+            endereco
+        )
+
+        # Mostra mensagem de sucesso
+        snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
+        page.snack_bar.open = True
+        page.update()
 
 
 
@@ -435,7 +506,7 @@ def main(page: ft.Page):
                         ),
                         ElevatedButton(
                             "Delivery",
-                            on_click=lambda _: page.go("/cardapio_deliveru"),
+                            on_click=lambda _: page.go("/cardapio_delivery"),
                             style=ButtonStyle(
                                 shape={"": RoundedRectangleBorder(radius=15)},
                                 padding=20,
@@ -467,7 +538,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/cardapio_delivery":
-            cardapio(e)
+            cardapio_delivery(e)
             page.views.append(
                 View(
                     "/cardapio",
@@ -480,9 +551,82 @@ def main(page: ft.Page):
                     ],
                     bgcolor=Colors.BLACK,
                 )
+
             )
 
+        if page.route.startswith("/vendas/"):
+            lanche_id = int(page.route.split("/")[-1])  # pega o id do lanche da rota
+            token = page.client_storage.get('token')
+            resultado_lanches = listar_lanche(token)
 
+            # procura o lanche pelo id
+            lanche = next((l for l in resultado_lanches if l["id_lanche"] == lanche_id), None)
+
+            if lanche:
+                qtd_field = ft.TextField(label="Quantidade", value="1", width=100, color=Colors.ORANGE_700)
+                pagamento_dropdown = ft.Dropdown(
+                    label="Forma de Pagamento",
+                    options=[
+                        ft.dropdown.Option("Dinheiro"),
+                        ft.dropdown.Option("Pix"),
+                        ft.dropdown.Option("Cartão de Débito"),
+                        ft.dropdown.Option("Cartão de Crédito"),
+                    ],
+                    width=250,
+                )
+                endereco_field = ft.TextField(label="Endereço de Entrega", width=300, color=Colors.ORANGE_700)
+
+                page.views.append(
+                    ft.View(
+                        "/vendas",
+                        [
+                            ft.AppBar(
+                                title=ft.Text("Finalizar Pedido", size=20, color=Colors.ORANGE_900),
+                                center_title=True,
+                                bgcolor=Colors.BLACK,
+                                actions=[btn_logout]
+                            ),
+                            ft.Column(
+                                [
+                                    ft.Text("Resumo do Pedido", size=22, color=Colors.YELLOW_800),
+                                    ft.Text(f"Lanche: {lanche['nome_lanche']}", color=Colors.ORANGE_700),
+                                    ft.Text(f"Preço: R$ {lanche['valor_lanche']:.2f}", color=Colors.YELLOW_700),
+                                    qtd_field,
+                                    pagamento_dropdown,
+                                    endereco_field,
+                                    ft.Row(
+                                        [
+                                            ft.ElevatedButton(
+                                                "Confirmar Pedido",
+                                                bgcolor=Colors.ORANGE_700,
+                                                color=Colors.BLACK,
+                                                on_click=lambda e: confirmar_pedido(
+                                                    lanche,
+                                                    page.client_storage.get("pessoa_id"),
+                                                    qtd_field,
+                                                    pagamento_dropdown,
+                                                    endereco_field,
+                                                    page
+                                                )
+                                            ),
+                                            ft.OutlinedButton(
+                                                "Voltar",
+                                                on_click=lambda e: page.go("/cardapio_delivery")
+                                            ),
+                                        ],
+                                        alignment=ft.MainAxisAlignment.CENTER
+                                    )
+                                ],
+                                alignment=ft.MainAxisAlignment.CENTER,
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=20,
+                            ),
+                        ],
+                        bgcolor=Colors.ORANGE_100,
+                    )
+                )
+
+            page.update()
 
         page.update()
 
