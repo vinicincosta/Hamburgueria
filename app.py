@@ -298,6 +298,10 @@ def main(page: ft.Page):
                                     icone_pedido,
                                     item,
                                 ]),
+                                ft.Row([
+                                    btn_pedidos,btn_limpar_tela
+                                ])
+
 
 
 
@@ -376,6 +380,9 @@ def main(page: ft.Page):
         border_color=Colors.DEEP_PURPLE_800,
         can_reveal_password=True
     )
+
+    btn_pedidos = ft.ElevatedButton(text='Ver pedidos',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
+    btn_limpar_tela = ft.ElevatedButton(text='Limpar tela',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
 
     input_nome = ft.TextField(
         label="Insira seu nome",
