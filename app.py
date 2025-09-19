@@ -62,6 +62,7 @@ def main(page: ft.Page):
             if papel == "cliente":
                 page.go("/cardapio")  # Redireciona para a rota do usuário
             elif papel == "garcom":
+
                 page.go("/mesa")  # Redireciona para a rota garçom
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
