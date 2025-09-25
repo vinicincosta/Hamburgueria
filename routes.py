@@ -2,7 +2,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.235.23:5000"
+base_url = "http://10.135.235.29:5000"
 
 
 # LOGIN
@@ -99,9 +99,9 @@ def listar_lanche(token):
 # listar_lanche()
 
 
-def listar_pessoas(token):
+def listar_pessoas():
     url = f'{base_url}/pessoas'
-    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+    response = requests.get(url)
 
     if response.status_code == 200:
         dados_get_pessoa = response.json()
