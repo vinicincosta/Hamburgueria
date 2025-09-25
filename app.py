@@ -29,6 +29,24 @@ def main(page: ft.Page):
         "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
     }
     # Funções
+    def bs_dismissed(e):
+        page.add(ft.Text("Bottom sheet dismissed"))
+    bs = ft.BottomSheet(
+        ft.Container(
+            ft.Column(
+                [
+
+                    ft.ElevatedButton("Dismiss", on_click=lambda _: page.close(bs)),
+                ],
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                tight=True,
+            ),
+            padding=50,
+        ),
+        open=False,
+        on_dismiss=bs_dismissed,
+    )
+
     def click_login(e):
         loading_indicator.visible = True
         page.update()
@@ -121,8 +139,8 @@ def main(page: ft.Page):
 
     def snack_sucesso(texto: str):
         page.snack_bar = ft.SnackBar(
-            content=ft.Text(texto),
-            bgcolor=Colors.ORANGE_800
+            content=ft.Text(texto,color=Colors.ORANGE_500),
+            bgcolor=Colors.BLACK
         )
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
@@ -203,6 +221,7 @@ def main(page: ft.Page):
             page.session.set("carrinho", carrinho)
             snack_sucesso(f"{lanche['nome_lanche']} adicionado ao carrinho!")
             print(f"Carrinho atualizado: {carrinho}")
+            page.update()
 
         # renderiza cada lanche
         for lanche in resultado_lanches:
@@ -502,6 +521,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/mesa":
+            page.overlay.append(bs)
             page.views.append(
                 View(
                     "/mesa",
@@ -509,18 +529,19 @@ def main(page: ft.Page):
                         AppBar(title=ft.Image(src="imgdois.png",width=90), center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE,
                                title_spacing=5,leading=logo, actions=[btn_logout]
                                ),
-                                ft.Row([
-                                    icone_mesa,
-                                    mesa,
-
-                                ]),
-                                ft.Row([
-                                    icone_pedido,
-                                    item,
-                                ]),
-                                ft.Row([
-                                    inserir_mesa,btn_pedidos,btn_limpar_tela
-                                ])
+                        ft.ElevatedButton("Display bottom sheet", on_click=lambda e: page.open())
+                                # ft.Row([
+                                #     icone_mesa,
+                                #     mesa,
+                                #
+                                # ]),
+                                # ft.Row([
+                                #     icone_pedido,
+                                #     # item,
+                                # ]),
+                                # ft.Row([
+                                #     inserir_mesa,btn_pedidos,btn_limpar_tela
+                                # ])
 
 
                     ], bgcolor=Colors.BLACK,
