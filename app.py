@@ -15,7 +15,7 @@ from flet.core.theme import TextTheme
 from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
 from sqlalchemy import Column
 from sqlalchemy.dialects.oracle import NUMBER
-
+from urllib.parse import urlparse, parse_qs
 from routes import *
 
 
@@ -117,6 +117,8 @@ def main(page: ft.Page):
         snack_sucesso("logout realizado com sucesso")
         page.go("/")
 
+
+
     def snack_sucesso(texto: str):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(texto),
@@ -188,6 +190,9 @@ def main(page: ft.Page):
         resultado_lanches = listar_lanche(token)
         print(f'Resultado dos lanches: {resultado_lanches}')
 
+
+        # O page.session é o estado temporário do usuário no app, e você está usando para manter o carrinho de compras.
+        # Quando o app fecha, essa memória some (não é persistente em banco de dados).
         # garante que o carrinho exista
         if page.session.get("carrinho") is None:
             page.session.set("carrinho", [])
@@ -221,6 +226,7 @@ def main(page: ft.Page):
                                         ft.ElevatedButton(
                                             "Adicionar ao Carrinho",
                                             on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
+
                                             style=ft.ButtonStyle(
                                                 bgcolor=Colors.ORANGE_700,
                                                 color=Colors.BLACK,
@@ -263,6 +269,15 @@ def main(page: ft.Page):
 
         page.update()
 
+    # Função para remover item do carrinho
+    def remover_item(index):
+        carrinho = page.session.get("carrinho") or []
+        if 0 <= index < len(carrinho):
+            item_removido = carrinho.pop(index)  # remove o item
+            page.session.set("carrinho", carrinho)
+            snack_sucesso(f"{item_removido['nome_lanche']} removido do carrinho!")
+            carrinho_view(None)  # recarrega a tela
+
     def carrinho_view(e):
         lv_carrinho.controls.clear()
 
@@ -275,7 +290,7 @@ def main(page: ft.Page):
         else:
             total = sum(item["valor_lanche"] for item in carrinho)
 
-            for item in carrinho:
+            for index, item in enumerate(carrinho):
                 lv_carrinho.controls.append(
                     ft.Card(
                         content=ft.Container(
@@ -286,13 +301,40 @@ def main(page: ft.Page):
                                         [
                                             ft.Text(item["nome_lanche"], color=Colors.ORANGE_900),
                                             ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
+
+                                            # Botões de ação
+                                            ft.Row(
+                                                [
+
+                                                    # É necessário passar a rota desse jeito para pegar o id do lanche
+                                                    ft.ElevatedButton(
+                                                        "Observações",
+                                                        on_click=lambda e, idx=index: page.go(
+                                                            f"/observacoes/?index={idx}"),
+                                                        bgcolor=Colors.ORANGE_700,
+                                                        color=Colors.BLACK
+                                                    ),
+
+                                                    ft.OutlinedButton(
+                                                        "Remover",
+                                                        on_click=lambda e, idx=index: remover_item(idx),
+                                                        style=ft.ButtonStyle(
+                                                            color=Colors.RED_600,
+                                                            side=ft.BorderSide(1, Colors.RED_600)
+                                                        )
+                                                    )
+                                                ],
+                                                spacing=10
+                                            )
+
                                         ]
                                     )
                                 ]
                             ),
                             bgcolor=Colors.BLACK,
-                            height=100,
+                            height=150,
                             border_radius=10,
+                            padding=10,
                         ),
                         shadow_color=Colors.YELLOW_900
                     )
@@ -322,8 +364,7 @@ def main(page: ft.Page):
 
         page.update()
 
-
-
+    # Função para alterar quantidade de verduras
 
     # 🔔 Modal de Confirmação
     def fechar_dialogo(e):
@@ -350,38 +391,28 @@ def main(page: ft.Page):
         bgcolor=Colors.ORANGE_800,
     )
 
-
-    def exibir_detalhes_lanches(lanche):
-        txt_resultado_lanche.value = (f'Nome - {lanche['nome_lanche']}\n'
-                                        f'Valor - {lanche['valor_lanche']}\n'
-                                        f'Descrição - {lanche['descricao_lanche']}\n'
-
-                                        )
-
-        page.go('/exibir_detalhes_lanches')
-
-
-    def confirmar_pedido(lanche, pessoa_id, qtd_field, pagamento_dropdown, endereco_field, page):
+    def confirmar_pedido(lanche_id, pessoa_id, qtd_lanche, forma_pagemnto, endereco):
         """Função que cadastra o pedido e exibe mensagem de confirmação."""
-        endereco = endereco_field.value.strip()
+        endereco = endereco.value.strip()
         if not endereco:
             snack_error("Por favor, informe o endereço!")
 
             page.update()
             return
 
+
+
         # Cadastra a venda
         cadastrar_venda_app(
-            lanche["id_lanche"],
+            lanche_id["id_lanche"],
             pessoa_id,
-            int(qtd_field.value),
-            pagamento_dropdown.value,
-            endereco
+            int(qtd_lanche.value),
+            forma_pagemnto.value,
+
         )
 
         # Mostra mensagem de sucesso
         snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
-        page.snack_bar.open = True
         page.update()
 
 
@@ -403,22 +434,6 @@ def main(page: ft.Page):
                         )
                     ),
 
-                    # ft.Column(
-                    #     [
-                    #         ft.Text("Bem-vindo à Biblioteca", size=24, weight=ft.FontWeight.BOLD),
-                    #         ft.Container(height=10),  # Espaçamento
-                    #         input_email,
-                    #         input_senha,
-                    #         ft.Container(height=10),  # Espaçamento
-                    #         loading_indicator,
-                    #         spacing,
-                    #         btn_login,
-                    #     ],
-                    #     # Alinha a coluna de login no centro horizontal da página
-                    #     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    #     height=page.window.height,
-                    #     alignment=ft.MainAxisAlignment.CENTER,
-                    # )
                 ], bgcolor=Colors.BLACK, floating_action_button=usuario,
                 horizontal_alignment=ft.CrossAxisAlignment.CENTER, vertical_alignment=ft.MainAxisAlignment.CENTER
             )
@@ -508,10 +523,6 @@ def main(page: ft.Page):
                                 ])
 
 
-
-
-
-
                     ], bgcolor=Colors.BLACK,
                 )
             )
@@ -599,7 +610,7 @@ def main(page: ft.Page):
                     "/carrinho",
                     [
                         AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
-                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
+                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout_carrinho]),
 
                         lv_carrinho,
 
@@ -609,6 +620,159 @@ def main(page: ft.Page):
 
             )
 
+
+
+        # ---------------- ROTA OBSERVAÇÕES ----------------
+
+        # ele permite tratar qualquer item do carrinho usando a mesma rota base /observacoes.
+        if page.route.startswith("/observacoes"):
+            query = urlparse(page.route).query
+            params = parse_qs(query)
+            try:
+                lanche_index = int(params.get("index", [-1])[0])
+            except:
+                lanche_index = -1
+
+            carrinho = page.session.get("carrinho") or []
+
+            if 0 <= lanche_index < len(carrinho):
+                item = carrinho[lanche_index]
+            else:
+                item = {"nome_lanche": "Lanche não encontrado", "valor_lanche": 0, "ingredientes": {}}
+
+            # Ingredientes padrão iniciando do zero
+            default_ingredientes = {"Alface": 0, "Carne": 0, "Queijo": 0, "Ovo": 0, "Presunto": 0, "Molho": 0}
+            if "ingredientes" not in item or not isinstance(item["ingredientes"], dict):
+                item["ingredientes"] = default_ingredientes.copy()
+
+            # Garante que todos os ingredientes existam
+            for ing in default_ingredientes.keys():
+                item["ingredientes"].setdefault(ing, 0)
+
+            ingrediente_controls = {}
+
+            def make_alterar_func(ingrediente):
+                def aumentar(e):
+                    ingrediente_controls[ingrediente].value = str(int(ingrediente_controls[ingrediente].value) + 1)
+                    page.update()
+
+                def diminuir(e):
+                    if int(ingrediente_controls[ingrediente].value) > 0:
+                        ingrediente_controls[ingrediente].value = str(int(ingrediente_controls[ingrediente].value) - 1)
+                        page.update()
+
+                return aumentar, diminuir
+
+            controles_lista = []
+            for ing, qtd in item["ingredientes"].items():
+                txt = ft.Text(str(qtd), color=Colors.WHITE, size=18, weight="bold")
+                ingrediente_controls[ing] = txt
+                aumentar, diminuir = make_alterar_func(ing)
+                controles_lista.append(
+                    ft.Card(
+                        content=ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.Text(ing, color=Colors.ORANGE_900, size=16, weight="bold"),
+                                    ft.Row(
+                                        [
+                                            ft.IconButton(ft.Icons.REMOVE_ROUNDED, icon_color=Colors.RED_700,
+                                                          on_click=diminuir),
+                                            txt,
+                                            ft.IconButton(ft.Icons.ADD_ROUNDED, icon_color=Colors.GREEN_700,
+                                                          on_click=aumentar),
+                                        ],
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                        spacing=10
+                                    )
+                                ],
+                                alignment=ft.MainAxisAlignment.CENTER
+                            ),
+                            padding=10,
+                            bgcolor=Colors.ORANGE_100,
+                            border_radius=10,
+                            alignment=ft.alignment.center
+                        ),
+                        elevation=3,
+                        shadow_color=Colors.YELLOW_800
+                    )
+                )
+
+            obs_input = ft.TextField(
+                label="Observações adicionais",
+                value=item.get("observacoes", ""),
+                color=Colors.ORANGE_900,
+                multiline=True,
+                width=350,
+                border_color=Colors.ORANGE_700,
+                border_radius=10,
+                content_padding=10,
+                bgcolor=Colors.WHITE
+            )
+
+            def salvar_observacoes(e):
+                carrinho = page.session.get("carrinho") or []
+                if 0 <= lanche_index < len(carrinho):
+                    carrinho[lanche_index]["observacoes"] = obs_input.value or "Nenhuma"
+
+                    # Armazena apenas os ingredientes com quantidade > 0
+                    ingredientes_filtrados = {ing: int(txt.value) for ing, txt in ingrediente_controls.items() if
+                                              int(txt.value) > 0}
+                    carrinho[lanche_index]["ingredientes"] = ingredientes_filtrados
+
+                    page.session.set("carrinho", carrinho)
+                    snack_sucesso("Observações salvas com sucesso!")
+                page.go("/carrinho")
+
+            # Column com scroll
+            page.views.append(
+                ft.View(
+                    "/observacoes",
+                    [
+                        ft.AppBar(
+                            title=ft.Text("Personalizar Lanche", size=22, color=Colors.ORANGE_900, weight="bold"),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            actions=[btn_logout]
+                        ),
+                        ft.Column(
+                            [
+                                ft.Text(f"Você está editando: {item['nome_lanche']}", color=Colors.YELLOW_800, size=22,
+                                        weight="bold"),
+                                ft.GridView(controles_lista, max_extent=150, spacing=15, run_spacing=15, padding=10),
+                                obs_input,
+                                ft.Row(
+                                    [
+                                        ft.ElevatedButton(
+                                            "Salvar",
+                                            on_click=salvar_observacoes,
+                                            bgcolor=Colors.GREEN_700,
+                                            color=Colors.WHITE,
+                                            style=ft.ButtonStyle(shape={"": ft.RoundedRectangleBorder(radius=12)})
+                                        ),
+                                        ft.OutlinedButton(
+                                            "Cancelar",
+                                            on_click=lambda e: page.go("/carrinho"),
+                                            style=ft.ButtonStyle(side=ft.BorderSide(2, Colors.RED_700),
+                                                                 shape={"": ft.RoundedRectangleBorder(radius=12)})
+                                        )
+                                    ],
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    spacing=20
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=25,
+                            expand=True,
+                            scroll=True
+                        )
+                    ],
+                    bgcolor=Colors.ORANGE_50
+                )
+            )
+
+        # ---------------- ROTA VENDAS ----------------
         if page.route == "/vendas":
             carrinho = page.session.get("carrinho") or []
 
@@ -624,11 +788,7 @@ def main(page: ft.Page):
                                 actions=[btn_logout]
                             ),
                             ft.Column(
-                                [
-                                    ft.Text("Seu carrinho está vazio!", color=Colors.YELLOW_800, size=18),
-                                    ft.OutlinedButton("Voltar ao Cardápio",
-                                                      on_click=lambda e: page.go("/cardapio_delivery"))
-                                ],
+                                [ft.Text("Seu carrinho está vazio!", color=Colors.YELLOW_800, size=18)],
                                 alignment=ft.MainAxisAlignment.CENTER,
                                 horizontal_alignment=ft.CrossAxisAlignment.CENTER
                             )
@@ -643,23 +803,53 @@ def main(page: ft.Page):
                     ft.View(
                         "/vendas",
                         [
-                            ft.AppBar(
-                                title=ft.Text("Finalizar Pedido", size=20, color=Colors.ORANGE_900),
+                            AppBar(
+                                title=ft.Image(src="imgdois.png", width=90),
                                 center_title=True,
                                 bgcolor=Colors.BLACK,
-                                actions=[btn_logout]
+                                color=Colors.PURPLE,
+                                title_spacing=5,
+                                leading=logo,
+                                actions=[btn_logout_carrinho]
                             ),
                             ft.Column(
                                 [
                                     ft.Text("Resumo do Pedido", size=22, color=Colors.YELLOW_800),
                                     ft.ListView(
                                         controls=[
-                                            ft.Row(
-                                                [
-                                                    ft.Text(item["nome_lanche"], color=Colors.ORANGE_700),
-                                                    ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
-                                                ],
-                                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                                            ft.Container(
+                                                content=ft.Column(
+                                                    [
+                                                        # Nome + preço
+                                                        ft.Row(
+                                                            [
+                                                                ft.Text(item["nome_lanche"], color=Colors.ORANGE_700),
+                                                                ft.Text(f'R$ {item["valor_lanche"]:.2f}',
+                                                                        color=Colors.YELLOW_900),
+                                                            ],
+                                                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                                                        ),
+                                                        # Observações
+                                                        ft.Text(
+                                                            f"Obs: {item.get('observacoes', 'Nenhuma')}",
+                                                            color=Colors.YELLOW_800,
+                                                            size=12
+                                                        ),
+                                                        # Ingredientes filtrados (apenas >0)
+                                                        ft.Text(
+                                                            "Ingredientes: " + ", ".join(
+                                                                [f"{ing} ({qtd})" for ing, qtd in
+                                                                 item.get("ingredientes", {}).items() if qtd > 0]
+                                                            ) if item.get("ingredientes") else "Ingredientes: Nenhum",
+                                                            color=Colors.YELLOW_600,
+                                                            size=12
+                                                        ),
+                                                        ft.Divider(color=Colors.BLACK, height=10)
+                                                    ]
+                                                ),
+                                                padding=10,
+                                                bgcolor=Colors.BLACK,
+                                                border_radius=10
                                             )
                                             for item in carrinho
                                         ],
@@ -667,30 +857,11 @@ def main(page: ft.Page):
                                     ),
                                     ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
                                     ft.TextField(label="Endereço de Entrega", width=300, color=Colors.ORANGE_700),
-                                    ft.Dropdown(
-                                        label="Forma de Pagamento",
-                                        options=[
-                                            ft.dropdown.Option("Dinheiro"),
-                                            ft.dropdown.Option("Pix"),
-                                            ft.dropdown.Option("Cartão de Débito"),
-                                            ft.dropdown.Option("Cartão de Crédito"),
-                                        ],
-                                        width=250,
-                                    ),
+                                    input_forma_pagamento,
                                     ft.Row(
                                         [
-                                            ft.ElevatedButton(
-                                                "Confirmar Pedido",
-                                                bgcolor=Colors.ORANGE_700,
-                                                color=Colors.BLACK,
-                                                on_click=lambda e: snack_sucesso(
-                                                    "Pedido confirmado! Seu lanche chegará em até 1 hora."
-                                                )
-                                            ),
-                                            ft.OutlinedButton(
-                                                "Voltar",
-                                                on_click=lambda e: page.go("/carrinho")
-                                            )
+                                            btn_confirmar_venda,
+                                            ft.OutlinedButton("Voltar", on_click=lambda e: page.go("/carrinho"))
                                         ],
                                         alignment=ft.MainAxisAlignment.CENTER
                                     )
@@ -798,6 +969,19 @@ def main(page: ft.Page):
         ]
     )
 
+    input_forma_pagamento = ft.Dropdown(
+        label="Forma de pagamento",
+        width=300, bgcolor=Colors.ORANGE_800,
+        fill_color=Colors.ORANGE_800, color=Colors.ORANGE_800, text_style=TextStyle(color=Colors.WHITE),
+        options=[
+            Option(key="Dinheiro", text="Dinheiro"),
+            Option(key="Credito", text="Crédito"),
+            Option(key="Debito", text="Débito"),
+            Option(key="Pix", text="Pix"),
+
+        ],
+
+    )
 
 
 
@@ -816,6 +1000,18 @@ def main(page: ft.Page):
         height=30,
         icon_color=Colors.WHITE,
         on_click=lambda _: page.go('/cadastrar_pessoa'),
+
+    )
+
+    btn_confirmar_venda = ft.ElevatedButton(
+        text="Confirmar",
+        icon=Icons.VERIFIED_USER,
+        bgcolor=Colors.ORANGE_800,
+        color=Colors.BLACK,
+        height=30,
+        icon_color=Colors.WHITE,
+        on_click=confirmar_pedido
+
 
     )
     ir_para_mesa = ft.ElevatedButton(
@@ -875,6 +1071,13 @@ def main(page: ft.Page):
         scale=1.5,
         icon_color=Colors.RED_700,
         on_click=click_logout
+    )
+
+    btn_logout_carrinho = ft.TextButton(
+        icon=Icons.LOGOUT,
+        scale=1.5,
+        icon_color=Colors.RED_700,
+        on_click=lambda _: page.go('/cardapio_delivery'),
     )
 
 
