@@ -120,7 +120,7 @@ def main(page: ft.Page):
     def snack_sucesso(texto: str):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(texto),
-            bgcolor=Colors.GREEN_700
+            bgcolor=Colors.ORANGE_800
         )
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
@@ -128,7 +128,7 @@ def main(page: ft.Page):
     def snack_error(texto: str):
         page.snack_bar = ft.SnackBar(
             content=ft.Text(texto),
-            bgcolor=Colors.RED_700
+            bgcolor=Colors.ORANGE_900
         )
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
@@ -138,8 +138,6 @@ def main(page: ft.Page):
         token = page.client_storage.get('token')
         resultado_lanches = listar_lanche(token)
         print(f'Resultado dos lanches: {resultado_lanches}')
-
-
 
         for lanche in resultado_lanches:
             lv_lanches.controls.append(
@@ -506,7 +504,7 @@ def main(page: ft.Page):
                                     item,
                                 ]),
                                 ft.Row([
-                                    btn_pedidos,btn_limpar_tela
+                                    inserir_mesa,btn_pedidos,btn_limpar_tela
                                 ])
 
 
@@ -743,7 +741,12 @@ def main(page: ft.Page):
         border_color=Colors.DEEP_PURPLE_800,border_radius=5,
         can_reveal_password=True
     )
-
+    inserir_mesa = ft.ElevatedButton(text='Ver pedidos',
+                                     icon=Icons.CHECK,
+                                     icon_color=Colors.BLACK,
+                                     color=Colors.BLACK,
+                                     bgcolor=Colors.YELLOW_900,
+                                     )
     btn_pedidos = ft.ElevatedButton(text='Ver pedidos',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
     btn_limpar_tela = ft.ElevatedButton(text='Limpar tela',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
 

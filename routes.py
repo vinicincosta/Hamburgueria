@@ -112,20 +112,3 @@ def listar_pessoas():
         return response.json()
 
 
-def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche=1, observacoes=None):
-    url = f"{base_url}/vendas"
-
-    nova_venda = {
-        "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "lanche_id": lanche_id,
-        "pessoa_id": pessoa_id,
-        "qtd_lanche": qtd_lanche,
-        "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []}
-    }
-
-    response = requests.post(url, json=nova_venda)
-
-    if response.status_code == 201:
-        return response.json()
-    else:
-        return {"error": response.json(), "status": response.status_code}
