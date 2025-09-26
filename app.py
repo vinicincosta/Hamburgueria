@@ -433,7 +433,7 @@ def main(page: ft.Page):
             page.update()
             return
 
-        # Cadastra a venda
+        # Cadastra a vendaa
         cadastrar_venda_app(
             lanche_id["id_lanche"],
             pessoa_id,
