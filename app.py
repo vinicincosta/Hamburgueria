@@ -394,74 +394,81 @@ def main(page: ft.Page):
         bgcolor=Colors.ORANGE_800,
     )
 
-
-    # Função que confirma o pedido e chama o cadastro
     def confirmar_pedido(e):
         """Finaliza o pedido cadastrando as vendas de todos os lanches do carrinho."""
 
-        # Pega usuário logado
+        # Usuário logado
         pessoa_id = page.session.get("pessoa_id")
         if not pessoa_id:
             snack_error("Usuário não logado!")
             page.go("/login")
             return
 
-        # Pega os valores dos inputs da view
+        # Endereço
         endereco_valor = input_endereco.value.strip()
         if not endereco_valor:
             snack_error("Por favor, informe o endereço!")
             page.update()
             return
 
+        # Forma de pagamento
         forma_pagamento_valor = getattr(input_forma_pagamento, "value", None)
         if not forma_pagamento_valor:
             snack_error("Selecione uma forma de pagamento!")
             page.update()
             return
 
-        # Pega o carrinho
+        # Carrinho
         carrinho = page.session.get("carrinho") or []
         if not carrinho:
             snack_error("Seu carrinho está vazio!")
             page.update()
             return
 
-        # Percorre cada lanche e cadastra na API
+        # Processa cada item do carrinho
         for item in carrinho:
             id_lanche = item.get("id_lanche")
             qtd_lanche = item.get("qtd", 1)
-            observacoes_texto = item.get("observacoes", "")
-            ingredientes = item.get("ingredientes", {})
 
-            # Apenas ingredientes alterados (>0)
+            # Observações (ajuste de ingredientes)
+            ingredientes = item.get("ingredientes", {})
             observacoes = {
-                "texto": observacoes_texto,
-                "ingredientes": {ing: qtd for ing, qtd in ingredientes.items() if qtd > 0}
+                "adicionar": [
+                    {"insumo_id": ing_id, "qtd": qtd}
+                    for ing_id, qtd in ingredientes.items() if qtd > 0
+                ],
+                "remover": [
+                    {"insumo_id": ing_id, "qtd": abs(qtd)}
+                    for ing_id, qtd in ingredientes.items() if qtd < 0
+                ]
             }
 
-            # Chama a função que envia para API
+            # Campo obrigatório: detalhamento
+            detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {item.get('observacoes', '')}"
+
+            # Chama a função da API
             response = cadastrar_venda_app(
                 lanche_id=id_lanche,
                 pessoa_id=pessoa_id,
                 qtd_lanche=qtd_lanche,
                 forma_pagamento=forma_pagamento_valor,
                 endereco=endereco_valor,
-                observacoes=observacoes,
-                mesa="delivery"  # define mesa padrão para pedidos de delivery
+                detalhamento=detalhamento,
+                observacoes=observacoes
             )
 
-            # Debug caso algo falhe
+            # Debug de erro
             if "error" in response:
                 snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
                 page.update()
                 return
 
-        # Limpa carrinho após confirmar
+        # Limpa carrinho
         page.session.set("carrinho", [])
 
-        # Mensagem de sucesso
+        # Sucesso
         snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
-        page.go("/")  # ou "/vendas" se quiser voltar para o resumo
+        page.go("/")
         page.update()
 
     # Rotas
@@ -687,40 +694,54 @@ def main(page: ft.Page):
             else:
                 item = {"nome_lanche": "Lanche não encontrado", "valor_lanche": 0, "ingredientes": {}}
 
-            # Ingredientes padrão iniciando do zero
-            default_ingredientes = {"Alface": 0, "Carne": 0, "Queijo": 0, "Ovo": 0, "Presunto": 0, "Molho": 0}
+            # Ingredientes disponíveis (id -> nome)
+            ingredientes_disponiveis = {
+                1: "Alface",
+                2: "Carne",
+                3: "Queijo",
+                4: "Ovo",
+                5: "Presunto",
+                6: "Molho"
+            }
+
+            # Ingredientes padrão do lanche (já vem no lanche)
+            ingredientes_padrao = item.get("ingredientes_padrao", {2: 1, 3: 1, 6: 1})
+            # Exemplo: Carne=1, Queijo=1, Molho=1 (você pode carregar isso da API)
+
+            # Se ainda não existir no carrinho, cria
             if "ingredientes" not in item or not isinstance(item["ingredientes"], dict):
-                item["ingredientes"] = default_ingredientes.copy()
+                item["ingredientes"] = {ing_id: 0 for ing_id in ingredientes_disponiveis.keys()}
 
             # Garante que todos os ingredientes existam
-            for ing in default_ingredientes.keys():
-                item["ingredientes"].setdefault(ing, 0)
+            for ing_id in ingredientes_disponiveis.keys():
+                item["ingredientes"].setdefault(ing_id, 0)
 
             ingrediente_controls = {}
 
-            def make_alterar_func(ingrediente):
+            def make_alterar_func(ing_id):
                 def aumentar(e):
-                    ingrediente_controls[ingrediente].value = str(int(ingrediente_controls[ingrediente].value) + 1)
+                    ingrediente_controls[ing_id].value = str(int(ingrediente_controls[ing_id].value) + 1)
                     page.update()
 
                 def diminuir(e):
-                    if int(ingrediente_controls[ingrediente].value) > 0:
-                        ingrediente_controls[ingrediente].value = str(int(ingrediente_controls[ingrediente].value) - 1)
-                        page.update()
+                    ingrediente_controls[ing_id].value = str(int(ingrediente_controls[ing_id].value) - 1)
+                    page.update()
 
                 return aumentar, diminuir
 
             controles_lista = []
-            for ing, qtd in item["ingredientes"].items():
+            for ing_id, qtd in item["ingredientes"].items():
+                nome = ingredientes_disponiveis[ing_id]
                 txt = ft.Text(str(qtd), color=Colors.WHITE, size=18, weight="bold")
-                ingrediente_controls[ing] = txt
-                aumentar, diminuir = make_alterar_func(ing)
+                ingrediente_controls[ing_id] = txt
+                aumentar, diminuir = make_alterar_func(ing_id)
+
                 controles_lista.append(
                     ft.Card(
                         content=ft.Container(
                             content=ft.Column(
                                 [
-                                    ft.Text(ing, color=Colors.ORANGE_900, size=16, weight="bold"),
+                                    ft.Text(nome, color=Colors.ORANGE_900, size=16, weight="bold"),
                                     ft.Row(
                                         [
                                             ft.IconButton(ft.Icons.REMOVE_ROUNDED, icon_color=Colors.RED_700,
@@ -747,7 +768,7 @@ def main(page: ft.Page):
 
             obs_input = ft.TextField(
                 label="Observações adicionais",
-                value=item.get("observacoes", ""),
+                value=item.get("observacoes_texto", ""),
                 color=Colors.ORANGE_900,
                 multiline=True,
                 width=350,
@@ -760,15 +781,35 @@ def main(page: ft.Page):
             def salvar_observacoes(e):
                 carrinho = page.session.get("carrinho") or []
                 if 0 <= lanche_index < len(carrinho):
-                    carrinho[lanche_index]["observacoes"] = obs_input.value or "Nenhuma"
+                    carrinho[lanche_index]["observacoes_texto"] = obs_input.value or "Nenhuma"
 
-                    # Armazena apenas os ingredientes com quantidade > 0
-                    ingredientes_filtrados = {ing: int(txt.value) for ing, txt in ingrediente_controls.items() if
-                                              int(txt.value) > 0}
-                    carrinho[lanche_index]["ingredientes"] = ingredientes_filtrados
+                    ingredientes_modificados = {ing_id: int(txt.value) for ing_id, txt in ingrediente_controls.items()
+                                                if int(txt.value) != 0}
+
+                    carrinho[lanche_index]["ingredientes"] = ingredientes_modificados
+
+                    # Organiza em adicionar/remover
+                    observacoes = {"adicionar": [], "remover": []}
+
+                    for ing_id, qtd in ingredientes_modificados.items():
+                        if qtd > 0:
+                            observacoes["adicionar"].append({
+                                "insumo_id": ing_id,
+                                "nome": ingredientes_disponiveis[ing_id],
+                                "qtd": qtd
+                            })
+                        elif qtd < 0:  # ingrediente removido
+                            observacoes["remover"].append({
+                                "insumo_id": ing_id,
+                                "nome": ingredientes_disponiveis[ing_id],
+                                "qtd": abs(qtd)
+                            })
+
+                    carrinho[lanche_index]["observacoes"] = observacoes
 
                     page.session.set("carrinho", carrinho)
                     snack_sucesso("Observações salvas com sucesso!")
+
                 page.go("/carrinho")
 
             # Column com scroll
@@ -825,8 +866,56 @@ def main(page: ft.Page):
             carrinho = page.session.get("carrinho") or []
             total = sum(item["valor_lanche"] for item in carrinho)
 
-            page.views.append(
+            lista_itens = []
+            for item in carrinho:
+                # Observações
+                obs_texto = item.get("observacoes_texto", "Nenhuma")
 
+                # Ingredientes adicionados/removidos
+                adicionados = [
+                    f"{ing} (+{qtd})"
+                    for ing, qtd in item.get("ingredientes", {}).items()
+                    if qtd > 0
+                ]
+                removidos = [
+                    f"{ing} (-{abs(qtd)})"
+                    for ing, qtd in item.get("ingredientes", {}).items()
+                    if qtd < 0
+                ]
+
+                lista_itens.append(
+                    ft.Container(
+                        content=ft.Column(
+                            [
+                                ft.Row(
+                                    [
+                                        ft.Text(item.get("nome_lanche", "Lanche"), color=Colors.ORANGE_700, size=16),
+                                        ft.Text(f'R$ {item.get("valor_lanche", 0):.2f}', color=Colors.YELLOW_900,
+                                                size=14),
+                                    ],
+                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                                ),
+                                ft.Text(f"Obs: {obs_texto}", color=Colors.YELLOW_800, size=12),
+                                ft.Text(
+                                    "Adicionados: " + (", ".join(adicionados) if adicionados else "Nenhum"),
+                                    color=Colors.GREEN_700,
+                                    size=12
+                                ),
+                                ft.Text(
+                                    "Removidos: " + (", ".join(removidos) if removidos else "Nenhum"),
+                                    color=Colors.RED_700,
+                                    size=12
+                                ),
+                                ft.Divider(color=Colors.BLACK, height=10)
+                            ]
+                        ),
+                        padding=10,
+                        bgcolor=Colors.BLACK,
+                        border_radius=10
+                    )
+                )
+
+            page.views.append(
                 ft.View(
                     "/vendas",
                     [
@@ -836,52 +925,14 @@ def main(page: ft.Page):
                             bgcolor=Colors.BLACK,
                             leading=logo,
                             actions=[btn_logout_carrinho],
-
                         ),
                         ft.Column(
                             [
                                 ft.Text("Resumo do Pedido", size=22, color=Colors.BLACK, font_family="Arial"),
-                                ft.ListView(
-                                    controls=[
-                                        ft.Container(
-                                            content=ft.Column(
-                                                [
-                                                    ft.Row(
-                                                        [
-                                                            ft.Text(item.get("nome_lanche", "Lanche"),
-                                                                    color=Colors.ORANGE_700),
-                                                            ft.Text(f'R$ {item.get("valor_lanche", 0):.2f}',
-                                                                    color=Colors.YELLOW_900),
-                                                        ],
-                                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                                    ),
-                                                    ft.Text(
-                                                        f"Obs: {item.get('observacoes', 'Nenhuma')}",
-                                                        color=Colors.YELLOW_800,
-                                                        size=12
-                                                    ),
-                                                    ft.Text(
-                                                        "Ingredientes: " + ", ".join(
-                                                            [f"{ing} ({qtd})" for ing, qtd in
-                                                             item.get("ingredientes", {}).items() if qtd > 0]
-                                                        ) if item.get("ingredientes") else "Ingredientes: Nenhum",
-                                                        color=Colors.YELLOW_600,
-                                                        size=12
-                                                    ),
-                                                    ft.Divider(color=Colors.BLACK, height=10)
-                                                ]
-                                            ),
-                                            padding=10,
-                                            bgcolor=Colors.BLACK,
-                                            border_radius=10
-                                        )
-                                        for item in carrinho
-                                    ],
-                                    expand=True,
-                                ),
+                                ft.ListView(controls=lista_itens, expand=True),
                                 ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
-                                input_endereco, # ✅ agora são controles, não tuplas
-                                input_forma_pagamento,# ✅
+                                input_endereco,
+                                input_forma_pagamento,
                                 ft.Row(
                                     [
                                         ft.ElevatedButton(
