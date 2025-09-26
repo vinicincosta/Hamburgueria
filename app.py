@@ -36,39 +36,43 @@ def main(page: ft.Page):
         resultado_pessoas = listar_pessoas()
         print(f'Resultado: {resultado_pessoas}')
 
-        # Verifica se os campos estão preenchidos
         if not input_email.value or not input_senha.value:
             snack_error('Email e senha são obrigatórios.')
             page.update()
             return
-        page.update()
 
-        # Chama a função de login
         token, papel, nome, error = post_login(input_email.value, input_senha.value)
 
         print(f"Token: {token}, Papel: {papel}, Nome: {nome}, Erro: {error}")
-        print(token)
+
         # Verifica se o usuário está inativo
         for pessoa in resultado_pessoas:
-            if pessoa['email'] == input_email.value:  # Verifica se o CPF corresponde
+            if pessoa['email'] == input_email.value:
                 if pessoa['status_pessoa'] == "Inativo":
                     snack_error('Erro: usuário inativo.')
                     page.update()
-                    return  # Sai da função se o usuário estiver inativo
+                    return
 
-        # Se o login foi bem-sucedido e o usuário está ativo
         if token:
             snack_sucesso(f'Login bem-sucedido, {nome} ({papel})!')
             print(f"Papel do usuário: {papel}, Nome: {nome}")
             page.client_storage.set('token', token)
             page.client_storage.set('papel', papel)
+
+            # 🔑 Salva o ID da pessoa logada na sessão
+            for pessoa in resultado_pessoas:
+                if pessoa['email'] == input_email.value:
+                    page.session.set("pessoa_id", pessoa["id_pessoa"])
+                    print("pessoa_id salvo na sessão:", pessoa["id_pessoa"])
+                    break
+
             input_email.value = ''
             input_senha.value = ''
 
             if papel == "cliente":
-                page.go("/presencial_delivery")  # Redireciona para a rota do usuário
+                page.go("/presencial_delivery")
             elif papel == "garcom":
-                page.go("/mesa")  # Redireciona para a rota garçom
+                page.go("/mesa")
             else:
                 snack_error('Erro: Papel do usuário desconhecido.')
         else:
@@ -364,7 +368,6 @@ def main(page: ft.Page):
 
         page.update()
 
-    # Função para alterar quantidade de verduras
 
     # 🔔 Modal de Confirmação
     def fechar_dialogo(e):
@@ -391,31 +394,75 @@ def main(page: ft.Page):
         bgcolor=Colors.ORANGE_800,
     )
 
-    def confirmar_pedido(lanche_id, pessoa_id, qtd_lanche, forma_pagemnto, endereco):
-        """Função que cadastra o pedido e exibe mensagem de confirmação."""
-        endereco = endereco.value.strip()
-        if not endereco:
-            snack_error("Por favor, informe o endereço!")
 
+    # Função que confirma o pedido e chama o cadastro
+    def confirmar_pedido(e):
+        """Finaliza o pedido cadastrando as vendas de todos os lanches do carrinho."""
+
+        # Pega usuário logado
+        pessoa_id = page.session.get("pessoa_id")
+        if not pessoa_id:
+            snack_error("Usuário não logado!")
+            page.go("/login")
+            return
+
+        # Pega os valores dos inputs da view
+        endereco_valor = input_endereco.value.strip()
+        if not endereco_valor:
+            snack_error("Por favor, informe o endereço!")
             page.update()
             return
 
+        forma_pagamento_valor = getattr(input_forma_pagamento, "value", None)
+        if not forma_pagamento_valor:
+            snack_error("Selecione uma forma de pagamento!")
+            page.update()
+            return
 
+        # Pega o carrinho
+        carrinho = page.session.get("carrinho") or []
+        if not carrinho:
+            snack_error("Seu carrinho está vazio!")
+            page.update()
+            return
 
-        # Cadastra a venda
-        cadastrar_venda_app(
-            lanche_id["id_lanche"],
-            pessoa_id,
-            int(qtd_lanche.value),
-            forma_pagemnto.value,
+        # Percorre cada lanche e cadastra na API
+        for item in carrinho:
+            id_lanche = item.get("id_lanche")
+            qtd_lanche = item.get("qtd", 1)
+            observacoes_texto = item.get("observacoes", "")
+            ingredientes = item.get("ingredientes", {})
 
-        )
+            # Apenas ingredientes alterados (>0)
+            observacoes = {
+                "texto": observacoes_texto,
+                "ingredientes": {ing: qtd for ing, qtd in ingredientes.items() if qtd > 0}
+            }
 
-        # Mostra mensagem de sucesso
+            # Chama a função que envia para API
+            response = cadastrar_venda_app(
+                lanche_id=id_lanche,
+                pessoa_id=pessoa_id,
+                qtd_lanche=qtd_lanche,
+                forma_pagamento=forma_pagamento_valor,
+                endereco=endereco_valor,
+                observacoes=observacoes,
+                mesa="delivery"  # define mesa padrão para pedidos de delivery
+            )
+
+            # Debug caso algo falhe
+            if "error" in response:
+                snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
+                page.update()
+                return
+
+        # Limpa carrinho após confirmar
+        page.session.set("carrinho", [])
+
+        # Mensagem de sucesso
         snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
+        page.go("/")  # ou "/vendas" se quiser voltar para o resumo
         page.update()
-
-
 
     # Rotas
     def gerencia_rotas(e):
@@ -774,106 +821,94 @@ def main(page: ft.Page):
 
         # ---------------- ROTA VENDAS ----------------
         if page.route == "/vendas":
+            print("aaaaaaaaaaaaaaaaaa")
             carrinho = page.session.get("carrinho") or []
+            total = sum(item["valor_lanche"] for item in carrinho)
 
-            if not carrinho:
-                page.views.append(
-                    ft.View(
-                        "/vendas",
-                        [
-                            ft.AppBar(
-                                title=ft.Text("Finalizar Pedido", size=20, color=Colors.ORANGE_900),
-                                center_title=True,
-                                bgcolor=Colors.BLACK,
-                                actions=[btn_logout]
-                            ),
-                            ft.Column(
-                                [ft.Text("Seu carrinho está vazio!", color=Colors.YELLOW_800, size=18)],
-                                alignment=ft.MainAxisAlignment.CENTER,
-                                horizontal_alignment=ft.CrossAxisAlignment.CENTER
-                            )
-                        ],
-                        bgcolor=Colors.ORANGE_100,
-                    )
-                )
-            else:
-                total = sum(item["valor_lanche"] for item in carrinho)
+            page.views.append(
 
-                page.views.append(
-                    ft.View(
-                        "/vendas",
-                        [
-                            AppBar(
-                                title=ft.Image(src="imgdois.png", width=90),
-                                center_title=True,
-                                bgcolor=Colors.BLACK,
-                                color=Colors.PURPLE,
-                                title_spacing=5,
-                                leading=logo,
-                                actions=[btn_logout_carrinho]
-                            ),
-                            ft.Column(
-                                [
-                                    ft.Text("Resumo do Pedido", size=22, color=Colors.YELLOW_800),
-                                    ft.ListView(
-                                        controls=[
-                                            ft.Container(
-                                                content=ft.Column(
-                                                    [
-                                                        # Nome + preço
-                                                        ft.Row(
-                                                            [
-                                                                ft.Text(item["nome_lanche"], color=Colors.ORANGE_700),
-                                                                ft.Text(f'R$ {item["valor_lanche"]:.2f}',
-                                                                        color=Colors.YELLOW_900),
-                                                            ],
-                                                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                                        ),
-                                                        # Observações
-                                                        ft.Text(
-                                                            f"Obs: {item.get('observacoes', 'Nenhuma')}",
-                                                            color=Colors.YELLOW_800,
-                                                            size=12
-                                                        ),
-                                                        # Ingredientes filtrados (apenas >0)
-                                                        ft.Text(
-                                                            "Ingredientes: " + ", ".join(
-                                                                [f"{ing} ({qtd})" for ing, qtd in
-                                                                 item.get("ingredientes", {}).items() if qtd > 0]
-                                                            ) if item.get("ingredientes") else "Ingredientes: Nenhum",
-                                                            color=Colors.YELLOW_600,
-                                                            size=12
-                                                        ),
-                                                        ft.Divider(color=Colors.BLACK, height=10)
-                                                    ]
-                                                ),
-                                                padding=10,
-                                                bgcolor=Colors.BLACK,
-                                                border_radius=10
-                                            )
-                                            for item in carrinho
-                                        ],
-                                        expand=True,
-                                    ),
-                                    ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
-                                    ft.TextField(label="Endereço de Entrega", width=300, color=Colors.ORANGE_700),
-                                    input_forma_pagamento,
-                                    ft.Row(
-                                        [
-                                            btn_confirmar_venda,
-                                            ft.OutlinedButton("Voltar", on_click=lambda e: page.go("/carrinho"))
-                                        ],
-                                        alignment=ft.MainAxisAlignment.CENTER
-                                    )
-                                ],
-                                alignment=ft.MainAxisAlignment.CENTER,
-                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                                spacing=20,
-                            )
-                        ],
-                        bgcolor=Colors.ORANGE_100,
-                    )
+                ft.View(
+                    "/vendas",
+                    [
+                        ft.AppBar(
+                            title=ft.Image(src="imgdois.png", width=90),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            leading=logo,
+                            actions=[btn_logout_carrinho],
+
+                        ),
+                        ft.Column(
+                            [
+                                ft.Text("Resumo do Pedido", size=22, color=Colors.BLACK, font_family="Arial"),
+                                ft.ListView(
+                                    controls=[
+                                        ft.Container(
+                                            content=ft.Column(
+                                                [
+                                                    ft.Row(
+                                                        [
+                                                            ft.Text(item.get("nome_lanche", "Lanche"),
+                                                                    color=Colors.ORANGE_700),
+                                                            ft.Text(f'R$ {item.get("valor_lanche", 0):.2f}',
+                                                                    color=Colors.YELLOW_900),
+                                                        ],
+                                                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+                                                    ),
+                                                    ft.Text(
+                                                        f"Obs: {item.get('observacoes', 'Nenhuma')}",
+                                                        color=Colors.YELLOW_800,
+                                                        size=12
+                                                    ),
+                                                    ft.Text(
+                                                        "Ingredientes: " + ", ".join(
+                                                            [f"{ing} ({qtd})" for ing, qtd in
+                                                             item.get("ingredientes", {}).items() if qtd > 0]
+                                                        ) if item.get("ingredientes") else "Ingredientes: Nenhum",
+                                                        color=Colors.YELLOW_600,
+                                                        size=12
+                                                    ),
+                                                    ft.Divider(color=Colors.BLACK, height=10)
+                                                ]
+                                            ),
+                                            padding=10,
+                                            bgcolor=Colors.BLACK,
+                                            border_radius=10
+                                        )
+                                        for item in carrinho
+                                    ],
+                                    expand=True,
+                                ),
+                                ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
+                                input_endereco, # ✅ agora são controles, não tuplas
+                                input_forma_pagamento,# ✅
+                                ft.Row(
+                                    [
+                                        ft.ElevatedButton(
+                                            text="Confirmar Pedido",
+                                            bgcolor=Colors.ORANGE_800,
+                                            color=Colors.BLACK,
+                                            on_click=confirmar_pedido
+                                        ),
+                                        ft.OutlinedButton(
+                                            "Voltar",
+                                            on_click=lambda e: page.go("/carrinho")
+                                        )
+                                    ],
+                                    alignment=ft.MainAxisAlignment.CENTER,
+                                    spacing=20
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                            spacing=20,
+                            expand=True,
+                            scroll=True
+                        )
+                    ],
+                    bgcolor=Colors.ORANGE_100,
                 )
+            )
 
         page.update()
 
@@ -900,6 +935,8 @@ def main(page: ft.Page):
         label_style=TextStyle(color=ft.Colors.WHITE),
         border_color=Colors.DEEP_PURPLE_800,border_radius=5,
     )
+
+    input_endereco = ft.TextField(label="Endereço de Entrega", width=300, color=Colors.ORANGE_700)
 
     input_senha = ft.TextField(
         label="Senha",
@@ -979,9 +1016,10 @@ def main(page: ft.Page):
             Option(key="Debito", text="Débito"),
             Option(key="Pix", text="Pix"),
 
-        ],
+        ]
 
     )
+
 
 
 
@@ -1003,17 +1041,8 @@ def main(page: ft.Page):
 
     )
 
-    btn_confirmar_venda = ft.ElevatedButton(
-        text="Confirmar",
-        icon=Icons.VERIFIED_USER,
-        bgcolor=Colors.ORANGE_800,
-        color=Colors.BLACK,
-        height=30,
-        icon_color=Colors.WHITE,
-        on_click=confirmar_pedido
 
 
-    )
     ir_para_mesa = ft.ElevatedButton(
         text="mesa",
         icon=Icons.LOGIN,
