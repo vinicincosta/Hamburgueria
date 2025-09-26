@@ -3,6 +3,7 @@ from tkinter.constants import CENTER
 import flet as ft
 from flet import AppBar, Text, View
 from flet.core.alignment import top_left, bottom_center
+from flet.core.animation import Animation, AnimationCurve
 from flet.core.border_radius import horizontal
 from flet.core.box import BoxDecoration
 from flet.core.buttons import ButtonStyle, RoundedRectangleBorder
@@ -28,9 +29,25 @@ def main(page: ft.Page):
     page.fonts = {
         "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
     }
+
     # Funções
+    def inserir_mesas(e):
+        if mesa.value == "":
+            snack_error('número da mesa está vazio')
+            page.update()
+        token = page.client_storage.get('token')
+        mesa_venda = get_vendas(token)
+        print(mesa_venda)
+        for venda in mesa_venda:
+            print(venda)
+            print(venda['id_venda'])
+            pedido.value = venda['id_venda']
+            page.update()
+
+
     def bs_dismissed(e):
         page.add(ft.Text("Bottom sheet dismissed"))
+
     bs = ft.BottomSheet(
         ft.Container(
             ft.Column(
@@ -135,11 +152,9 @@ def main(page: ft.Page):
         snack_sucesso("logout realizado com sucesso")
         page.go("/")
 
-
-
     def snack_sucesso(texto: str):
         page.snack_bar = ft.SnackBar(
-            content=ft.Text(texto,color=Colors.ORANGE_500),
+            content=ft.Text(texto, color=Colors.ORANGE_500),
             bgcolor=Colors.BLACK
         )
         page.snack_bar.open = True
@@ -207,7 +222,6 @@ def main(page: ft.Page):
         token = page.client_storage.get('token')
         resultado_lanches = listar_lanche(token)
         print(f'Resultado dos lanches: {resultado_lanches}')
-
 
         # O page.session é o estado temporário do usuário no app, e você está usando para manter o carrinho de compras.
         # Quando o app fecha, essa memória some (não é persistente em banco de dados).
@@ -419,8 +433,6 @@ def main(page: ft.Page):
             page.update()
             return
 
-
-
         # Cadastra a venda
         cadastrar_venda_app(
             lanche_id["id_lanche"],
@@ -434,8 +446,6 @@ def main(page: ft.Page):
         snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
         page.update()
 
-
-
     # Rotas
     def gerencia_rotas(e):
         page.views.clear()
@@ -444,12 +454,11 @@ def main(page: ft.Page):
             View(
                 "/",
                 [
-
                     ft.Container(
                         width=page.window.width,
                         height=page.window.height,
                         image=ft.DecorationImage(
-                            src="imagem1.png",fit=ft.ImageFit.COVER
+                            src="imagem1.png", fit=ft.ImageFit.COVER
                         )
                     ),
 
@@ -476,7 +485,7 @@ def main(page: ft.Page):
                                 input_senha,
                                 btn_login,
                                 btn_cadastro_login,
-                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER,spacing=5)
+                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=5)
                         ),
                     ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
                     vertical_alignment=ft.MainAxisAlignment.CENTER
@@ -490,7 +499,10 @@ def main(page: ft.Page):
                 View(
                     "/cadastrar_pessoa",
                     [
-                        AppBar(title=Text('Cadastro',color=Colors.YELLOW_900),title_text_style=TextStyle(weight=ft.FontWeight.BOLD,font_family="Playfair Display",size=18), leading=fundo, bgcolor=Colors.BLACK,center_title=True),
+                        AppBar(title=Text('Cadastro', color=Colors.YELLOW_900),
+                               title_text_style=TextStyle(weight=ft.FontWeight.BOLD, font_family="Playfair Display",
+                                                          size=18), leading=fundo, bgcolor=Colors.BLACK,
+                               center_title=True),
                         input_nome,
                         input_email_cadastrado,
                         input_senha_cadastro,
@@ -501,7 +513,6 @@ def main(page: ft.Page):
                         # slider_salario,
 
                         # txt_salario,
-
 
                         ElevatedButton(
                             "Cadastrar",
@@ -515,7 +526,7 @@ def main(page: ft.Page):
                             bgcolor=Colors.ORANGE_800,
                             color=Colors.BLACK,
                         ),
-                    ],bgcolor=Colors.BLACK
+                    ], bgcolor=Colors.BLACK
 
                 )
             )
@@ -526,30 +537,32 @@ def main(page: ft.Page):
                 View(
                     "/mesa",
                     [
-                        AppBar(title=ft.Image(src="imgdois.png",width=90), center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE,
-                               title_spacing=5,leading=logo, actions=[btn_logout]
+                        AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
+                               color=Colors.PURPLE,
+                               title_spacing=5, leading=logo, actions=[btn_logout]
                                ),
-                        ft.ElevatedButton("Display bottom sheet", on_click=lambda e: page.open())
-                                # ft.Row([
-                                #     icone_mesa,
-                                #     mesa,
-                                #
-                                # ]),
-                                # ft.Row([
-                                #     icone_pedido,
-                                #     # item,
-                                # ]),
-                                # ft.Row([
-                                #     inserir_mesa,btn_pedidos,btn_limpar_tela
-                                # ])
+                        ft.Row([
+                            icone_mesa,
+                            mesa,
 
+                        ]),
+                        ft.Row([
+                            pedido,
+                        ],alignment=ft.MainAxisAlignment.CENTER,),
+                        ft.Row([
+                            icone_pedido,
+                            input_lanche,
+                        ]),
+                        ft.Row([
+                            btn_pedidos
+                        ])
+                        ,btn_limpar_tela
 
-                    ], bgcolor=Colors.BLACK,
+                    ], bgcolor=Colors.BLACK
                 )
             )
 
         if page.route == "/presencial_delivery":
-
             page.views.append(
                 View(
                     "/presencial_delivery",
@@ -640,8 +653,6 @@ def main(page: ft.Page):
                 )
 
             )
-
-
 
         # ---------------- ROTA OBSERVAÇÕES ----------------
 
@@ -909,7 +920,7 @@ def main(page: ft.Page):
     lv_lanches = ft.ListView(expand=True)
     lv_carrinho = ft.ListView(expand=True)
 
-    icone_mesa = ft.Icon(Icons.TABLE_BAR,color=Colors.ORANGE_800)
+    icone_mesa = ft.Icon(Icons.TABLE_BAR, color=Colors.ORANGE_800)
     icone_pedido = ft.Icon(Icons.CHECKLIST)
 
     input_email = ft.TextField(
@@ -919,7 +930,7 @@ def main(page: ft.Page):
         opacity=0.9,
         fill_color=Colors.ORANGE_800,
         label_style=TextStyle(color=ft.Colors.WHITE),
-        border_color=Colors.DEEP_PURPLE_800,border_radius=5,
+        border_color=Colors.DEEP_PURPLE_800, border_radius=5,
     )
 
     input_senha = ft.TextField(
@@ -930,17 +941,17 @@ def main(page: ft.Page):
         fill_color=Colors.ORANGE_800,
         password=True,
         label_style=TextStyle(color=ft.Colors.WHITE),
-        border_color=Colors.DEEP_PURPLE_800,border_radius=5,
+        border_color=Colors.DEEP_PURPLE_800, border_radius=5,
         can_reveal_password=True
     )
-    inserir_mesa = ft.ElevatedButton(text='Ver pedidos',
-                                     icon=Icons.CHECK,
-                                     icon_color=Colors.BLACK,
-                                     color=Colors.BLACK,
-                                     bgcolor=Colors.YELLOW_900,
-                                     )
-    btn_pedidos = ft.ElevatedButton(text='Ver pedidos',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
-    btn_limpar_tela = ft.ElevatedButton(text='Limpar tela',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
+
+    btn_pedidos = ft.ElevatedButton(text='Ver pedidos', icon=Icons.CHECK, icon_color=Colors.BLACK, color=Colors.BLACK,
+                                    bgcolor=Colors.YELLOW_900)
+    btn_limpar_tela = ft.ElevatedButton(text='Limpar tela', icon=Icons.CHECK, icon_color=Colors.BLACK,
+                                        color=Colors.BLACK, bgcolor=Colors.YELLOW_900, on_click=lambda _: limpar_input_mesa())
+    def limpar_input_mesa():
+        mesa.value = ''
+        page.update()
 
     input_nome = ft.TextField(
         label="Insira seu nome",
@@ -1004,8 +1015,6 @@ def main(page: ft.Page):
 
     )
 
-
-
     # Indicador de carregamento
     loading_indicator = ft.ProgressRing(visible=False, width=20, height=20, stroke_width=2)
 
@@ -1033,7 +1042,6 @@ def main(page: ft.Page):
         icon_color=Colors.WHITE,
         on_click=confirmar_pedido
 
-
     )
     ir_para_mesa = ft.ElevatedButton(
         text="mesa",
@@ -1046,7 +1054,6 @@ def main(page: ft.Page):
         on_click=lambda _: page.go('/mesa'),
 
     )
-
 
     btn_login = ft.ElevatedButton(
         text="Logar",
@@ -1067,8 +1074,6 @@ def main(page: ft.Page):
         on_click=lambda _: page.go("/usuarios"),
         height=45,
     )
-
-
 
     logo = ft.Image(
         src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
@@ -1101,14 +1106,12 @@ def main(page: ft.Page):
         on_click=lambda _: page.go('/cardapio_delivery'),
     )
 
-
     btn_salvar = ft.FilledButton(
         text="Salvar",
         style=ft.ButtonStyle(text_style=ft.TextStyle(size=16)),
         width=page.window.width,
         height=45,
     )
-
 
     btn_cancelar = ft.OutlinedButton(
         text="Cancelar",
@@ -1131,25 +1134,27 @@ def main(page: ft.Page):
         border_color=Colors.DEEP_PURPLE_800
 
     )
+    pedido = ft.Text(value='',bgcolor=Colors.ORANGE_800,color=Colors.BLACK,style=TextStyle(color=ft.Colors.WHITE),)
+    mesa = ft.TextField(keyboard_type=ft.Number, color=Colors.BLACK,
+                        bgcolor=Colors.RED_900, fill_color=Colors.ORANGE_800, label="Numero da mesa",
+                        border_color=Colors.DEEP_PURPLE_800, label_style=TextStyle(color=Colors.WHITE),on_submit=inserir_mesas)
 
 
 
-    mesa = ft.TextField(keyboard_type=ft.Number,color=Colors.ORANGE_800,
-                        bgcolor=Colors.RED_900,fill_color=Colors.ORANGE_800,label="Numero da mesa",
-                        border_color=Colors.DEEP_PURPLE_800,label_style=TextStyle(color=Colors.WHITE))
 
-    item = ft.TextField(keyboard_type=ft.Number, color=Colors.ORANGE_800,
+
+    input_lanche = ft.TextField(keyboard_type=ft.Number, color=Colors.ORANGE_800,
                         bgcolor=Colors.RED_900, fill_color=Colors.ORANGE_800, label="Pedido",
                         border_color=Colors.DEEP_PURPLE_800, label_style=TextStyle(color=Colors.WHITE))
 
     input_papel = ft.Dropdown(
 
-        label = "Papel",
-        width = 300,bgcolor=Colors.ORANGE_800,
-        fill_color = Colors.ORANGE_800,color=Colors.ORANGE_800,text_style=TextStyle(color=Colors.WHITE),
-        options = [
+        label="Papel",
+        width=300, bgcolor=Colors.ORANGE_800,
+        fill_color=Colors.ORANGE_800, color=Colors.ORANGE_800, text_style=TextStyle(color=Colors.WHITE),
+        options=[
             Option(key="Cliente", text="Cliente"),
-            Option(key= "garcom", text="Garçom"),
+            Option(key="garcom", text="Garçom"),
 
         ]
     )
@@ -1158,14 +1163,14 @@ def main(page: ft.Page):
         txt_salario.value = f'SALÁRIO: {int(e.control.value)}'
         page.update()
 
-
-
     slider_salario = ft.Slider(min=0, max=50000, divisions=485, label="{value}",
                                active_color=Colors.ORANGE_800,
-                               inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,thumb_color=Colors.RED
+                               inactive_color=Colors.ORANGE_900, on_change=display_slider_salario,
+                               thumb_color=Colors.RED
                                )
 
-    txt_salario = ft.Text(value='SALÁRIO: 0', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,weight=FontWeight.BOLD,theme_style=TextThemeStyle.HEADLINE_SMALL)
+    txt_salario = ft.Text(value='SALÁRIO: 0', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,
+                          weight=FontWeight.BOLD, theme_style=TextThemeStyle.HEADLINE_SMALL)
 
     txt_resultado_lanche = ft.Text("", font_family="Arial", color=Colors.BLACK, size=18)
     # Eventos
@@ -1177,5 +1182,3 @@ def main(page: ft.Page):
 # Comando que executa o aplicativo
 # Deve estar sempre colado na linha
 ft.app(main)
-
-
