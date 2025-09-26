@@ -130,3 +130,14 @@ def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, observacoes=None):
         return response.json()
     else:
         return {"error": response.json(), "status": response.status_code}
+
+def get_vendas(token):
+    url = f'{base_url}/vendas'
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+    if response.status_code == 200:
+        dados_get_venda = response.json()
+        print(dados_get_venda)
+        return dados_get_venda['vendas']
+    else:
+        print(f'Erro: {response.status_code}')
+        return response.json()
