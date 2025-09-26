@@ -2,7 +2,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.235.29:5000"
+base_url = "http://10.135.235.26:5000"
 
 
 # LOGIN
@@ -111,22 +111,22 @@ def listar_pessoas():
         print(f'Erro: {response.status_code}')
         return response.json()
 
+    # Função que envia a venda para o banco / API
 
 
-def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, observacoes=None):
-    url = f"{base_url}/vendas"
-
-    nova_venda = {
+def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, endereco, observacoes=None, mesa="delivery"):
+    url = f"{base_url}/vendas"  # ajuste para sua API
+    payload = {
         "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "lanche_id": lanche_id,
         "pessoa_id": pessoa_id,
         "qtd_lanche": qtd_lanche,
+        "mesa": mesa,  # <--- obrigatório
+        "endereco": endereco,
+        "forma_pagamento": forma_pagamento,
         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []}
     }
-
-    response = requests.post(url, json=nova_venda)
-
-    if response.status_code == 201:
-        return response.json()
-    else:
-        return {"error": response.json(), "status": response.status_code}
+    response = requests.post(url, json=payload)
+    if response.status_code != 201:
+        print("DEBUG cadastrar_venda_app:", response.status_code, response.text)
+    return response.json()
