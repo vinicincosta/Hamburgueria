@@ -6,6 +6,8 @@ import requests
 base_url = "http://10.135.235.29:5000"
 
 
+
+
 # LOGIN
 def post_login(email, senha):
     url = f"{base_url}/login"
@@ -112,25 +114,69 @@ def listar_pessoas():
         print(f'Erro: {response.status_code}')
         return response.json()
 
-    # Função que envia a venda para o banco / API
+
+# def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None):
+#     url = f"{base_url}/vendas"  # rota da API
+#
+#     payload = {
+#         "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#         "lanche_id": lanche_id,
+#         "pessoa_id": pessoa_id,
+#         "qtd_lanche": qtd_lanche,
+#         "detalhamento": detalhamento,  # obs_input cai aqui
+#         "endereco": endereco,
+#         "forma_pagamento": forma_pagamento,
+#         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []}
+#     }
+#
+#     response = requests.post(url, json=payload)
+#
+#     if response.status_code != 201:
+#         print("DEBUG cadastrar_venda_app:", response.status_code, response.text)
+#
+#     return response.json()
 
 
-def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None):
-    url = f"{base_url}/vendas"  # ajuste para sua API
+
+def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None, valor_venda=0.0):
+    url = f"{base_url}/vendas"  # rota da API
+
     payload = {
         "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "lanche_id": lanche_id,
         "pessoa_id": pessoa_id,
         "qtd_lanche": qtd_lanche,
-        "detalhamento": detalhamento,  # campo obrigatório na API
+        "detalhamento": detalhamento,   # obs_input cai aqui
         "endereco": endereco,
         "forma_pagamento": forma_pagamento,
-        "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []}
+        "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
+        "valor_venda": valor_venda      # agora sempre mandamos o valor final calculado
     }
 
-    response = requests.post(url, json=payload)
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 201:
+            print("DEBUG cadastrar_venda_app:", response.status_code, response.text)
+            return {"error": response.text}
+        return response.json()
+    except Exception as e:
+        print("ERRO cadastrar_venda_app:", str(e))
+        return {"error": str(e)}
 
-    if response.status_code != 201:
-        print("DEBUG cadastrar_venda_app:", response.status_code, response.text)
 
-    return response.json()
+
+
+
+def get_insumo(id_insumo):
+    url = f"{base_url}/get_insumo_id/{id_insumo}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        dados_get_postagem = response.json()
+        print(dados_get_postagem)
+        return dados_get_postagem
+    else:
+        print(f'Erro: {response.status_code}')
+        return response.json()
+
+
