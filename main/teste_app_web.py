@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 import utils
 app = Flask(__name__)
 
-global token
-
 @app.route('/')
 def index():
     return redirect(url_for('login'))
@@ -15,7 +13,7 @@ def login():
     else:
         email = request.form.get('email')
         password = request.form.get('password')
-
+        global token
         token = utils.post_login(email, password)['access_token']
         return render_template('login.html')
 
@@ -24,7 +22,11 @@ def login():
 def cards(valor_=None):
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 10, type=int)
+    if token:
+        pessoas = utils.get_pessoas(token)['pessoas']
 
+    else:
+        return redirect(url_for('login'))
     if valor_ is None:
         return render_template('cards.html', valor_=False)
     else:

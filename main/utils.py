@@ -10,7 +10,7 @@ def get_lanches(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_insumos(token_):
     base_url = f"{url}/insumos"
@@ -20,7 +20,7 @@ def get_insumos(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_receita(token_):
     base_url = f"{url}/vendas/receitas"
@@ -30,7 +30,7 @@ def get_receita(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_lanche_insumos(token_):
     base_url = f"{url}/lanche_insumos"
@@ -40,7 +40,7 @@ def get_lanche_insumos(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_categorias(token_):
     base_url = f"{url}/categorias"
@@ -50,7 +50,7 @@ def get_categorias(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_entradas(token_):
     base_url = f"{url}/entradas"
@@ -60,7 +60,7 @@ def get_entradas(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def listar_vendas_by_id_mesa(id_mesa, token_):
     base_url = f"{url}/vendas/{id_mesa}"
@@ -70,7 +70,7 @@ def listar_vendas_by_id_mesa(id_mesa, token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_vendas(token_):
     base_url = f"{url}/vendas"
@@ -80,7 +80,7 @@ def get_vendas(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_pessoas(token_):
     base_url = f"{url}/pessoas"
@@ -90,7 +90,7 @@ def get_pessoas(token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 def get_insumo_by_id_insumo(id_insumo, token_):
     base_url = f"{url}/get_insumo_id/{id_insumo}"
@@ -100,7 +100,7 @@ def get_insumo_by_id_insumo(id_insumo, token_):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
 
 
@@ -111,7 +111,7 @@ def post_login(email, password):
     else:
         print(response.status_code)
         print(response.json())
-        return 'erro'
+        return {'erro':response.status_code}
 
-print(get_insumos(post_login('l@', '123')))
+print(get_insumos(post_login('vini@', '123')))
 print(get_pessoas(post_login('l@', '123')))
