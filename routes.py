@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://192.168.1.238:5000"
+base_url = "http://10.135.235.26:5000"
 
 
 
@@ -163,10 +163,6 @@ def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, ender
         print("ERRO cadastrar_venda_app:", str(e))
         return {"error": str(e)}
 
-
-
-
-
 def get_insumo(id_insumo):
     url = f"{base_url}/get_insumo_id/{id_insumo}"
     response = requests.get(url)
@@ -179,6 +175,49 @@ def get_insumo(id_insumo):
         print(f'Erro: {response.status_code}')
         return response.json()
 
+def update_insumo(id_insumo):
+    url = f"{base_url}/update_insumo/{id_insumo}"
+    response = requests.put(url)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Erro: {response.status_code}')
+        return response.json()
+
+def listar_insumos(token):
+    try:
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(f"{base_url}/insumos", headers=headers)
+        data = response.json()
+        if "insumos" in data:
+            return data["insumos"]
+        else:
+            print("Erro ao listar insumos:", data)
+            return []
+    except Exception as e:
+        print("Erro de conexão:", e)
+        return []
+
+def listar_receita_lanche(lanche_id):
+    """
+    Retorna a receita base de um lanche: {insumo_id: quantidade_base}
+    """
+    try:
+        # Consulta os insumos que fazem parte do lanche
+        response = requests.get(f"{base_url}/lanche_receita/{lanche_id}")  # crie esta rota se não existir
+
+        if response.status_code == 200:
+            dados = response.json()  # espera algo como [{"insumo_id": 1, "qtd_insumo": 100}, ...]
+            receita = {item["insumo_id"]: item["qtd_insumo"] // 100 for item in dados}  # converte pra "1 unidade = 100"
+            return receita
+        else:
+            print(f"Erro ao buscar receita: {response.status_code}")
+            return {}
+
+    except Exception as e:
+        print(f"Erro de conexão ao buscar receita: {e}")
+        return {}
 
 
 def listar_vendas_mesa(token, numero_mesa):

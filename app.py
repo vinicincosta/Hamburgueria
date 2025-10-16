@@ -172,57 +172,75 @@ def main(page: ft.Page):
         page.snack_bar.open = True
         page.overlay.append(page.snack_bar)
 
+    def atualizar_lanches_estoque():
+        token = page.client_storage.get('token')
+        insumos = listar_insumos(token)  # pega todos os insumos
+
+        for insumo in insumos:
+            id_insumo = insumo["id_insumo"]
+            # Chama a rota de update para cada insumo
+            update_insumo(id_insumo)
+
     def cardapio(e):
-        lv_lanches.controls.clear()  # limpa antes de carregar
+        lv_lanches.controls.clear()
+
+        # Primeiro atualiza o estoque de todos os insumos
+        atualizar_lanches_estoque()
+
         token = page.client_storage.get('token')
         resultado_lanches = listar_lanche(token)
+
         print(f'Resultado dos lanches: {resultado_lanches}')
 
         for lanche in resultado_lanches:
-            lv_lanches.controls.append(
-                ft.Card(
-                    content=ft.Container(
-                        content=ft.Row(
-                            [
-                                ft.Image(src="imagemdolanche.png", height=100),
-                                ft.Column(
-                                    [
-                                        ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
-                                        ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
-                                        ft.Text(f'{lanche["descricao_lanche"]}',
-                                                color=Colors.YELLOW_800, width=200),
-
-                                        # Botão Finalizar Pedido
-                                        ft.ElevatedButton(
-                                            "Finalizar Pedido",
-                                            on_click=lambda e: page.open(dlg_modal),
-                                            style=ft.ButtonStyle(
-                                                bgcolor=Colors.ORANGE_700,
-                                                color=Colors.BLACK,
-                                                padding=15,
-                                                shape={"": ft.RoundedRectangleBorder(radius=10)}
+            # Mostra só os ativos
+            if lanche["disponivel"] == True:
+                lv_lanches.controls.append(
+                    ft.Card(
+                        content=ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Image(src="imagemdolanche.png", height=100),
+                                    ft.Column(
+                                        [
+                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
+                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
+                                            ft.Text(f'{lanche["descricao_lanche"]}',
+                                                    color=Colors.YELLOW_800, width=200),
+                                            ft.ElevatedButton(
+                                                "Finalizar Pedido",
+                                                on_click=lambda e: page.open(dlg_modal),
+                                                style=ft.ButtonStyle(
+                                                    bgcolor=Colors.ORANGE_700,
+                                                    color=Colors.BLACK,
+                                                    padding=15,
+                                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                                                )
                                             )
-                                        )
-                                    ]
-                                ),
-                            ]
+                                        ]
+                                    ),
+                                ]
+                            ),
+                            bgcolor=Colors.BLACK,
+                            height=180,
+                            border_radius=10,
+                            border=ft.Border(
+                                top=ft.BorderSide(2, color=Colors.WHITE),
+                                bottom=ft.BorderSide(2, color=Colors.WHITE)
+                            ),
                         ),
-                        bgcolor=Colors.BLACK,
-                        height=180,
-                        border_radius=10,
-                        border=ft.Border(
-                            top=ft.BorderSide(2, color=Colors.WHITE),
-                            bottom=ft.BorderSide(2, color=Colors.WHITE)
-                        ),
-                    ),
-                    shadow_color=Colors.YELLOW_900
+                        shadow_color=Colors.YELLOW_900
+                    )
                 )
-            )
 
         page.update()
 
     def cardapio_delivery(e):
         lv_lanches.controls.clear()  # limpa antes de carregar
+
+        # Primeiro atualiza o estoque de todos os insumos
+        atualizar_lanches_estoque()
+
         token = page.client_storage.get('token')
         resultado_lanches = listar_lanche(token)
         print(f'Resultado dos lanches: {resultado_lanches}')
@@ -243,47 +261,48 @@ def main(page: ft.Page):
 
         # renderiza cada lanche
         for lanche in resultado_lanches:
-            lv_lanches.controls.append(
-                ft.Card(
-                    content=ft.Container(
-                        content=ft.Row(
-                            [
-                                ft.Image(src="imagemdolanche.png", height=100),
-                                ft.Column(
-                                    [
-                                        ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
-                                        ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
+            if lanche["disponivel"] == True:
+                lv_lanches.controls.append(
+                    ft.Card(
+                        content=ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Image(src="imagemdolanche.png", height=100),
+                                    ft.Column(
+                                        [
+                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
+                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
 
-                                        ft.Text(f'{lanche["descricao_lanche"]}',
-                                                color=Colors.YELLOW_800, width=200, font_family="Aharoni"),
+                                            ft.Text(f'{lanche["descricao_lanche"]}',
+                                                    color=Colors.YELLOW_800, width=200, font_family="Aharoni"),
 
 
 
-                                        ft.ElevatedButton(
-                                            "Adicionar ao Carrinho",
-                                            on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
-                                            style=ft.ButtonStyle(
-                                                bgcolor=Colors.ORANGE_700,
-                                                color=Colors.BLACK,
-                                                padding=15,
-                                                shape={"": ft.RoundedRectangleBorder(radius=10)}
-                                            )
-                                        ),
-                                    ]
-                                ),
-                            ]
+                                            ft.ElevatedButton(
+                                                "Adicionar ao Carrinho",
+                                                on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
+                                                style=ft.ButtonStyle(
+                                                    bgcolor=Colors.ORANGE_700,
+                                                    color=Colors.BLACK,
+                                                    padding=15,
+                                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                                                )
+                                            ),
+                                        ]
+                                    ),
+                                ]
+                            ),
+                            bgcolor=Colors.BLACK,
+                            height=180,
+                            border_radius=10,
+                            border=ft.Border(
+                                top=ft.BorderSide(2, color=Colors.WHITE),
+                                bottom=ft.BorderSide(2, color=Colors.WHITE)
+                            ),
                         ),
-                        bgcolor=Colors.BLACK,
-                        height=180,
-                        border_radius=10,
-                        border=ft.Border(
-                            top=ft.BorderSide(2, color=Colors.WHITE),
-                            bottom=ft.BorderSide(2, color=Colors.WHITE)
-                        ),
-                    ),
-                    shadow_color=Colors.YELLOW_900
+                        shadow_color=Colors.YELLOW_900
+                    )
                 )
-            )
 
         # Botão "Ver Carrinho" no final da tela
         lv_lanches.controls.append(
@@ -427,18 +446,11 @@ def main(page: ft.Page):
             page.update()
             return
 
+        token = page.client_storage.get("token")
+        insumos = listar_insumos(token)
+
         # Tabela fixa de preços
-        preco_ingredientes = {
-            1: 0.50,
-            2: 2.00,
-            3: 1.00,
-            4: 0.70,
-            5: 1.50,
-            6: 0.30,
-            7: 2.00,
-            8: 2.00,
-            9: 2.00
-        }
+        preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
 
         for item in carrinho:
             id_lanche = item.get("id_lanche")
@@ -724,8 +736,6 @@ def main(page: ft.Page):
 
             )
 
-
-
         # ---------------- ROTA OBSERVAÇÕES ----------------
 
         if page.route.startswith("/observacoes"):
@@ -743,44 +753,53 @@ def main(page: ft.Page):
             else:
                 item = {"nome_lanche": "Lanche não encontrado", "valor_lanche": 0, "ingredientes": {}}
 
-            # Ingredientes disponíveis
-            ingredientes_disponiveis = {
-                1: "Alface",
-                2: "Hambúrguer",
-                3: "Queijo",
-                4: "Ovo",
-                5: "Presunto",
-                6: "Molho",
-                7: "Bacon",
-                8: "Calabresa",
-                9: "Salsicha"
-            }
+            # Ingredientes disponíveis (filtrados por estoque > 5, sem alterar listar_insumos)
+            token = page.client_storage.get("token")
+            insumos = [i for i in listar_insumos(token) if i.get("qtd_insumo", 0) > 5]
 
-            # Preço dos insumos
-            preco_ingredientes = {
-                1: 0.50,
-                2: 2.00,  # Hambúrguer
-                3: 1.00,
-                4: 0.70,
-                5: 1.50,
-                6: 0.30,
-                7: 2.00,
-                8: 2.00,
-                9: 2.00
-            }
+            ingredientes_disponiveis = {i["id_insumo"]: i["nome_insumo"] for i in insumos}
+            preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
 
-            # Usar valor atual do lanche como base
-            valor_base = item.get("valor_lanche", 0)
+            # Valor base original do lanche (sem extras)
+            valor_base_original = item.get("valor_original_lanche", item.get("valor_lanche", 0))
+            item["valor_original_lanche"] = valor_base_original  # garante persistência no carrinho
 
-            if "ingredientes" not in item or not isinstance(item["ingredientes"], dict):
-                item["ingredientes"] = {ing_id: 0 for ing_id in ingredientes_disponiveis.keys()}
+            # RECEITA BASE DO LANCHE (carrega do backend)
+            lanche_id = item.get("id_lanche")
+
+            receita_base = {}
+            if lanche_id:
+                try:
+                    dados_receita = listar_receita_lanche(lanche_id) or {}
+
+                    # acessa a lista de itens dentro da chave "receita"
+                    receita_itens = dados_receita.get("receita", [])
+
+                    for item_receita in receita_itens:
+                        ing_id = int(item_receita.get("insumo_id", 0))
+                        qtd = int(item_receita.get("quantidade_base", 0))
+                        if ing_id > 0:
+                            receita_base[ing_id] = qtd
+
+                except Exception as e:
+                    print("Erro de conexão ao buscar receita:", e)
+                    receita_base = {}
+
+            # Preenche o dicionário item["ingredientes"] com as quantidades da receita base
+            # e garante também que todos os insumos disponíveis apareçam (com 0 se não fizerem parte da receita)
+            item["ingredientes"] = {}
+            for ing_id, qtd in receita_base.items():
+                # assegura int keys/values (consistência)
+                item["ingredientes"][int(ing_id)] = int(qtd)
 
             for ing_id in ingredientes_disponiveis.keys():
                 item["ingredientes"].setdefault(ing_id, 0)
 
+            # Map de controles (Text exibido com a quantidade)
             ingrediente_controls = {}
-            preco_label = ft.Text(f"Preço total: R$ {valor_base:.2f}", color=Colors.ORANGE_900, size=18)
+            preco_label = ft.Text(f"Preço total: R$ {valor_base_original:.2f}", color=Colors.ORANGE_900, size=18)
 
+            # Atualiza o preço baseado nos valores que o usuário está vendo
             def atualizar_preco():
                 total_insumos = 0
                 detalhes = []
@@ -789,64 +808,82 @@ def main(page: ft.Page):
                     if qtd > 0:
                         preco_insumo = preco_ingredientes.get(ing_id, 0) * qtd
                         total_insumos += preco_insumo
-                        detalhes.append(f"{ingredientes_disponiveis[ing_id]}: R$ {preco_insumo:.2f}")
-                total_lanche = valor_base + total_insumos
+                        detalhes.append(
+                            f"{ingredientes_disponiveis[ing_id]}: {qtd} x R$ {preco_ingredientes[ing_id]:.2f} = R$ {preco_insumo:.2f}"
+                        )
+                total_lanche = valor_base_original + total_insumos
                 preco_label.value = f"Preço total: R$ {total_lanche:.2f}\n" + "\n".join(detalhes)
                 page.update()
                 return total_lanche
 
-            # Funções aumentar/diminuir
+            # Limite por ingrediente (se quiser)
+            MAX_ADICIONAIS = 4
+
             def make_alterar_func(ing_id):
                 def aumentar(e):
-                    ingrediente_controls[ing_id].value = str(int(ingrediente_controls[ing_id].value) + 1)
-                    atualizar_preco()
+                    qtd_atual = int(ingrediente_controls[ing_id].value)
+                    if qtd_atual < MAX_ADICIONAIS:
+                        ingrediente_controls[ing_id].value = str(qtd_atual + 1)
+                        atualizar_preco()
+                    else:
+                        page.snack_bar = ft.SnackBar(
+                            ft.Text(f"Você só pode adicionar até {MAX_ADICIONAIS} deste ingrediente!"),
+                            open=True,
+                            bgcolor=Colors.RED_700,
+                            duration=2000
+                        )
+                        page.update()
 
                 def diminuir(e):
-                    if int(ingrediente_controls[ing_id].value) > 0:
-                        ingrediente_controls[ing_id].value = str(int(ingrediente_controls[ing_id].value) - 1)
+                    qtd_atual = int(ingrediente_controls[ing_id].value)
+                    if qtd_atual > 0:
+                        ingrediente_controls[ing_id].value = str(qtd_atual - 1)
                         atualizar_preco()
 
                 return aumentar, diminuir
 
+            # Monta os cards de ingredientes usando as quantidades da receita como valores iniciais
             controles_lista = []
             for ing_id, qtd in item["ingredientes"].items():
-                nome = ingredientes_disponiveis[ing_id]
-                txt = ft.Text(str(qtd), color=Colors.WHITE, size=18, weight="bold")
-                ingrediente_controls[ing_id] = txt
-                aumentar, diminuir = make_alterar_func(ing_id)
-                controles_lista.append(
-                    ft.Card(
-                        content=ft.Container(
-                            content=ft.Column(
-                                [
-                                    ft.Text(f"{nome} (R$ {preco_ingredientes[ing_id]:.2f})", color=Colors.ORANGE_900,
-                                            size=16, weight="bold"),
-                                    ft.Row(
-                                        [
-                                            ft.IconButton(ft.Icons.REMOVE_ROUNDED, icon_color=Colors.RED_700,
-                                                          on_click=diminuir),
-                                            txt,
-                                            ft.IconButton(ft.Icons.ADD_ROUNDED, icon_color=Colors.GREEN_700,
-                                                          on_click=aumentar),
-                                        ],
-                                        alignment=ft.MainAxisAlignment.CENTER,
-                                        spacing=10
-                                    )
-                                ],
-                                alignment=ft.MainAxisAlignment.CENTER
+                # só mostrar insumos que realmente existem na lista filtrada
+                if ing_id in ingredientes_disponiveis:
+                    nome = ingredientes_disponiveis[ing_id]
+                    txt = ft.Text(str(qtd), color=Colors.WHITE, size=18, weight="bold")
+                    ingrediente_controls[ing_id] = txt
+                    aumentar, diminuir = make_alterar_func(ing_id)
+                    controles_lista.append(
+                        ft.Card(
+                            content=ft.Container(
+                                content=ft.Column(
+                                    [
+                                        ft.Text(f"{nome} (R$ {preco_ingredientes[ing_id]:.2f})",
+                                                color=Colors.ORANGE_900, size=16, weight="bold"),
+                                        ft.Row(
+                                            [
+                                                ft.IconButton(ft.Icons.REMOVE_ROUNDED, icon_color=Colors.RED_700,
+                                                              on_click=diminuir),
+                                                txt,
+                                                ft.IconButton(ft.Icons.ADD_ROUNDED, icon_color=Colors.GREEN_700,
+                                                              on_click=aumentar),
+                                            ],
+                                            alignment=ft.MainAxisAlignment.CENTER,
+                                            spacing=10
+                                        )
+                                    ],
+                                    alignment=ft.MainAxisAlignment.CENTER
+                                ),
+                                padding=10,
+                                bgcolor=Colors.ORANGE_100,
+                                border_radius=10,
+                                alignment=ft.alignment.center
                             ),
-                            padding=10,
-                            bgcolor=Colors.ORANGE_100,
-                            border_radius=10,
-                            alignment=ft.alignment.center
-                        ),
-                        elevation=3,
-                        shadow_color=Colors.YELLOW_800
+                            elevation=3,
+                            shadow_color=Colors.YELLOW_800
+                        )
                     )
-                )
 
             obs_input = ft.TextField(
-                label="Detalhes do lanches",
+                label="Detalhes do lanche",
                 hint_text='Ex: Ponto da Carne',
                 value=item.get("observacoes_texto", ""),
                 color=Colors.ORANGE_900,
@@ -858,38 +895,61 @@ def main(page: ft.Page):
                 bgcolor=Colors.WHITE
             )
 
+            # Ao salvar: calcula diferenças entre receita_base e valores atuais do usuário
             def salvar_observacoes(e):
                 carrinho = page.session.get("carrinho") or []
                 if 0 <= lanche_index < len(carrinho):
-                    # Pega o lanche atual
-                    item = carrinho[lanche_index].copy()  # ← Cópia garante que não afete os outros
+                    item_copy = carrinho[lanche_index].copy()
 
-                    # Salva observações únicas
-                    item["observacoes_texto"] = obs_input.value or "Nenhuma"
+                    # pega valores atuais que o usuário vê (inteiros)
+                    valores_atualizados = {ing_id: int(txt.value) for ing_id, txt in ingrediente_controls.items()}
 
-                    # Ingredientes personalizados (só deste lanche)
-                    ingredientes_modificados = {
-                        ing_id: int(txt.value)
-                        for ing_id, txt in ingrediente_controls.items()
-                        if int(txt.value) != 0
-                    }
-                    item["ingredientes"] = ingredientes_modificados
+                    # construir observacoes no formato esperado pela sua rota /vendas
+                    observacoes = {"adicionar": [], "remover": []}
 
-                    # Recalcula preço apenas deste lanche
+                    # para cada ingrediente da receita base: se o usuário diminuiu -> remover
+                    for ing_id, qtd_base in receita_base.items():
+                        qtd_nova = valores_atualizados.get(int(ing_id), 0)
+                        if qtd_nova < int(qtd_base):
+                            observacoes["remover"].append(
+                                {"insumo_id": int(ing_id), "qtd": int(qtd_base) - int(qtd_nova)})
+                        elif qtd_nova > int(qtd_base):
+                            # excesso sobre a receita base vira "adicionar"
+                            observacoes["adicionar"].append(
+                                {"insumo_id": int(ing_id), "qtd": int(qtd_nova) - int(qtd_base)})
+
+                    # ingredientes que não faziam parte da receita mas o usuário adicionou -> adicionar
+                    for ing_id, qtd_nova in valores_atualizados.items():
+                        if int(ing_id) not in [int(i) for i in receita_base.keys()] and qtd_nova > 0:
+                            observacoes["adicionar"].append({"insumo_id": int(ing_id), "qtd": int(qtd_nova)})
+
+                    # Atualiza o item para exibição no carrinho: guarda os valores atuais (o usuário vê)
+                    item_copy["observacoes_texto"] = obs_input.value or "Nenhuma"
+                    item_copy["ingredientes"] = valores_atualizados
+                    # Mantém o valor exibido com o preço recalculado
                     total_lanche = atualizar_preco()
-                    item["valor_lanche"] = total_lanche
-                    item["valor_venda"] = total_lanche
+                    item_copy["valor_lanche"] = total_lanche
+                    item_copy["valor_venda"] = total_lanche
 
-                    # Atualiza só o lanche atual
-                    carrinho[lanche_index] = item
+                    # Salva também as observações que serão enviadas quando o pedido for finalizado
+                    item_copy["observacoes"] = observacoes
+
+                    carrinho[lanche_index] = item_copy
                     page.session.set("carrinho", carrinho)
 
-                    snack_sucesso("Observações salvas com sucesso!")
+                    page.snack_bar = ft.SnackBar(
+                        ft.Text("Observações salvas com sucesso!"),
+                        open=True,
+                        bgcolor=Colors.GREEN_700,
+                        duration=1500
+                    )
+                    page.update()
 
                 page.go("/carrinho")
 
             atualizar_preco()
 
+            # (aqui segue a montagem da view - igual ao que você já tinha)
             page.views.append(
                 ft.View(
                     "/observacoes",
@@ -935,17 +995,11 @@ def main(page: ft.Page):
 
             carrinho = page.session.get("carrinho") or []
 
-            ingredientes_disponiveis = {
-                1: "Alface",
-                2: "Hambúrguer",
-                3: "Queijo",
-                4: "Ovo",
-                5: "Presunto",
-                6: "Molho",
-                7: "Bacon",
-                8: "Calabresa",
-                9: "Salsicha"
-            }
+            # Ingredientes disponíveis
+            token = page.client_storage.get("token")
+            insumos = listar_insumos(token)
+
+            ingredientes_disponiveis = {i["id_insumo"]: i["nome_insumo"] for i in insumos}
 
             lista_itens = []
             total = 0
@@ -955,9 +1009,9 @@ def main(page: ft.Page):
                 item["valor_venda"] = item.get("valor_lanche", 0)  # sincroniza com valor_lanche
 
                 obs_texto = item.get("observacoes_texto", "Nenhuma")
-                adicionados = [f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{qtd})" for ing_id, qtd in
+                adicionados = [f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{qtd*100}g)" for ing_id, qtd in
                                item.get("ingredientes", {}).items() if qtd > 0]
-                removidos = [f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{abs(qtd)})" for ing_id, qtd in
+                removidos = [f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{abs(qtd*100)}g)" for ing_id, qtd in
                              item.get("ingredientes", {}).items() if qtd < 0]
 
                 lista_itens.append(
