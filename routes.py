@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.235.29:5000"
+base_url = "http://192.168.1.238:5000"
 
 
 
@@ -180,3 +180,12 @@ def get_insumo(id_insumo):
         return response.json()
 
 
+
+def listar_vendas_mesa(token, numero_mesa):
+    url = f"{base_url}/vendas_id/{numero_mesa}"
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+    if response.status_code == 200:
+        return response.json().get("vendas", [])
+    else:
+        print("Erro ao buscar pedidos da mesa:", response.text)
+        return []
