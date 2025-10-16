@@ -4,12 +4,12 @@
     <main>
 <!--        <h1>{{valor_}}</h1>-->
         {% if not valor_ or valor_ == 'False' %}
-<!--            <span style="display: block">-->
-<!--                <form method="get" action="{{url_for('cards', valor_=valor_)}}">-->
-<!--                    <label for="tabela2">Tabela</label>-->
-<!--                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">-->
-<!--                </form>-->
-<!--            </span>-->
+            <span style="display: block">
+                <form method="get" action="{{url_for('cards', valor_=valor_)}}">
+                    <label for="tabela2">Tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
+                </form>
+            </span>
             <div class="card">CARD</div>
             <div class="card">CARD</div>
             <div class="card">CARD</div>

@@ -107,11 +107,11 @@ def get_insumo_by_id_insumo(id_insumo, token_):
 def post_login(email, password):
     response = requests.post(f"{url}/login", json={"email": f"{email}", "senha": f"{password}"})
     if response.status_code == 200:
-        return response.json()['access_token']
+        return response.json()
     else:
         print(response.status_code)
         print(response.json())
         return {'erro':response.status_code}
 
-print(get_insumos(post_login('vini@', '123')))
-print(get_pessoas(post_login('l@', '123')))
+# print(get_insumos(post_login('vini@', '123')))
+# print(get_pessoas(post_login('l@', '123')))
