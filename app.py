@@ -13,11 +13,9 @@ from flet.core.icons import Icons
 from flet.core.text_style import TextStyle, TextThemeStyle
 from flet.core.theme import TextTheme
 from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
-from sqlalchemy import Column
-from sqlalchemy.dialects.oracle import NUMBER
+
 from urllib.parse import urlparse, parse_qs
 
-from sqlalchemy.orm import sessionmaker
 
 from routes import *
 
@@ -32,6 +30,38 @@ def main(page: ft.Page):
         "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
     }
     # Funções
+
+    def ver_pedidos_mesa(e):
+        numero_mesa = mesa.value.strip()
+        if not numero_mesa:
+            snack_error("Digite o número da mesa.")
+            return
+
+        token = page.client_storage.get("token")
+        pedidos = listar_vendas_mesa(token, numero_mesa)
+
+        if not pedidos:
+            snack_error("Nenhum pedido encontrado para essa mesa.")
+            return
+
+        lista_pedidos.controls.clear()
+        for p in pedidos:
+            lista_pedidos.controls.append(
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Text(f"Pedido ID: {p['id_venda']}", color=Colors.ORANGE_900),
+                            ft.Text(f"Data: {p['data_venda']}", color=Colors.YELLOW_800),
+                            ft.Text(f"Valor: R$ {p['valor_venda']:.2f}", color=Colors.GREEN_700),
+                            ft.Text(f"Lanche ID: {p['lanche_id']}", color=Colors.WHITE),
+                        ]),
+                        bgcolor=Colors.BLACK,
+                        padding=10,
+                        border_radius=10
+                    )
+                )
+            )
+
     def click_login(e):
         loading_indicator.visible = True
         page.update()
@@ -119,7 +149,6 @@ def main(page: ft.Page):
 
         page.go("/login")
         page.update()
-
         page.update()
 
     def click_logout(e):
@@ -491,86 +520,6 @@ def main(page: ft.Page):
         actions_alignment=ft.MainAxisAlignment.END,
         bgcolor=Colors.ORANGE_800,
     )
-
-
-    # def confirmar_pedido(e):
-    #     """Finaliza o pedido cadastrando as vendas de todos os lanches do carrinho."""
-    #
-    #     # Usuário logado
-    #     pessoa_id = page.session.get("pessoa_id")
-    #     if not pessoa_id:
-    #         snack_error("Usuário não logado!")
-    #         page.go("/login")
-    #         return
-    #
-    #     # Endereço
-    #     endereco_valor = input_endereco.value.strip()
-    #     if not endereco_valor:
-    #         snack_error("Por favor, informe o endereço!")
-    #         page.update()
-    #         return
-    #
-    #     # Forma de pagamento
-    #     forma_pagamento_valor = getattr(input_forma_pagamento, "value", None)
-    #     if not forma_pagamento_valor:
-    #         snack_error("Selecione uma forma de pagamento!")
-    #         page.update()
-    #         return
-    #
-    #     # Carrinho
-    #     carrinho = page.session.get("carrinho") or []
-    #     if not carrinho:
-    #         snack_error("Seu carrinho está vazio!")
-    #         page.update()
-    #         return
-    #
-    #     # Processa cada item do carrinho
-    #     for item in carrinho:
-    #         id_lanche = item.get("id_lanche")
-    #         qtd_lanche = item.get("qtd", 1)
-    #
-    #         # Observações (ajuste de ingredientes)
-    #         ingredientes = item.get("ingredientes", {})
-    #         observacoes = {
-    #             "adicionar": [
-    #                 {"insumo_id": ing_id, "qtd": qtd}
-    #                 for ing_id, qtd in ingredientes.items() if qtd > 0
-    #             ],
-    #             "remover": [
-    #                 {"insumo_id": ing_id, "qtd": abs(qtd)}
-    #                 for ing_id, qtd in ingredientes.items() if qtd < 0
-    #             ]
-    #         }
-    #
-    #         # Campo obrigatório: detalhamento
-    #         detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {item.get('observacoes', '')}"
-    #
-    #         # Chama a função da API
-    #         response = cadastrar_venda_app(
-    #             lanche_id=id_lanche,
-    #             pessoa_id=pessoa_id,
-    #             qtd_lanche=qtd_lanche,
-    #             forma_pagamento=forma_pagamento_valor,
-    #             endereco=endereco_valor,
-    #             detalhamento=detalhamento,
-    #             observacoes=observacoes
-    #         )
-    #
-    #         # Debug de erro
-    #         if "error" in response:
-    #             snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
-    #             page.update()
-    #             return
-    #
-    #     # Limpa carrinho
-    #     page.session.set("carrinho", [])
-    #
-    #     # Sucesso
-    #     snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
-    #     page.go("/")
-    #     page.update()
-
-
     # Rotas
     def gerencia_rotas(e):
         page.views.clear()
@@ -670,11 +619,12 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     icone_pedido,
-                                    item,
+                                    # item,
                                 ]),
                                 ft.Row([
                                     inserir_mesa,btn_pedidos,btn_limpar_tela
-                                ])
+                                ]),
+                        lista_pedidos
 
 
                     ], bgcolor=Colors.BLACK,
@@ -1129,7 +1079,14 @@ def main(page: ft.Page):
                                      color=Colors.BLACK,
                                      bgcolor=Colors.YELLOW_900,
                                      )
-    btn_pedidos = ft.ElevatedButton(text='Ver pedidos',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
+    btn_pedidos = ft.ElevatedButton(
+        text='Ver pedidos',
+        icon=Icons.CHECK,
+        icon_color=Colors.BLACK,
+        color=Colors.BLACK,
+        bgcolor=Colors.YELLOW_900,
+        on_click=ver_pedidos_mesa
+    )
     btn_limpar_tela = ft.ElevatedButton(text='Limpar tela',icon=Icons.CHECK,icon_color=Colors.BLACK,color=Colors.BLACK,bgcolor=Colors.YELLOW_900)
 
     input_nome = ft.TextField(
@@ -1194,7 +1151,7 @@ def main(page: ft.Page):
 
     )
 
-
+    lista_pedidos = ft.ListView(expand=True, spacing=10)
 
 
     # Indicador de carregamento
