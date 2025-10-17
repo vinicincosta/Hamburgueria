@@ -219,7 +219,6 @@ def listar_receita_lanche(lanche_id):
     Retorna a receita base de um lanche: {insumo_id: quantidade_base}
     """
     try:
-        print("lanche_id:", lanche_id)
         # Consulta os insumos que fazem parte do lanche
         response = requests.get(f"{base_url}/lanche_receita/{lanche_id}")  # crie esta rota se não existir
 
