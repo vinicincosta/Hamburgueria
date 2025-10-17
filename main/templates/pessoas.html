@@ -5,7 +5,7 @@
 <!--        <h1>{{pessoas}}</h1>-->
         {% if not valor_ or valor_ == 'False' %}
             <span style="display: block">
-                <form method="get" action="{{url_for('cards', valor_=valor_)}}">
+                <form method="get" action="{{url_for('pessoas', valor_=valor_)}}">
                     <label for="tabela2">Tabela</label>
                     <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
                 </form>
@@ -22,7 +22,7 @@
                 {% endif %}
             {% endfor %}
         {% else %}
-            <form method="get" action="{{url_for('cards', valor_=valor_)}}">
+            <form method="get" action="{{url_for('pessoas', valor_=valor_)}}">
                 <label for="tabela">Tabela</label>
                 <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
             </form>

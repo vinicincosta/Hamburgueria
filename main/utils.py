@@ -115,4 +115,6 @@ def post_login(email, password):
         return {'erro':response.status_code}
 
 # print(get_insumos(post_login('vini@', '123')))
-# print(get_pessoas(post_login('l@', '123')))
+token = post_login('vini@', '123')
+print(token)
+print(get_pessoas(token['access_token']))
