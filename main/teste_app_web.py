@@ -57,7 +57,6 @@ def login():
 @app.route('/logout')
 def logout():
     try:
-        # logout_user()
         session.clear()
         print(session, 'session')
         return redirect(url_for('login'))
@@ -70,7 +69,7 @@ def logout():
 @app.route('/pessoas', methods=['GET'])
 @app.route('/pessoas/<valor_>', methods=['GET'])
 def pessoas(valor_=None):
-    # print(session['token'], session['papel'])
+
     verificar_login()
 
     get_pessoas = utils.get_pessoas(session['token'])
@@ -79,16 +78,13 @@ def pessoas(valor_=None):
         flash('Parece que você não tem acesso a essa página, entre com uma conta que possua acesso', 'error')
         return redirect(url_for('login'))
 
-    # print(pessoas)
     if valor_ is None:
         return render_template('pessoas.html', valor_=False, pessoas=get_pessoas['pessoas'])
     else:
         if valor_ in ['true', 'True', True, 1, '1']:
             booleano = True
-            print('wwwTRUE', booleano)
         else:
             booleano = False
-            print('wwwFalse', booleano)
 
     # page = request.args.get("page", 1, type=int)
     # per_page = request.args.get("per_page", 10, type=int)
@@ -98,7 +94,11 @@ def pessoas(valor_=None):
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
     verificar_login()
+
     get_vendas = utils.get_vendas(session['token'])
+
+    return render_template('vendas.html', vendas=get_vendas['vendas'], papel=session['papel'])
+
 
 
 if __name__ == '__main__':
