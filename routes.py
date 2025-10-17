@@ -199,6 +199,21 @@ def listar_insumos(token):
         print("Erro de conexão:", e)
         return []
 
+# Função global
+def carregar_receita_base(lanche_id):
+    try:
+        dados_receita = listar_receita_lanche(lanche_id) or {}
+        receita = {}
+        for ing_id, qtd in dados_receita.items():
+            ing_id, qtd = int(ing_id), int(qtd)
+            if ing_id > 0:
+                receita[ing_id] = qtd
+        return receita
+    except Exception as e:
+        print("Erro ao buscar receita:", e)
+        return {}
+
+
 def listar_receita_lanche(lanche_id):
     """
     Retorna a receita base de um lanche: {insumo_id: quantidade_base}
@@ -208,9 +223,11 @@ def listar_receita_lanche(lanche_id):
         response = requests.get(f"{base_url}/lanche_receita/{lanche_id}")  # crie esta rota se não existir
 
         if response.status_code == 200:
-            dados = response.json()  # espera algo como [{"insumo_id": 1, "qtd_insumo": 100}, ...]
-            receita = {item["insumo_id"]: item["qtd_insumo"] // 100 for item in dados}  # converte pra "1 unidade = 100"
+            dados = response.json()
+            receita_lista = dados["receita"]
+            receita = {item["insumo_id"]: item["quantidade_base"] // 100 for item in receita_lista}
             return receita
+
         else:
             print(f"Erro ao buscar receita: {response.status_code}")
             return {}
