@@ -3,6 +3,7 @@ from flask_login import logout_user
 import routes
 
 def verificar_login():
+    # noinspection PyInconsistentReturns
     if not session:
         flash('Você deve estar logado para visualizar esta página', 'error')
         return redirect(url_for('login'))
