@@ -1,9 +1,9 @@
-
+import json
 from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.235.13:5002"
+base_url = "http://10.135.233.159:5002"
 
 
 
@@ -114,27 +114,32 @@ def listar_pessoas():
         print(f'Erro: {response.status_code}')
         return response.json()
 
+def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
+    url = f"{base_url}/pedidos"
 
-# def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None):
-#     url = f"{base_url}/vendas"  # rota da API
-#
-#     payload = {
-#         "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#         "lanche_id": lanche_id,
-#         "pessoa_id": pessoa_id,
-#         "qtd_lanche": qtd_lanche,
-#         "detalhamento": detalhamento,  # obs_input cai aqui
-#         "endereco": endereco,
-#         "forma_pagamento": forma_pagamento,
-#         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []}
-#     }
-#
-#     response = requests.post(url, json=payload)
-#
-#     if response.status_code != 201:
-#         print("DEBUG cadastrar_venda_app:", response.status_code, response.text)
-#
-#     return response.json()
+    payload = {
+        "data_pedido": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "numero_mesa": numero_mesa,
+        "id_pessoa": id_pessoa,
+        "id_lanche": id_lanche if id_lanche else None,
+        "id_bebida": id_bebida if id_bebida else None,
+        "qtd_lanche": qtd_lanche,
+        "detalhamento": detalhamento,
+        "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
+    }
+
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 201:
+            print("DEBUG cadastrar_pedido_app:", response.status_code, response.text)
+            return {"error": response.text}
+        return response.json()
+    except Exception as e:
+        print("ERRO cadastrar_pedido_app:", str(e))
+        return {"error": str(e)}
+
+
+
 
 
 
