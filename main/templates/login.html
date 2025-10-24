@@ -1,12 +1,12 @@
 {% extends 'inicio.html' %}
 
-{% block conteudo %}
+{% block content %}
     <main>
         <div>
             <form action="{{url_for('login')}}" method="POST">
                 <h1>Login</h1>
-                <label for="usuario"></label>
-                <input type="text" name="usuario" id="usuario">
+                <label for="email"></label>
+                <input type="text" name="email" id="email">
                 <label for="senha"></label>
                 <input type="password" name="senha" id="senha">
                 <label for="lembrar"></label>

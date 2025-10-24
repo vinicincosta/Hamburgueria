@@ -105,7 +105,7 @@ main{
     /*background-color: aqua;*/
     width: 11vh;
     height: 10vh;
-    margin: 10px;
+    margin-top: 10px;
     /*border-radius: 6vh;*/
 }
 #img-user{
@@ -150,6 +150,29 @@ main{
     height: 50px;
 
 }
+
+.flash-message {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: bold;
+    z-index: 9999;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    animation: fadeout 4s forwards;
+}
+.flash-message.success { background: #28a745; }
+.flash-message.error { background: #dc3545; }
+.flash-message.info { background: #17a2b8; }
+
+@keyframes fadeout {
+    0% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-10px); }
+}
+
 @media screen and (max-height: 450px) {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}

@@ -1,6 +1,7 @@
 import requests
 
-url = "http://10.135.235.49:5000"
+#url = "http://10.135.235.49:5000"
+url = "http://10.135.233.26:5002"
 
 def get_lanches(token_):
     base_url = f"{url}/lanches"
@@ -105,13 +106,15 @@ def get_insumo_by_id_insumo(id_insumo, token_):
 
 
 def post_login(email, password):
-    response = requests.post(f"{url}/login", json={"email": f"{email}", "senha": f"{password}"})
+    response = requests.post(f"{url}/login", json={"email": email, "senha": password})
     if response.status_code == 200:
-        return response.json()['access_token']
+        return response.json()
     else:
         print(response.status_code)
-        print(response.json())
+        print(response)
         return {'erro':response.status_code}
 
-print(get_insumos(post_login('vini@', '123')))
-print(get_pessoas(post_login('l@', '123')))
+# print(get_insumos(post_login('vini@', '123')))
+token = post_login('vini@', '123')
+print(token)
+print(get_pessoas(token['access_token']))

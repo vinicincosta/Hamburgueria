@@ -1989,6 +1989,7 @@ from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
 
 from urllib.parse import urlparse, parse_qs
 
+
 from routes import *
 
 
@@ -2001,7 +2002,6 @@ def main(page: ft.Page):
     page.fonts = {
         "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
     }
-
     # Funções
 
     def click_login(e):
@@ -2222,6 +2222,8 @@ def main(page: ft.Page):
                                             ft.Text(f'{lanche["descricao_lanche"]}',
                                                     color=Colors.YELLOW_800, width=200, font_family="Aharoni"),
 
+
+
                                             ft.ElevatedButton(
                                                 "Adicionar ao Carrinho",
                                                 on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
@@ -2392,6 +2394,8 @@ def main(page: ft.Page):
 
         token = page.client_storage.get("token")
         insumos = listar_insumos(token)
+
+        # Tabela fixa de preços
         preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
 
         for item in carrinho:
