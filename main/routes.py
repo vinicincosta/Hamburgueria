@@ -1,9 +1,11 @@
 import requests
+from flask_jwt_extended import get_jwt
 
-#url = "http://10.135.235.49:5000"
+
+# url = "http://10.135.233.139:5002"
 url = "http://10.135.233.150:5002"
 
-def get_lanches(token_):
+def get_lanches(token_): # Feito
     base_url = f"{url}/lanches"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -13,7 +15,7 @@ def get_lanches(token_):
         print(response.json())
         return {'erro':response.status_code}
 
-def get_insumos(token_):
+def get_insumos(token_): # Feito
     base_url = f"{url}/insumos"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -53,7 +55,7 @@ def get_categorias(token_):
         print(response.json())
         return {'erro':response.status_code}
 
-def get_entradas(token_):
+def get_entradas(token_): # Feito
     base_url = f"{url}/entradas"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -83,7 +85,7 @@ def get_vendas(token_):
         print(response.json())
         return {'erro':response.status_code}
 
-def get_pessoas(token_):
+def get_pessoas(token_): # Feito
     base_url = f"{url}/pessoas"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -214,6 +216,16 @@ def post_login(email, password):
         return {'erro':response.status_code}
 
 # print(get_insumos(post_login('vini@', '123')))
-token = post_login('vini@', '123')
-print(token)
-print(get_pessoas(token['access_token']))
+
+def get_id_pessoa_by_token(token_):
+    response = requests.get(f"{url}/teste", headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        return {'erro':response.status_code}
+
+# token = post_login('vini@', '123')
+# print(token)
+# print(get_jwt())
+# print(get_pessoas(token['access_token']))
