@@ -2769,7 +2769,7 @@ def main(page: ft.Page):
                             bgcolor=Colors.BLACK,
                             color=Colors.PURPLE,
                             leading=logo,
-                            actions=[btn_logout_carrinho_garcom]
+                            actions=[btn_logout]
                         ),
                         ft.Container(
                             content=ft.Column(
@@ -3325,7 +3325,7 @@ def main(page: ft.Page):
                     "/observacoes",
                     [
                         ft.AppBar(title=ft.Text("Personalizar Lanche", size=22, color=Colors.ORANGE_900, weight="bold"),
-                                  center_title=True, bgcolor=Colors.BLACK, actions=[btn_logout_observacoes]),
+                                  center_title=True, bgcolor=Colors.BLACK, actions=[btn_logout_observacoes_garcom]),
                         ft.Column([
                             ft.Text(f"Você está editando: {item['nome_lanche']}", color=Colors.YELLOW_800, size=22,
                                     weight="bold"),
@@ -3614,6 +3614,13 @@ def main(page: ft.Page):
         on_click=lambda _: page.go('/cardapio_delivery'),
     )
 
+    btn_logout_observacoes_garcom = ft.TextButton(
+        icon=Icons.LOGOUT,
+        scale=1.5,
+        icon_color=Colors.RED_700,
+        on_click=lambda _: page.go(f"/carrinho_garcom?mesa={mesa_dropdown_aberta.value}")
+    )
+
     btn_logout_carrinho = ft.TextButton(
         icon=Icons.LOGOUT,
         scale=1.5,
@@ -3721,3 +3728,108 @@ def main(page: ft.Page):
 # Comando que executa o aplicativo
 # Deve estar sempre colado na linha
 ft.app(main)
+
+#     # ---------------- ROTA VENDAS ----------------
+# if page.route == "/vendas":
+#     input_forma_pagamento.value = ""
+#     input_endereco.value = ""
+#
+#     carrinho = page.session.get("carrinho") or []
+#
+#     ingredientes_disponiveis = {
+#         1: "Alface",
+#         2: "Hambúrguer",
+#         3: "Queijo",
+#         4: "Ovo",
+#         5: "Presunto",
+#         6: "Molho"
+#     }
+#
+#     lista_itens = []
+#     total = 0
+#
+#     for item in carrinho:
+#         total += item.get("valor_lanche", 0)
+#         item["valor_venda"] = item.get("valor_lanche", 0)  # sincroniza com valor_lanche
+#
+#         obs_texto = item.get("observacoes_texto", "Nenhuma")
+#         adicionados = [f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{qtd})" for ing_id, qtd in
+#                        item.get("ingredientes", {}).items() if qtd > 0]
+#         removidos = [f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{abs(qtd)})" for ing_id, qtd in
+#                      item.get("ingredientes", {}).items() if qtd < 0]
+#
+#         lista_itens.append(
+#             ft.Container(
+#                 content=ft.Column(
+#                     [
+#                         ft.Row(
+#                             [
+#                                 ft.Text(item.get("nome_lanche", "Lanche"), color=Colors.ORANGE_700, size=16),
+#                                 ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900, size=14),
+#                             ],
+#                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN
+#                         ),
+#                         ft.Text(f"Obs: {obs_texto}", color=Colors.YELLOW_800, size=12),
+#                         ft.Text("Adicionados: " + (", ".join(adicionados) if adicionados else "Nenhum"),
+#                                 color=Colors.GREEN_700, size=12),
+#                         ft.Text("Removidos: " + (", ".join(removidos) if removidos else "Nenhum"),
+#                                 color=Colors.RED_700, size=12),
+#                         ft.Divider(color=Colors.BLACK, height=10)
+#                     ]
+#                 ),
+#                 padding=10,
+#                 bgcolor=Colors.BLACK,
+#                 border_radius=10
+#             )
+#         )
+#
+#     page.session.set("carrinho", carrinho)
+#     total_label = ft.Text(f"Total do Pedido: R$ {total:.2f}", color=Colors.ORANGE_700, size=20)
+#
+#     page.views.append(
+#         ft.View(
+#             "/vendas",
+#             [
+#                 ft.AppBar(
+#                     title=ft.Image(src="imgdois.png", width=90),
+#                     center_title=True,
+#                     bgcolor=Colors.BLACK,
+#                     leading=logo,
+#                     actions=[btn_logout_carrinho],
+#                 ),
+#                 ft.Column(
+#                     [
+#                         ft.Text("Resumo do Pedido", size=22, color=Colors.BLACK, font_family="Arial"),
+#                         ft.ListView(controls=lista_itens, expand=True),
+#                         total_label,
+#                         input_endereco,
+#                         input_forma_pagamento,
+#                         ft.Row(
+#                             [
+#                                 ft.ElevatedButton(
+#                                     text="Confirmar Pedido",
+#                                     bgcolor=Colors.ORANGE_800,
+#                                     color=Colors.BLACK,
+#                                     on_click=confirmar_pedido
+#                                 ),
+#                                 ft.OutlinedButton(
+#                                     "Voltar",
+#                                     on_click=lambda e: page.go("/carrinho")
+#                                 )
+#                             ],
+#                             alignment=ft.MainAxisAlignment.CENTER,
+#                             spacing=20
+#                         )
+#                     ],
+#                     alignment=ft.MainAxisAlignment.CENTER,
+#                     horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+#                     spacing=20,
+#                     expand=True,
+#                     scroll=True
+#                 )
+#             ],
+#             bgcolor=Colors.ORANGE_100,
+#         )
+#     )
+#
+# page.update()
