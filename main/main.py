@@ -1,13 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import logout_user
-import utils
+import routes
 
 def verificar_login():
     if not session:
         flash('Você deve estar logado para visualizar esta página', 'error')
         return redirect(url_for('login'))
-
-
 
 
 app = Flask(__name__)
@@ -22,7 +20,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('senha')
         print(email, password, 'EMAILSENHA')
-        user = utils.post_login(email, password)
+        user = routes.post_login(email, password)
         print(user)
         if 'access_token' in user:
             session['token'] = user['access_token']
@@ -72,7 +70,7 @@ def pessoas(valor_=None):
 
     verificar_login()
 
-    get_pessoas = utils.get_pessoas(session['token'])
+    get_pessoas = routes.get_pessoas(session['token'])
 
     if 'pessoas' not in get_pessoas:
         flash('Parece que você não tem acesso a essa página, entre com uma conta que possua acesso', 'error')
@@ -95,7 +93,7 @@ def pessoas(valor_=None):
 def pedidos():
     verificar_login()
 
-    get_vendas = utils.get_vendas(session['token'])
+    get_vendas = routes.get_vendas(session['token'])
 
     return render_template('vendas.html', vendas=get_vendas['vendas'], papel=session['papel'])
 

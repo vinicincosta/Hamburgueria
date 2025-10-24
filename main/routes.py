@@ -1,7 +1,7 @@
 import requests
 
 #url = "http://10.135.235.49:5000"
-url = "http://10.135.233.26:5002"
+url = "http://10.135.233.150:5002"
 
 def get_lanches(token_):
     base_url = f"{url}/lanches"
@@ -103,6 +103,105 @@ def get_insumo_by_id_insumo(id_insumo, token_):
         print(response.json())
         return {'erro':response.status_code}
 
+########################
+########################
+
+# POST
+
+def post_cadastro_pessoas(token_, nome, cpf, email, telefone, senha, salario, papel):
+    response = requests.post(f"{url}/cadastro_pessoas_login", json={
+        "email":email,
+        "telefone":telefone,
+        "senha":senha,
+        "nome_pessoa":nome,
+        "cpf":cpf,
+        "salario":salario,
+        "papel":papel
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+
+def post_lanches(token_, nome_lanche, descricao, valor):
+    response = requests.post(f"{url}/lanches", json={
+        "nome_lanche":nome_lanche,
+        "descricao_lanche":descricao,
+        "valor_lanche":valor,
+
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def post_insumos(token_, nome_insumo, custo, categoria_id):
+    response = requests.post(f"{url}/insumos", json={
+        "nome_insumo":nome_insumo,
+        "categoria_id":categoria_id,
+        "custo": custo
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def post_entradas(token_, insumo_id, qtd_entrada, data_entrada, nota_fiscal, valor_entrada):
+    response = requests.post(f"{url}/entradas", json={
+        "insumo_id":insumo_id,
+        "qtd_entrada":qtd_entrada,
+        "data_entrada":data_entrada,
+        "nota_fiscal":nota_fiscal,
+        "valor_entrada":valor_entrada
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def post_lanche_insumos(token_, lanche_id, insumo_id, qtd_insumo):
+    response = requests.post(f"{url}/lanche_insumos",
+                             json={"lanche_id":lanche_id, "insumo_id":insumo_id, "qtd_insumo":qtd_insumo},
+                             headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def post_vendas(token_, data_venda, lanche_id, pessoa_id, qtd_lanche, detalhamento):
+    response = requests.post(f"{url}/vendas", json={
+        "data_venda":data_venda,
+        "lanche_id":lanche_id,
+        "pessoa_id":pessoa_id,
+        "qtd_lanche":qtd_lanche,
+        "detalhamento":detalhamento
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def post_categorias(token_, nome_categoria):
+    response = requests.post(f"{url}/categorias", json={"nome_categoria":nome_categoria}, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
 
 
 def post_login(email, password):
