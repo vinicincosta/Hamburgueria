@@ -2546,6 +2546,7 @@ def main(page: ft.Page):
                                         ]
                                     )
                                 ]
+
                             ),
                             bgcolor=Colors.BLACK,
                             height=150,
