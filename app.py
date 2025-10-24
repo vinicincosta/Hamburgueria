@@ -2543,6 +2543,7 @@ def main(page: ft.Page):
                                                 ],
                                                 spacing=10
                                             )
+
                                         ]
                                     )
                                 ]
