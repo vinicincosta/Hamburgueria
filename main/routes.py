@@ -215,6 +215,9 @@ def post_login(email, password):
         print(response)
         return {'erro':response.status_code}
 
+def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
+    response = requests.post(f"{url}/pedidos", json={})
+
 # print(get_insumos(post_login('vini@', '123')))
 
 def get_id_pessoa_by_token(token_):
