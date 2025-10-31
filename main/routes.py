@@ -215,14 +215,8 @@ def post_login(email, password):
         print(response)
         return {'erro':response.status_code}
 
-def get_pedidos(token_):
-    response = requests.get(f"{url}/pedidos", headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response)
-        return {'erro':response.status_code}
+def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
+    response = requests.post(f"{url}/pedidos", json={})
 
 # print(get_insumos(post_login('vini@', '123')))
 
