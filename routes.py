@@ -101,32 +101,6 @@ def listar_lanche(token):
 
 # listar_lanche()
 
-def listar_pedidos(token):
-    url = f'{base_url}/pedidos'
-    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
-
-    if response.status_code == 200:
-        dados_get_pedidos_ = response.json()
-        print(dados_get_pedidos_)
-        return dados_get_pedidos_
-    else:
-        print(f'Erro: {response.status_code}')
-        return response.json()
-
-
-
-def listar_bebidas(token):
-    url = f'{base_url}/bebidas'
-    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
-
-    if response.status_code == 200:
-        dados_get_bebidas = response.json()
-        print(dados_get_bebidas)
-        return dados_get_bebidas ['bebidas']
-    else:
-        print(f'Erro: {response.status_code}')
-        return response.json()
-
 
 def listar_pessoas():
     url = f'{base_url}/pessoas'
@@ -269,7 +243,7 @@ def listar_receita_lanche(lanche_id):
 
 
 def listar_vendas_mesa(token, numero_mesa):
-    url = f"{base_url}/vendas_garcom/{numero_mesa}"
+    url = f"{base_url}/vendas_id/{numero_mesa}"
     response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
     if response.status_code == 200:
         return response.json().get("vendas", [])
