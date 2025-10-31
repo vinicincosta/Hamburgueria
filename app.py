@@ -72,7 +72,7 @@ def main(page: ft.Page):
             #  Salva o ID da pessoa logada na sessão
             for pessoa in resultado_pessoas:
                 if pessoa['email'] == input_email.value:
-                    page.session.set("pessoa_id", pessoa["id_pessoa"])
+                    page.client_storage.set("pessoa_id", pessoa["id_pessoa"])
                     print("pessoa_id salvo na sessão:", pessoa["id_pessoa"])
                     break
 
@@ -227,13 +227,13 @@ def main(page: ft.Page):
         print(f'Resultado dos lanches: {resultado_lanches}')
 
         # garante que o carrinho exista
-        if page.session.get("carrinho") is None:
-            page.session.set("carrinho", [])
+        if page.client_storage.get("carrinho") is None:
+            page.client_storage.set("carrinho", [])
 
         def adicionar_ao_carrinho(lanche):
-            carrinho = page.session.get("carrinho")
+            carrinho = page.client_storage.get("carrinho")
             carrinho.append(lanche)
-            page.session.set("carrinho", carrinho)
+            page.client_storage.set("carrinho", carrinho)
 
             # Mensagem de sucesso
             snack_sucesso(f"{lanche['nome_lanche']} adicionado ao carrinho!")
@@ -307,19 +307,19 @@ def main(page: ft.Page):
 
     # Função para remover item do carrinho
     def remover_item(index):
-        carrinho = page.session.get("carrinho") or []
+        carrinho = page.client_storage.get("carrinho") or []
         if 0 <= index < len(carrinho):
             # pop é usado para remover e retornar
 
             item_removido = carrinho.pop(index)  # remove o item
-            page.session.set("carrinho", carrinho)
+            page.client_storage.set("carrinho", carrinho)
             snack_sucesso(f"{item_removido['nome_lanche']} removido do carrinho!")
             carrinho_view(None)  # recarrega a tela
 
     def carrinho_view(e):
         lv_carrinho.controls.clear()
 
-        carrinho = page.session.get("carrinho") or []
+        carrinho = page.client_storage.get("carrinho") or []
 
         if not carrinho:
             lv_carrinho.controls.append(
@@ -404,14 +404,14 @@ def main(page: ft.Page):
 
     def confirmar_pedido_cozinha(e):
 
-        id_pessoa = page.session.get("pessoa_id")
+        id_pessoa = page.client_storage.get("pessoa_id")
         if not id_pessoa:
             snack_error("Garcom não logado!")
             page.go("/login")
             return
 
         # Usa o carrinho correto (garçom)
-        carrinho = page.session.get("carrinho_garcom") or []
+        carrinho = page.client_storage.get("carrinho_garcom") or []
         if not carrinho:
             snack_error("Nenhum item no carrinho da mesa!")
             page.update()
@@ -483,14 +483,14 @@ def main(page: ft.Page):
                 return
 
         # Limpa o carrinho da mesa e confirma sucesso
-        page.session.set("carrinho_garcom", [])
+        page.client_storage.set("carrinho_garcom", [])
         snack_sucesso("Pedido enviado para a cozinha com sucesso!")
         page.go("/mesa")
         page.update()
 
 
     def confirmar_pedido(e):
-        pessoa_id = page.session.get("pessoa_id")
+        pessoa_id = page.client_storage.get("pessoa_id")
         if not pessoa_id:
             snack_error("Usuário não logado!")
             page.go("/login")
@@ -508,7 +508,7 @@ def main(page: ft.Page):
             page.update()
             return
 
-        carrinho = page.session.get("carrinho") or []
+        carrinho = page.client_storage.get("carrinho") or []
         if not carrinho:
             snack_error("Seu carrinho está vazio!")
             page.update()
@@ -575,7 +575,7 @@ def main(page: ft.Page):
                 return
 
         # Limpa carrinho após confirmação
-        page.session.set("carrinho", [])
+        page.client_storage.set("carrinho", [])
         snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
         page.go("/")
         page.update()
@@ -584,12 +584,12 @@ def main(page: ft.Page):
     def carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num):
         lv_carrinho_garcom.controls.clear()
 
-        carrinho = page.session.get("carrinho_garcom") or []
+        carrinho = page.client_storage.get("carrinho_garcom") or []
 
         # Garante que cada lanche tenha um ID único
         for item in carrinho:
-            if "id_unico" not in item:
-                item["id_unico"] = str(uuid.uuid4())
+            if "id_lanche" not in item:
+                item["id_lanche"] = str(uuid.uuid4())
 
         # Filtra apenas os itens da mesa
         carrinho_mesa = [item for item in carrinho if str(item["mesa"]) == str(mesa_num)]
@@ -604,7 +604,7 @@ def main(page: ft.Page):
             def remover_item(idx):
                 carrinho_mesa.pop(idx)
                 novo_carrinho = [item for item in carrinho if str(item["mesa"]) != str(mesa_num)] + carrinho_mesa
-                page.session.set("carrinho_garcom", novo_carrinho)
+                page.client_storage.set("carrinho_garcom", novo_carrinho)
                 snack_sucesso("Item removido com sucesso!")
                 carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num)
 
@@ -633,7 +633,7 @@ def main(page: ft.Page):
                                                     ft.ElevatedButton(
                                                         "Observações",
                                                         on_click=lambda e, item=item: page.go(
-                                                            f"/observacoes_garcom/?id={item['id_unico']}"
+                                                            f"/observacoes_garcom/?id={item['id_lanche']}"
                                                         ),
                                                         bgcolor=Colors.ORANGE_700,
                                                         color=Colors.BLACK
@@ -688,7 +688,7 @@ def main(page: ft.Page):
             snack_error("Preencha todos os campos antes de salvar.")
             return
 
-        carrinho = page.session.get("carrinho_garcom") or []
+        carrinho = page.client_storage.get("carrinho_garcom") or []
         lanche = next((l for l in lanches_disponiveis if l["id_lanche"] == int(lanche_id)), None)
 
         if not lanche:
@@ -709,7 +709,7 @@ def main(page: ft.Page):
         # cliente_dropdown.value = ""
 
         carrinho.append(item_carrinho)
-        page.session.set("carrinho_garcom", carrinho)
+        page.client_storage.set("carrinho_garcom", carrinho)
 
         # Atualiza dropdown de mesas abertas
         mesa_dropdown_aberta.options = [ft.dropdown.Option(m, f"Mesa {m}") for m in listar_mesas_abertas()]
@@ -717,7 +717,7 @@ def main(page: ft.Page):
         page.update()
 
     def listar_mesas_abertas():
-        carrinho = page.session.get("carrinho_garcom") or []
+        carrinho = page.client_storage.get("carrinho_garcom") or []
         mesas = set()
         for item in carrinho:
             mesas.add(str(item["mesa"]))
@@ -837,6 +837,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/mesa":
+            print("mesa")
             numero_mesa.value = ""
             lanche_dropdown.value = ""
             cliente_dropdown.value = ""
@@ -886,8 +887,70 @@ def main(page: ft.Page):
 
             page.update()
 
+        # Carrinho Garçom
+        if page.route.startswith("/carrinho_garcom"):
+            print("carrinho garcom")
+            # --- Pega o número da mesa dos parâmetros da rota ---
+            # Exemplo de rota: /carrinho_garcom?mesa=5
+
+            query = page.route.split("?")[-1] if "?" in page.route else ""
+            params = urllib.parse.parse_qs(query)
+            mesa_num = params.get("mesa", [""])[0]  # pega o valor da mesa ou string vazia
+
+            lv_carrinho_garcom = ft.ListView(expand=True, spacing=10, padding=10)
+
+            # Chama a função para exibir os itens da mesa ---
+            if mesa_num:
+                carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num)
+
+            btn_voltar = ft.ElevatedButton(
+                "Voltar para Mesas",
+                on_click=lambda e: page.go("/mesa"),
+                style=ft.ButtonStyle(
+                    bgcolor=Colors.ORANGE_700,
+                    color=Colors.BLACK,
+                    padding=15,
+                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                )
+            )
+
+            btn_fechar_mesa = ft.ElevatedButton(
+                "Fechar Mesa",
+                on_click=lambda e: page.go(f"/vendas_garcom?mesa={mesa_num}"),
+                style=ft.ButtonStyle(
+                    bgcolor=Colors.ORANGE_700,
+                    color=Colors.BLACK,
+                    padding=15,
+                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                )
+            )
+
+            # --- Monta a view do carrinho do garçom ---
+            page.views.append(
+                ft.View(
+                    "/carrinho_garcom",
+                    [
+                        ft.AppBar(
+                            title=ft.Text(f"Carrinho da Mesa {mesa_num}", size=20),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            color=Colors.ORANGE_700,
+                            leading=logo,
+                            actions=[btn_logout_carrinho_garcom]
+                        ),
+                        lv_carrinho_garcom,
+                        ft.Container(content=btn_voltar, padding=20),
+                        ft.Container(content=btn_fechar_mesa, padding=20)
+                    ],
+                    bgcolor=Colors.ORANGE_100
+                )
+            )
+
+            page.update()
+
         # Rota observação Garçom, igual o delivery
         if page.route.startswith("/observacoes_garcom"):
+            print("observacoes_garcom")
 
             def get_lanche_por_id():
                 query = urlparse(page.route).query
@@ -895,9 +958,10 @@ def main(page: ft.Page):
                 return params.get("id", [None])[0]
 
             def carregar_carrinho_item(lanche_id):
-                carrinho = page.session.get("carrinho_garcom") or []
+                carrinho = page.client_storage.get("carrinho_garcom") or []
+
                 for item in carrinho:
-                    if item.get("id_unico") == lanche_id:
+                    if item.get("id_lanche") == int(lanche_id):
                         return item
                 return None
 
@@ -911,8 +975,10 @@ def main(page: ft.Page):
             # ==========================
             # Inicialização
             # ==========================
-            lanche_id_unico = get_lanche_por_id()
-            item = carregar_carrinho_item(lanche_id_unico)
+            lanche_id = get_lanche_por_id()
+            print(lanche_id)
+            item = carregar_carrinho_item(lanche_id)
+            print("passei por aqui", item)
             token = page.client_storage.get("token")
 
             if not item:
@@ -1014,7 +1080,8 @@ def main(page: ft.Page):
                                     ],
                                     alignment=ft.MainAxisAlignment.CENTER
                                 ),
-                                padding=10, bgcolor=Colors.ORANGE_100, border_radius=10, alignment=ft.alignment.center
+                                padding=10, bgcolor=Colors.ORANGE_100, border_radius=10,
+                                alignment=ft.alignment.center
                             ),
                             elevation=3, shadow_color=Colors.YELLOW_800
                         )
@@ -1030,7 +1097,7 @@ def main(page: ft.Page):
             )
 
             def salvar_observacoes(e):
-                carrinho = page.session.get("carrinho_garcom") or []
+                carrinho = page.client_storage.get("carrinho_garcom") or []
                 valores_atualizados = {ing_id: int(txt.value) for ing_id, txt in ingrediente_controls.items()}
 
                 observacoes = {"adicionar": [], "remover": []}
@@ -1048,7 +1115,7 @@ def main(page: ft.Page):
                 novo_valor = atualizar_preco()
 
                 for i, it in enumerate(carrinho):
-                    if it.get("id_unico") == lanche_id_unico:
+                    if it.get("id_lanche") == lanche_id:
                         carrinho[i].update({
                             "observacoes_texto": obs_input.value or "Nenhuma",
                             "ingredientes": valores_atualizados,
@@ -1058,7 +1125,7 @@ def main(page: ft.Page):
                         })
                         break
 
-                page.session.set("carrinho_garcom", carrinho)
+                page.client_storage.set("carrinho_garcom", carrinho)
 
                 page.snack_bar = ft.SnackBar(
                     ft.Text("Observações salvas com sucesso!"),
@@ -1090,7 +1157,8 @@ def main(page: ft.Page):
                                 ft.ElevatedButton("Salvar", on_click=salvar_observacoes, bgcolor=Colors.GREEN_700,
                                                   color=Colors.WHITE),
                                 ft.OutlinedButton("Cancelar",
-                                                  on_click=lambda e: page.go(f"/carrinho_garcom?mesa={item['mesa']}"))
+                                                  on_click=lambda e: page.go(
+                                                      f"/carrinho_garcom?mesa={item['mesa']}"))
                             ], alignment=ft.MainAxisAlignment.CENTER, spacing=20)
                         ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER,
                             spacing=25, expand=True, scroll=True)
@@ -1100,69 +1168,8 @@ def main(page: ft.Page):
             )
             page.update()
 
-        # Carrinho Garçom
-        if page.route.startswith("/carrinho_garcom"):
-
-            # --- Pega o número da mesa dos parâmetros da rota ---
-            # Exemplo de rota: /carrinho_garcom?mesa=5
-
-            query = page.route.split("?")[-1] if "?" in page.route else ""
-            params = urllib.parse.parse_qs(query)
-            mesa_num = params.get("mesa", [""])[0]  # pega o valor da mesa ou string vazia
-
-            lv_carrinho_garcom = ft.ListView(expand=True, spacing=10, padding=10)
-
-            # Chama a função para exibir os itens da mesa ---
-            if mesa_num:
-                carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num)
-
-            btn_voltar = ft.ElevatedButton(
-                "Voltar para Mesas",
-                on_click=lambda e: page.go("/mesa"),
-                style=ft.ButtonStyle(
-                    bgcolor=Colors.ORANGE_700,
-                    color=Colors.BLACK,
-                    padding=15,
-                    shape={"": ft.RoundedRectangleBorder(radius=10)}
-                )
-            )
-
-            btn_fechar_mesa = ft.ElevatedButton(
-                "Fechar Mesa",
-                on_click=lambda e: page.go(f"/vendas_garcom?mesa={mesa_num}"),
-                style=ft.ButtonStyle(
-                    bgcolor=Colors.ORANGE_700,
-                    color=Colors.BLACK,
-                    padding=15,
-                    shape={"": ft.RoundedRectangleBorder(radius=10)}
-                )
-            )
-
-            # --- Monta a view do carrinho do garçom ---
-            page.views.append(
-                ft.View(
-                    "/carrinho_garcom",
-                    [
-                        ft.AppBar(
-                            title=ft.Text(f"Carrinho da Mesa {mesa_num}", size=20),
-                            center_title=True,
-                            bgcolor=Colors.BLACK,
-                            color=Colors.ORANGE_700,
-                            leading=logo,
-                            actions=[btn_logout_carrinho_garcom]
-                        ),
-                        lv_carrinho_garcom,
-                        ft.Container(content=btn_voltar, padding=20),
-                        ft.Container(content=btn_fechar_mesa, padding=20)
-                    ],
-                    bgcolor=Colors.ORANGE_100
-                )
-            )
-
-            page.update()
-
         if page.route.startswith("/vendas_garcom"):
-
+            print("vendas garcom")
             # --- Captura número da mesa ---
             query = page.route.split("?")[-1] if "?" in page.route else ""
             params = urllib.parse.parse_qs(query)
@@ -1172,7 +1179,7 @@ def main(page: ft.Page):
             input_endereco.value = ""
 
             # --- Pega o carrinho do garçom e filtra pelo número da mesa ---
-            carrinho = page.session.get("carrinho_garcom") or []
+            carrinho = page.client_storage.get("carrinho_garcom") or []
             carrinho_mesa = [item for item in carrinho if str(item.get("mesa")) == str(mesa_num)]
 
             # --- Verifica se há itens no carrinho ---
@@ -1261,7 +1268,7 @@ def main(page: ft.Page):
 
                 # Remove os itens da mesa do carrinho do garçom
                 carrinho = [item for item in carrinho if str(item.get("mesa")) != str(mesa_num)]
-                page.session.set("carrinho_garcom", carrinho)
+                page.client_storage.set("carrinho_garcom", carrinho)
 
                 page.dialog = ft.AlertDialog(
                     title=ft.Text("Sucesso"),
@@ -1413,7 +1420,8 @@ def main(page: ft.Page):
 
             )
 
-        if page.route.startswith("/observacoes"):
+        if page.route.startswith("/observacoes/"):
+            print("observacoes")
             # ==========================
             # Funções auxiliares
             # ==========================
@@ -1426,7 +1434,7 @@ def main(page: ft.Page):
                     return -1
 
             def carregar_carrinho_item(index):
-                carrinho = page.session.get("carrinho") or []
+                carrinho = page.client_storage.get("carrinho") or []
                 if 0 <= index < len(carrinho):
                     return carrinho[index]
                 return {"nome_lanche": "Lanche não encontrado", "valor_lanche": 0, "ingredientes": {}}
@@ -1543,7 +1551,7 @@ def main(page: ft.Page):
             )
 
             def salvar_observacoes(e):
-                carrinho = page.session.get("carrinho") or []
+                carrinho = page.client_storage.get("carrinho") or []
                 if 0 <= lanche_index < len(carrinho):
                     item_copy = carrinho[lanche_index].copy()
                     valores_atualizados = {ing_id: int(txt.value) for ing_id, txt in ingrediente_controls.items()}
@@ -1568,7 +1576,7 @@ def main(page: ft.Page):
                         "observacoes": observacoes
                     })
                     carrinho[lanche_index] = item_copy
-                    page.session.set("carrinho", carrinho)
+                    page.client_storage.set("carrinho", carrinho)
 
                     page.snack_bar = ft.SnackBar(
                         ft.Text("Observações salvas com sucesso!"),
@@ -1610,7 +1618,7 @@ def main(page: ft.Page):
             input_forma_pagamento.value = ""
             input_endereco.value = ""
 
-            carrinho = page.session.get("carrinho") or []
+            carrinho = page.client_storage.get("carrinho") or []
 
             # Ingredientes disponíveis
             token = page.client_storage.get("token")
@@ -1671,7 +1679,7 @@ def main(page: ft.Page):
                     )
                 )
 
-            page.session.set("carrinho", carrinho)
+            page.client_storage.set("carrinho", carrinho)
             total_label = ft.Text(f"Total do Pedido: R$ {total:.2f}", color=Colors.ORANGE_700, size=20)
 
             page.views.append(
