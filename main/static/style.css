@@ -1,18 +1,14 @@
-*{
+*, body{
     margin: 0;
     padding: 0;
+    font-family: "Arial Black", sans-serif;
 }
-/*body{*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*}*/
 header{
     width: 100vw;
     height: 10vh;
     background-color: #161E25;
-    color: #F2D43D;
+    /*#161E25*/
     display: flex;
-    align-items: center;
     justify-content: space-between;
     font-family: "Arial Black";
     position: fixed;
@@ -85,11 +81,16 @@ main{
 .header-nav{
     opacity: 1;
     display: flex;
+    flex-direction: row;
     justify-content: flex-end;
     font-size: 40px;
     font-family:"Script MT Bold", sans-serif ;
     height: 10%;
 }
+/*.header-nav img{*/
+/*    width: 80px;*/
+/*    height: 80px;*/
+/*}*/
 .header-nav p{
     margin: 30px;
     cursor: pointer;
