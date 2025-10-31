@@ -1143,75 +1143,15 @@ def main(page: ft.Page):
                 style=ft.ButtonStyle(bgcolor=Colors.PURPLE, color=Colors.BLACK, padding=15)
             )
 
-            def tentar_fechar_mesa(e, mesa=mesa_num):
-                token = page.client_storage.get("token")
-
-                if not token:
-                    snack_error("Garçom não logado!")
-                    page.go("/login")
-                    return
-
-                try:
-                    pedidos = listar_pedidos(token)
-                except Exception as ex:
-                    snack_error(f"Erro ao buscar pedidos: {ex}")
-                    return
-
-                # --- Filtra pedidos da mesa ---
-                pedidos_mesa = []
-                for p in pedidos:
-                    if isinstance(p, str):
-                        try:
-                            p = json.loads(p)
-                        except:
-                            continue
-
-                    numero_mesa = str(p.get("numero_mesa", "")).strip()
-                    if numero_mesa == str(mesa):
-                        pedidos_mesa.append(p)
-
-                # --- Carrinho local da mesa ---
-                carrinho_local = page.client_storage.get("carrinho_garcom") or []
-                carrinho_da_mesa = [c for c in carrinho_local if str(c.get("mesa")) == str(mesa)]
-
-                # --- Verifica se todos os pedidos da mesa estão enviados ---
-                pedidos_pendentes = [p for p in pedidos_mesa if int(p.get("status", -1)) != 0]
-                if pedidos_pendentes:
-                    snack_error("Há pedidos dessa mesa ainda não enviados para a cozinha!")
-                    page.update()
-                    return
-
-                # --- Verificação final ---
-                if not carrinho_da_mesa:
-                    snack_error(f"A mesa {mesa} não possui itens no carrinho local.")
-                    page.update()
-                    return
-
-                # Tudo certo → vai para fechamento
-                snack_sucesso(f"Mesa {mesa} pronta para fechamento!")
-                page.go(f"/vendas_garcom?mesa={mesa}")
-                page.update()
-
-            btn_fechar_mesa = ft.ElevatedButton(
-                "Fechar Mesa",
-                on_click=lambda e, mesa=mesa_num: tentar_fechar_mesa(e, mesa),
-                style=ft.ButtonStyle(bgcolor=Colors.ORANGE_700, color=Colors.BLACK, padding=15)
-            )
-
-            page.views.append(
-                ft.View(
-                    "/carrinho_garcom",
-                    [
-                        ft.AppBar(
-                            title=ft.Text(f"Carrinho da Mesa {mesa_num}", color=Colors.ORANGE_700),
-                            center_title=True,
-                            bgcolor=Colors.BLACK,
-                        ),
-                        lv_carrinho_garcom,
-
-                        btn_voltar,
-                        btn_fechar_mesa,
-
+                                    ft.Divider(height=20, color=Colors.PURPLE),
+                                    ft.Text("Mesas Abertas", color=Colors.ORANGE_800, size=20),
+                                    ft.Row([mesa_dropdown_aberta], alignment=ft.MainAxisAlignment.CENTER, spacing=10),
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=15,
+                            ),
+                            padding=20,
+                        )
                     ],
                     bgcolor=Colors.BLACK
                 )
@@ -1438,6 +1378,67 @@ def main(page: ft.Page):
             )
             page.update()
 
+        # Carrinho Garçom
+        if page.route.startswith("/carrinho_garcom"):
+
+            # --- Pega o número da mesa dos parâmetros da rota ---
+            # Exemplo de rota: /carrinho_garcom?mesa=5
+
+            query = page.route.split("?")[-1] if "?" in page.route else ""
+            params = urllib.parse.parse_qs(query)
+            mesa_num = params.get("mesa", [""])[0]  # pega o valor da mesa ou string vazia
+
+            lv_carrinho_garcom = ft.ListView(expand=True, spacing=10, padding=10)
+
+            # Chama a função para exibir os itens da mesa ---
+            if mesa_num:
+                carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num)
+
+            btn_voltar = ft.ElevatedButton(
+                "Voltar para Mesas",
+                on_click=lambda e: page.go("/mesa"),
+                style=ft.ButtonStyle(
+                    bgcolor=Colors.ORANGE_700,
+                    color=Colors.BLACK,
+                    padding=15,
+                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                )
+            )
+
+            btn_fechar_mesa = ft.ElevatedButton(
+                "Fechar Mesa",
+                on_click=lambda e: page.go(f"/vendas_garcom?mesa={mesa_num}"),
+                style=ft.ButtonStyle(
+                    bgcolor=Colors.ORANGE_700,
+                    color=Colors.BLACK,
+                    padding=15,
+                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                )
+            )
+
+            # --- Monta a view do carrinho do garçom ---
+            page.views.append(
+                ft.View(
+                    "/carrinho_garcom",
+                    [
+                        ft.AppBar(
+                            title=ft.Text(f"Carrinho da Mesa {mesa_num}", size=20),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            color=Colors.ORANGE_700,
+                            leading=logo,
+                            actions=[btn_logout_carrinho_garcom]
+                        ),
+                        lv_carrinho_garcom,
+                        ft.Container(content=btn_voltar, padding=20),
+                        ft.Container(content=btn_fechar_mesa, padding=20)
+                    ],
+                    bgcolor=Colors.ORANGE_100
+                )
+            )
+
+            page.update()
+
         if page.route.startswith("/vendas_garcom"):
             query = urlparse(page.route).query
             params = parse_qs(query)
@@ -1553,8 +1554,11 @@ def main(page: ft.Page):
 
                         ft.Column(
                             [
+                                ft.Text(f"Resumo do Pedido da Mesa {mesa_num}", size=22, color=Colors.BLACK,
+                                        font_family="Arial"),
                                 ft.ListView(controls=lista_itens, expand=True),
                                 total_label,
+                                input_endereco,
                                 input_forma_pagamento,
                                 ft.Row(
                                     [btn_fechar_venda, btn_voltar],
