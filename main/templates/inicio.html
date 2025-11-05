@@ -47,13 +47,14 @@
         <div>
             <a class="titulo" href="{{url_for('login')}}"><h1>ROYAL BURGER</h1></a>
         </div>
-        <a href="{{url_for('logout')}}">○</a>
+        <!-- <a href="#{{url_for('logout')}}">○</a> -->
         <div id="img-user"></div>
 
 
     </header>
     {% block content %}
         <main>
+            <a href="{{url_for('pessoas')}}">PESSOAS</a>
             <a href="{{url_for('pessoas')}}">PESSOAS</a>
 
         </main>
