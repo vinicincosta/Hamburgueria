@@ -143,7 +143,15 @@ def insumos(id_insumo=None):
     try:
         if 'papel' not in session:
             flash('Você deve entrar com uma conta para visualizar esta página', 'error')
-            return redirect(url_for('login'))
+            return redirect(url_for(session['funcao_rota_anterior']))
+
+        if session['papel'] == "cliente" or session['papel'] == "garcom":
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+            return redirect(url_for(session['funcao_rota_anterior']))
+
+        if session['papel'] == "cliente" or session['papel'] == "garcom":
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+            return redirect(url_for(session['funcao_rota_anterior']))
 
         if id_insumo is None:
             get_insumos = routes.get_insumos(session['token'])
@@ -166,8 +174,10 @@ def insumos(id_insumo=None):
 def categorias():
     if 'papel' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
-        return redirect(url_for('login'))
-
+        return redirect(url_for(session['funcao_rota_anterior']))
+    if session['papel'] == "cliente" or session['papel'] == "garcom":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
     get_categorias = routes.get_categorias(session['token'])
 
     if 'categorias' not in get_categorias:
@@ -177,7 +187,12 @@ def categorias():
     session['funcao_rota_anterior'] = 'categorias'
     return render_template('categorias.html', lanches=get_categorias['categorias'])
 
-
+@app.route('/pedidos', methods=['GET'])
+def pedidos():
+    if not session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
 
 # @app.route('/pedidos', methods=['GET'])
 # def pedidos():
