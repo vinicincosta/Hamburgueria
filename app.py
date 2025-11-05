@@ -686,6 +686,8 @@ def main(page: ft.Page):
 
         if not numero_mesa or not lanche_id :
             snack_error("Preencha todos os campos antes de salvar.")
+            page.update()
+
             return
 
         carrinho = page.client_storage.get("carrinho_garcom") or []

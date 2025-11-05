@@ -1,4 +1,5 @@
 import requests
+from flask_jwt_extended import get_jwt
 
 
 # url = "http://10.135.233.139:5002"
@@ -45,7 +46,7 @@ def get_lanche_insumos(token_):
         print(response.json())
         return {'erro':response.status_code}
 
-def get_categorias(token_): # Feito
+def get_categorias(token_):
     base_url = f"{url}/categorias"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -214,14 +215,9 @@ def post_login(email, password):
         print(response)
         return {'erro':response.status_code}
 
-def get_pedidos(token_):
-    response = requests.get(f"{url}/pedidos", headers={'Authorization':f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
+    response = requests.post(f"{url}/pedidos", json={})
+
 # print(get_insumos(post_login('vini@', '123')))
 
 def get_id_pessoa_by_token(token_):
