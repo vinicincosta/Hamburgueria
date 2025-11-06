@@ -625,7 +625,7 @@ def main(page: ft.Page):
                             content=ft.Container(
                                 content=ft.Row(
                                     [
-                                        ft.Image(src="istockphoto-460246147-612x612.jpg", height=80),
+                                        ft.Image(src="istockphoto-459361585-170667a.jpg", height=80),
                                         ft.Column(
                                             [
                                                 ft.Text(item.get("nome_bebida", "Bebida"), color=Colors.ORANGE_900),
@@ -971,7 +971,7 @@ def main(page: ft.Page):
                         content=ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Image(src="istockphoto-460246147-612x612.jpg", height=80),
+                                    ft.Image(src="istockphoto-459361585-170667a.jpg", height=80),
                                     ft.Column(
                                         [
                                             ft.Text(item["nome_bebida"], color=Colors.ORANGE_900, size=16),
@@ -1123,41 +1123,62 @@ def main(page: ft.Page):
         lanche_id = lanche_dropdown.value
         bebida_id = bebidas_dropdow.value
 
-        if not mesa_valor or not lanche_id:
-            snack_error("Preencha todos os campos antes de salvar.")
+        # A mesa é obrigatória, mas lanche e bebida não
+        if not mesa_valor:
+            snack_error("Informe o número da mesa antes de salvar.")
             return
 
-        print(bebida_id)
-        print(listar_bebidas(token))
+        # Se nenhum lanche nem bebida for selecionado, não deixa salvar
+        if not lanche_id and not bebida_id:
+            snack_error("Selecione pelo menos um lanche ou uma bebida.")
+            return
+
         carrinho = page.client_storage.get("carrinho_garcom") or []
-        lanche = next((l for l in lanches_disponiveis if l["id_lanche"] == int(lanche_id)), None)
-        bebida = next((b for b in bebidas_disponiveis if b["id_bebida"] == int(bebida_id)), None)
 
-        if not lanche:
-            snack_error("Lanche não encontrado.")
-            return
+        # Busca o lanche selecionado (se houver)
+        lanche = None
+        if lanche_id:
+            lanche = next((l for l in lanches_disponiveis if l["id_lanche"] == int(lanche_id)), None)
+            if not lanche:
+                snack_error("Lanche selecionado não foi encontrado.")
+                return
 
-        if not bebida:
-            snack_error("Bebida não encontrada")
+        # Busca a bebida selecionada (se houver)
+        bebida = None
+        if bebida_id:
+            bebida = next((b for b in bebidas_disponiveis if b["id_bebida"] == int(bebida_id)), None)
+            if not bebida:
+                snack_error("Bebida selecionada não foi encontrada.")
+                return
 
-        item_carrinho = {
-            "id_lanche": lanche["id_lanche"],
-            "nome_lanche": lanche["nome_lanche"],
-            "valor_lanche": lanche["valor_lanche"],
+        # Cria um ou dois itens no carrinho, conforme a seleção
+        if lanche:
+            item_lanche = {
+                "id_lanche": lanche["id_lanche"],
+                "nome_lanche": lanche["nome_lanche"],
+                "valor_lanche": lanche["valor_lanche"],
+                "mesa": mesa_valor,
+            }
+            carrinho.append(item_lanche)
 
-            "id_bebida": bebida["id_bebida"],
-            "nome_bebida": bebida["nome_bebida"],
-            "valor": bebida["valor"],
+        if bebida:
+            item_bebida = {
+                "id_bebida": bebida["id_bebida"],
+                "nome_bebida": bebida["nome_bebida"],
+                "valor": bebida["valor"],
+                "mesa": mesa_valor,
+            }
+            carrinho.append(item_bebida)
 
-            "mesa": mesa_valor,
-        }
-
-        carrinho.append(item_carrinho)
+        # Atualiza o carrinho salvo
         page.client_storage.set("carrinho_garcom", carrinho)
 
         snack_sucesso(f"Pedido da Mesa {mesa_valor} adicionado com sucesso!")
+
+        # Limpa campos
         numero_mesa.value = ""
         lanche_dropdown.value = ""
+        bebidas_dropdow.value = ""
 
         # Atualiza dropdown de mesas abertas
         mesa_dropdown_aberta.options = [
@@ -1208,7 +1229,7 @@ def main(page: ft.Page):
         for item in carrinho:
             mesas.add(str(item["mesa"]))
         return sorted(list(mesas))
-7
+
 
 
     # 🔔 Modal de Confirmação (Pedido Presencial)
@@ -2181,7 +2202,9 @@ def main(page: ft.Page):
 
             lista_itens = []
             total = 0.0
+            # lanches = [i for i in carrinho if []]
             lanches = [i for i in carrinho if "valor_lanche" in i]
+
 
             for item in lanches:
                 total += item.get("valor_lanche", 0)
@@ -2307,6 +2330,7 @@ def main(page: ft.Page):
                                                 color=Colors.BLACK,
                                                 on_click=confirmar_venda(e),
                                             ),
+                                            print("asdfghjkj"),
                                             ft.OutlinedButton(
                                                 "Voltar",
                                                 on_click=lambda e: page.go("/carrinho"),
