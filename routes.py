@@ -3,9 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.235.10:5002"
-
-
+base_url = "http://10.135.232.13:5002"
 
 
 # LOGIN
@@ -15,7 +13,6 @@ def post_login(email, senha):
         # Verifica se os campos estão preenchidos
         if not email or not senha:
             return None, None, None, "Email e senha são obrigatórios"
-
 
         response = requests.post(
             url,
@@ -48,6 +45,7 @@ def post_login(email, senha):
         return None, None, None, f"Erro de conexão: {str(e)}"
     except Exception as e:
         return None, None, None, f"Erro inesperado: {str(e)}"
+
 
 def post_pessoas(nome_pessoa, cpf, papel, senha, salario, email, status_pessoa):
     url = f"{base_url}/cadastro_pessoas_login"
@@ -99,7 +97,33 @@ def listar_lanche(token):
         print(f'Erro: {response.status_code}')
         return response.json()
 
+
 # listar_lanche()
+
+def listar_pedidos(token):
+    url = f'{base_url}/pedidos'
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+
+    if response.status_code == 200:
+        dados_get_pedidos_ = response.json()
+        print(dados_get_pedidos_)
+        return dados_get_pedidos_
+    else:
+        print(f'Erro: {response.status_code}')
+        return response.json()
+
+
+def listar_bebidas(token):
+    url = f'{base_url}/bebidas'
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+
+    if response.status_code == 200:
+        dados_get_bebidas = response.json()
+        print(dados_get_bebidas)
+        return dados_get_bebidas['bebidas']
+    else:
+        print(f'Erro: {response.status_code}')
+        return response.json()
 
 
 def listar_pessoas():
@@ -113,6 +137,7 @@ def listar_pessoas():
     else:
         print(f'Erro: {response.status_code}')
         return response.json()
+
 
 def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
     url = f"{base_url}/pedidos"
@@ -139,23 +164,21 @@ def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_
         return {"error": str(e)}
 
 
-
-
-
-
-def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None, valor_venda=0.0):
+def cadastrar_venda_app(lanche_id, pessoa_id, bebida_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None,
+                        valor_venda=0.0):
     url = f"{base_url}/vendas"  # rota da API
 
     payload = {
         "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "lanche_id": lanche_id,
         "pessoa_id": pessoa_id,
+        "bebida_id": bebida_id,
         "qtd_lanche": qtd_lanche,
-        "detalhamento": detalhamento,   # obs_input cai aqui
+        "detalhamento": detalhamento,  # obs_input cai aqui
         "endereco": endereco,
         "forma_pagamento": forma_pagamento,
         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
-        "valor_venda": valor_venda      # agora sempre mandamos o valor final calculado
+        "valor_venda": valor_venda  # agora sempre mandamos o valor final calculado
     }
 
     try:
@@ -167,6 +190,7 @@ def cadastrar_venda_app(lanche_id, pessoa_id, qtd_lanche, forma_pagamento, ender
     except Exception as e:
         print("ERRO cadastrar_venda_app:", str(e))
         return {"error": str(e)}
+
 
 def get_insumo(id_insumo):
     url = f"{base_url}/get_insumo_id/{id_insumo}"
@@ -180,6 +204,7 @@ def get_insumo(id_insumo):
         print(f'Erro: {response.status_code}')
         return response.json()
 
+
 def update_insumo(id_insumo):
     url = f"{base_url}/update_insumo/{id_insumo}"
     response = requests.put(url)
@@ -189,6 +214,7 @@ def update_insumo(id_insumo):
     else:
         print(f'Erro: {response.status_code}')
         return response.json()
+
 
 def listar_insumos(token):
     try:
@@ -204,6 +230,8 @@ def listar_insumos(token):
         print("Erro de conexão:", e)
         return []
 
+
+# Função global
 # Função global
 def carregar_receita_base(lanche_id):
     try:
@@ -217,6 +245,7 @@ def carregar_receita_base(lanche_id):
     except Exception as e:
         print("Erro ao buscar receita:", e)
         return {}
+
 
 
 def listar_receita_lanche(lanche_id):
@@ -243,7 +272,7 @@ def listar_receita_lanche(lanche_id):
 
 
 def listar_vendas_mesa(token, numero_mesa):
-    url = f"{base_url}/vendas_id/{numero_mesa}"
+    url = f"{base_url}/vendas_garcom/{numero_mesa}"
     response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
     if response.status_code == 200:
         return response.json().get("vendas", [])
