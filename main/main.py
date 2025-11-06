@@ -10,8 +10,10 @@ app.config['SECRET_KEY'] = 'secret'
     #     flash('Você deve estar logado para visualizar esta página', 'error')
     #     return redirect(url_for('login'))
 
+
 @app.route('/')
 def index():
+    session['funcao_rota_anterior'] = 'index'
     return render_template('inicio.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -21,9 +23,10 @@ def login():
         password = request.form.get('senha')
         print(email, password, 'EMAILSENHA')
         user = routes.post_login(email, password)
-        print(user)
+        print(routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa'])
         if 'access_token' in user:
-            session['id'] = routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa']
+            print()
+            # session['id'] = routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa']
             session['token'] = user['access_token']
             session['username'] = user['nome']
             session['papel'] = user['papel']
@@ -68,13 +71,15 @@ def logout():
 @app.route('/pessoas', methods=['GET'])
 @app.route('/pessoas/<valor_>', methods=['GET'])
 def pessoas(valor_=None):
+    if 'papel' not in session:
 
-    if not session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
-        return redirect(url_for(session['funcao_rota_anterior']))
+        return redirect(url_for('login'))
+    
     if session['papel'] != 'admin':
         flash('Parece que você não tem acesso a essa página, entre com uma conta que possua acesso', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
+        
 
     get_pessoas = routes.get_pessoas(session['token'])
 
@@ -98,12 +103,13 @@ def pessoas(valor_=None):
 @app.route('/entradas', methods=['GET'])
 def entradas():
     # noinspection PyInconsistentReturns
-    if not session:
+    if 'papel' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
-        return redirect(url_for(session['funcao_rota_anterior']))
+        return redirect(url_for('login'))
     if session['papel'] != 'admin':
         flash('Você deve ser um admin para visualizar esta página', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
+        
 
     get_entradas = routes.get_entradas(session['token'])
 
@@ -116,15 +122,17 @@ def entradas():
 
 @app.route('/lanches', methods=['GET'])
 def lanches():
-    if not session:
+    if 'papel' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
-        return redirect(url_for(session['funcao_rota_anterior']))
+        return redirect(url_for('login'))
 
     get_lanches = routes.get_lanches(session['token'])
 
     if 'lanches' not in get_lanches:
         flash('Parece que algo ocorreu errado :/', 'error')
+
         return redirect(url_for(session['funcao_rota_anterior']))
+
 
     session['funcao_rota_anterior'] = 'lanches'
     return render_template('lanches.html', lanches=get_lanches['lanches'])
@@ -133,8 +141,12 @@ def lanches():
 @app.route('/insumos/<id_insumo>', methods=['GET'])
 def insumos(id_insumo=None):
     try:
-        if not session:
+        if 'papel' not in session:
             flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+            return redirect(url_for(session['funcao_rota_anterior']))
+
+        if session['papel'] == "cliente" or session['papel'] == "garcom":
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
 
         if session['papel'] == "cliente" or session['papel'] == "garcom":
@@ -160,7 +172,7 @@ def insumos(id_insumo=None):
 
 @app.route('/categorias', methods=['GET'])
 def categorias():
-    if not session:
+    if 'papel' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
     if session['papel'] == "cliente" or session['papel'] == "garcom":
@@ -180,7 +192,7 @@ def pedidos():
     if not session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
-    if session['papel'] == "cliente" or session['papel'] == "garcom"]:
+    # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
 
 # @app.route('/pedidos', methods=['GET'])
 # def pedidos():

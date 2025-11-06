@@ -1125,6 +1125,8 @@ def main(page: ft.Page):
 
         if not mesa_valor or not lanche_id:
             snack_error("Preencha todos os campos antes de salvar.")
+            page.update()
+
             return
 
         print(bebida_id)

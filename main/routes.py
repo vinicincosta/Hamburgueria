@@ -3,7 +3,8 @@ from flask_jwt_extended import get_jwt
 
 
 # url = "http://10.135.233.139:5002"
-url = "http://10.135.233.150:5002"
+#url = "http://10.135.233.150:5002"
+url ="http://192.168.15.9:5002"
 
 def get_lanches(token_): # Feito
     base_url = f"{url}/lanches"
@@ -110,16 +111,15 @@ def get_insumo_by_id_insumo(id_insumo, token_):
 
 # POST
 
-def post_cadastro_pessoas(token_, nome, cpf, email, telefone, senha, salario, papel):
+def post_cadastro_pessoas(nome, cpf, email, senha, salario, papel):
     response = requests.post(f"{url}/cadastro_pessoas_login", json={
         "email":email,
-        "telefone":telefone,
         "senha":senha,
         "nome_pessoa":nome,
         "cpf":cpf,
         "salario":salario,
-        "papel":papel
-    }, headers={'Authorization': f'Bearer {token_}'})
+        "papel":papel})
+    # }, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 201:
         return response.json()
     else:
@@ -226,8 +226,11 @@ def get_id_pessoa_by_token(token_):
         return response.json()
     else:
         print(response.status_code)
+        # print({'erro':response.json()})
         return {'erro':response.status_code}
 
+# pessoa = post_cadastro_pessoas("vini", "47811718900", "v@", "123", 20.0, "admin")
+# print(pessoa)
 # token = post_login('vini@', '123')
 # print(token)
 # print(get_jwt())
