@@ -119,16 +119,16 @@ def entradas(valor_=None):
 
     session['funcao_rota_anterior'] = 'entradas'
 
-    return jsonify({"entradas": var_entradas['entradas']})
-    #if valor_ is None:
-     #   return render_template('entradas.html', valor_=False, pessoas=var_entradas['pessoas'])
-    #else:
-     #   if valor_ in ['true', 'True', True, 1, '1']:
-      #      booleano = True
-     #   else:
-       #     booleano = False
+    # return jsonify({"entradas": var_entradas['entradas']})
+    if valor_ is None:
+       return render_template('entradas.html', valor_=False, entradas=var_entradas['entradas'])
+    else:
+       if valor_ in ['true', 'True', True, 1, '1']:
+           booleano = True
+       else:
+           booleano = False
 
-    #return render_template('entradas', entradas=var_entradas['entradas'], valor_=not booleano)
+    return render_template('entradas.html', entradas=var_entradas['entradas'], valor_=not booleano)
 
 @app.route('/lanches', methods=['GET'])
 def lanches():

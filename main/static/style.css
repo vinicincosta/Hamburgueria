@@ -207,9 +207,7 @@ main {
 .tabela thead{
     background-color: #2b3a48;
 }
-.tabela tr{
-    border: 2px solid white;
-}
+
 .tabela tbody tr:hover{
     background-color: #318dde;
 }
