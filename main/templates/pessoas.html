@@ -43,15 +43,13 @@
                 </thead>
                 <tbody>
                     {% for p in pessoas %}
-                        {% if p['nome_pessoa'] != session['username'] %}
-                            <tr>
-                                <th>#{{p['id_pessoa']}}</th>
-                                <th>{{p['nome_pessoa']}}</th>
-                                <th>{{p['papel']}}</th>
-                                <th>{{p['email']}}</th>
-                                <th>{{p['salario']}} R$</th>
-                            </tr>
-                        {% endif %}
+                        <tr>
+                            <th>#{{p['id_pessoa']}}</th>
+                            <th>{{p['nome_pessoa']}}</th>
+                            <th>{{p['papel']}}</th>
+                            <th>{{p['email']}}</th>
+                            <th>{{p['salario']}} R$</th>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
