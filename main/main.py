@@ -25,7 +25,7 @@ def login():
         user = routes.post_login(email, password)
         print(routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa'])
         if 'access_token' in user:
-            print()
+            # print()
             # session['id'] = routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa']
             session['token'] = user['access_token']
             session['username'] = user['nome']
@@ -71,7 +71,7 @@ def logout():
 @app.route('/pessoas', methods=['GET'])
 @app.route('/pessoas/<valor_>', methods=['GET'])
 def pessoas(valor_=None):
-    if 'papel' not in session:
+    if 'papel ' not in session:
 
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
@@ -189,9 +189,18 @@ def categorias():
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
-    if not session:
+    if 'papel' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] == "cliente":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    get_pedidos = routes.get_pedidos(session['token'])
+    if 'pedidos' in get_pedidos:
+        return render_template('pedidos', pedidos=get_pedidos['pedidos'])
+
     # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
 
 # @app.route('/pedidos', methods=['GET'])
