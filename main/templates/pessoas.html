@@ -14,19 +14,24 @@
                 {% if p['nome_pessoa'] != session['username'] %}
                     <card class="card">
                         <h1>#{{p['id_pessoa']}}</h1>
+                {% else %}
+                    <card class="card-user">
+                        <h1>#{{p['id_pessoa']}}</h1>
+                        <p>(VOCÊ)</p>
+                {% endif %}
+
                         <h2>{{p['nome_pessoa']}}</h2>
                         <p>{{p['papel']}}</p>
                         <p>{{p['email']}}</p>
                         <p>{{p['salario']}} R$</p>
                     </card>
-                {% endif %}
             {% endfor %}
         {% else %}
             <form method="get" action="{{url_for('pessoas', valor_=valor_)}}">
                 <label for="tabela">Tabela</label>
                 <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
             </form>
-            <table>
+            <table class="tabela">
                 <thead>
                     <tr>
                         <th>ID</th>
