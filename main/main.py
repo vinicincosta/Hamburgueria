@@ -142,10 +142,27 @@ def lanches():
         flash('Parece que algo ocorreu errado :/', 'error')
 
         return redirect(url_for(session['funcao_rota_anterior']))
-
-
+    # return jsonify({'lanches': var_lanches['lanches']})
+    form_id = request.args.get('form_id', None)
+    print('form_id', form_id)
+    valor_ = request.args.get('valor_', False)
+    print('valor_', valor_)
+    exibir = request.args.get('exibir', False)
+    print('exibir', exibir)
     session['funcao_rota_anterior'] = 'lanches'
-    return render_template('lanches.html', lanches=var_lanches['lanches'])
+    if form_id is not None:
+        if form_id == 'exibir':
+            if not exibir or exibir ['False', 'false']:
+                exibir = True
+            else:
+                exibir = False
+        elif form_id == 'valor':
+            if not valor_ or valor_ in ['false', 'False']:
+                valor_ = False
+            else:
+                valor_ = True
+
+    return render_template('lanches.html', lanches=var_lanches['lanches'], valor_=valor_, exibir=exibir)
 
 @app.route('/insumos', methods=['GET'])
 @app.route('/insumos/<id_insumo>', methods=['GET'])
