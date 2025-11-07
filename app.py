@@ -1921,7 +1921,6 @@ def main(page: ft.Page):
             for lanche in lanches:
                 if lanche_id == lanche["id_lanche"]:
                     valor_base_original = lanche["valor_lanche"]
-                    print(valor_base_original)
 
             # Mantém alterações salvas ou receita original
             ingredientes_salvos_raw = item.get("ingredientes") or {}
@@ -1938,7 +1937,6 @@ def main(page: ft.Page):
 
             def atualizar_preco():
                 total = valor_base_original
-                print("valor_original: ", valor_base_original)
                 detalhes = []
                 for ing_id, txt in ingrediente_controls.items():
                     qtd_atual = int(txt.value)
