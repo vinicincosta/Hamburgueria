@@ -1,0 +1,53 @@
+{% extends 'inicio.html' %}
+{% block content %}
+    <main>
+        {% if not valor_ or valor_ == 'False' %}
+            <span style="display: block">
+                <form method="get" action="{{url_for('entradas', valor_=valor_)}}">
+                    <label for="tabela2">Tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
+                </form>
+            </span>
+            {% for e in entradas %}
+                {% if e['nome_pessoa'] != session['username'] %}
+                    <card class="card">
+                        <h1>#{{p['id_pessoa']}}</h1>
+                        <h2>{{p['nome_pessoa']}}</h2>
+                        <p>{{p['papel']}}</p>
+                        <p>{{p['email']}}</p>
+                        <p>{{p['salario']}} R$</p>
+                    </card>
+                {% endif %}
+            {% endfor %}
+        {% else %}
+            <form method="get" action="{{url_for('pessoas', valor_=valor_)}}">
+                <label for="tabela">Tabela</label>
+                <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
+            </form>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>PAPEL</th>
+                        <th>EMAIL</th>
+                        <th>SALÁRIO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pessoas %}
+                        {% if p['nome_pessoa'] != session['username'] %}
+                            <tr>
+                                <th>#{{p['id_pessoa']}}</th>
+                                <th>{{p['nome_pessoa']}}</th>
+                                <th>{{p['papel']}}</th>
+                                <th>{{p['email']}}</th>
+                                <th>{{p['salario']}} R$</th>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}

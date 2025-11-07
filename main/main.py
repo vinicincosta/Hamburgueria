@@ -101,7 +101,8 @@ def pessoas(valor_=None):
     return render_template('pessoas.html', valor_=not booleano, pessoas=var_pessoas['pessoas'])
 
 @app.route('/entradas', methods=['GET'])
-def entradas():
+@app.route('/entradas<valor_>', methods=['GET'])
+def entradas(valor_=None):
     # noinspection PyInconsistentReturns
     if 'papel' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
@@ -118,7 +119,16 @@ def entradas():
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'entradas'
-    return render_template('entradas', entradas=var_entradas['entradas'])
+
+    if valor_ is None:
+        return render_template('entradas.html', valor_=False, pessoas=var_entradas['pessoas'])
+    else:
+        if valor_ in ['true', 'True', True, 1, '1']:
+            booleano = True
+        else:
+            booleano = False
+
+    return render_template('entradas', entradas=var_entradas['entradas'], valor_=not booleano)
 
 @app.route('/lanches', methods=['GET'])
 def lanches():
