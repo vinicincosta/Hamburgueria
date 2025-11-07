@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import routes
+from main.routes import get_vendas
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -81,16 +82,16 @@ def pessoas(valor_=None):
         return redirect(url_for(session['funcao_rota_anterior']))
         
 
-    get_pessoas = routes.get_pessoas(session['token'])
+    var_pessoas = routes.get_pessoas(session['token'])
 
-    if 'pessoas' not in get_pessoas:
+    if 'pessoas' not in var_pessoas:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'pessoas'
 
     if valor_ is None:
-        return render_template('pessoas.html', valor_=False, pessoas=get_pessoas['pessoas'])
+        return render_template('pessoas.html', valor_=False, pessoas=var_pessoas['pessoas'])
     else:
         if valor_ in ['true', 'True', True, 1, '1']:
             booleano = True
@@ -98,7 +99,7 @@ def pessoas(valor_=None):
             booleano = False
     # page = request.args.get("page", 1, type=int)
     # per_page = request.args.get("per_page", 10, type=int)
-    return render_template('pessoas.html', valor_=not booleano, pessoas=get_pessoas['pessoas'])
+    return render_template('pessoas.html', valor_=not booleano, pessoas=var_pessoas['pessoas'])
 
 @app.route('/entradas', methods=['GET'])
 def entradas():
@@ -111,14 +112,14 @@ def entradas():
         return redirect(url_for(session['funcao_rota_anterior']))
         
 
-    get_entradas = routes.get_entradas(session['token'])
+    var_entradas = routes.get_entradas(session['token'])
 
-    if 'entradas' not in get_entradas:
+    if 'entradas' not in var_entradas:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'entradas'
-    return render_template('entradas', entradas=get_entradas['entradas'])
+    return render_template('entradas', entradas=var_entradas['entradas'])
 
 @app.route('/lanches', methods=['GET'])
 def lanches():
@@ -126,16 +127,16 @@ def lanches():
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
 
-    get_lanches = routes.get_lanches(session['token'])
+    var_lanches = routes.get_lanches(session['token'])
 
-    if 'lanches' not in get_lanches:
+    if 'lanches' not in var_lanches:
         flash('Parece que algo ocorreu errado :/', 'error')
 
         return redirect(url_for(session['funcao_rota_anterior']))
 
 
     session['funcao_rota_anterior'] = 'lanches'
-    return render_template('lanches.html', lanches=get_lanches['lanches'])
+    return render_template('lanches.html', lanches=var_lanches['lanches'])
 
 @app.route('/insumos', methods=['GET'])
 @app.route('/insumos/<id_insumo>', methods=['GET'])
@@ -154,18 +155,18 @@ def insumos(id_insumo=None):
             return redirect(url_for(session['funcao_rota_anterior']))
 
         if id_insumo is None:
-            get_insumos = routes.get_insumos(session['token'])
+            var_insumos = routes.get_insumos(session['token'])
 
         else:
             id_insumo = int(id_insumo)
-            get_insumos = routes.get_insumo_by_id_insumo(id_insumo, session['token'])
+            var_insumos = routes.get_insumo_by_id_insumo(id_insumo, session['token'])
 
-        if 'insumos' not in get_insumos:
+        if 'insumos' not in var_insumos:
             flash('Parece que algo ocorreu errado :/', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
 
         session['funcao_rota_anterior'] = 'insumos'
-        return render_template('insumos.html', lanches=get_insumos['insumos'])
+        return render_template('insumos.html', lanches=var_insumos['insumos'])
     except ValueError:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
@@ -178,14 +179,14 @@ def categorias():
     if session['papel'] == "cliente" or session['papel'] == "garcom":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-    get_categorias = routes.get_categorias(session['token'])
+    var_categorias = routes.get_categorias(session['token'])
 
-    if 'categorias' not in get_categorias:
+    if 'categorias' not in var_categorias:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'categorias'
-    return render_template('categorias.html', lanches=get_categorias['categorias'])
+    return render_template('categorias.html', lanches=var_categorias['categorias'])
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
@@ -197,13 +198,31 @@ def pedidos():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
-    get_pedidos = routes.get_pedidos(session['token'])
-    if 'pedidos' not in get_pedidos:
+    var_pedidos = routes.get_pedidos(session['token'])
+    if 'pedidos' not in var_pedidos:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
     session['funcao_rota_anterior'] = 'pedidos'
-    return render_template('pedidos.html', pedidos=get_pedidos['pedidos'])
+    return render_template('pedidos.html', pedidos=var_pedidos['pedidos'])
 
+@app.route('/vendas', methods=['GET'])
+def vendas():
+    if 'papel' not in session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] == "cliente":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    var_vendas = routes.get_vendas(session['token'])
+
+    if 'vendas' not in var_vendas:
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    session['funcao_rota_anterior'] = 'vendas'
+    return render_template('vendas.html', pedidos=var_vendas['pedidos'])
     # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
 
 # @app.route('/pedidos', methods=['GET'])
