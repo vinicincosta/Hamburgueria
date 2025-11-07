@@ -14,13 +14,20 @@
                     </form>
                 </span>
                 <span style="display: block">
-                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='False')}}">
+                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='True')}}">
                         <input type="hidden" name="form_id" value="exibir">
                         <label for="oculto" style="color: white">Exibir ocultos</label>
                         <input type="checkbox" name="tabela" onchange="this.form.submit()" id="oculto">
                     </form>
                 </span>
             {% else %}
+                <span style="display: block">
+                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='False')}}">
+                        <input type="hidden" name="form_id" value="valor">
+                        <label for="tabela2" style="color: white">Tabela</label>
+                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
+                    </form>
+                </span>
                 <span style="display: block">
                     <form method="get" action="{{url_for('lanches', valor_='False', exibir='False')}}">
                         <input type="hidden" name="form_id" value="exibir">
