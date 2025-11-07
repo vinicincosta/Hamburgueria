@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.232.13:5002"
+base_url = "http://10.135.235.26:5002"
 
 
 # LOGIN
@@ -82,7 +82,7 @@ def cadastrar_lanche_post(novo_lanche):
               f'Valor: {dados_post_lanche["valor"]}\n'
               f'Descrição: {dados_post_lanche["descricao"]}\n')
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro3: {response.status_code}')
 
 
 def listar_lanche(token):
@@ -94,7 +94,7 @@ def listar_lanche(token):
         print(dados_get_lanche)
         return dados_get_lanche['lanches']
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro1: {response.status_code}')
         return response.json()
 
 
@@ -109,7 +109,7 @@ def listar_pedidos(token):
         print(dados_get_pedidos_)
         return dados_get_pedidos_
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro4: {response.status_code}')
         return response.json()
 
 
@@ -122,7 +122,7 @@ def listar_bebidas(token):
         print(dados_get_bebidas)
         return dados_get_bebidas['bebidas']
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro2: {response.status_code}')
         return response.json()
 
 
@@ -135,7 +135,7 @@ def listar_pessoas():
         print(dados_get_pessoa)
         return dados_get_pessoa['pessoas']
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro5: {response.status_code}')
         return response.json()
 
 
@@ -201,7 +201,7 @@ def get_insumo(id_insumo):
         print(dados_get_postagem)
         return dados_get_postagem
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro6: {response.status_code}')
         return response.json()
 
 
@@ -212,7 +212,7 @@ def update_insumo(id_insumo):
     if response.status_code == 200:
         return response.json()
     else:
-        print(f'Erro: {response.status_code}')
+        print(f'Erro7: {response.status_code}')
         return response.json()
 
 
@@ -233,21 +233,6 @@ def listar_insumos(token):
 
 # Função global
 # Função global
-def carregar_receita_base(lanche_id):
-    try:
-        dados_receita = listar_receita_lanche(lanche_id) or {}
-        receita = {}
-        for ing_id, qtd in dados_receita.items():
-            ing_id, qtd = int(ing_id), int(qtd)
-            if ing_id > 0:
-                receita[ing_id] = qtd
-        return receita
-    except Exception as e:
-        print("Erro ao buscar receita:", e)
-        return {}
-
-
-
 def listar_receita_lanche(lanche_id):
     """
     Retorna a receita base de um lanche: {insumo_id: quantidade_base}
@@ -268,6 +253,21 @@ def listar_receita_lanche(lanche_id):
 
     except Exception as e:
         print(f"Erro de conexão ao buscar receita: {e}")
+        return {}
+
+def carregar_receita_base(lanche_id):
+    try:
+        print("lanche_id: ", lanche_id)
+        dados_receita = listar_receita_lanche(lanche_id) or {}
+        print("dados_receita: ", dados_receita)
+        receita = {}
+        for ing_id, qtd in dados_receita.items():
+            ing_id, qtd = int(ing_id), int(qtd)
+            if ing_id > 0:
+                receita[ing_id] = qtd
+        return receita
+    except Exception as e:
+        print("Erro ao buscar receita:", e)
         return {}
 
 
