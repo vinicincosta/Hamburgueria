@@ -4,7 +4,7 @@
         {% if not valor_ or valor_ == 'False' %}
             <span style="display: block">
                 <form method="get" action="{{url_for('entradas', valor_=valor_)}}">
-                    <label for="tabela2">Tabela</label>
+                    <label for="tabela2" style="color: white">Tabela</label>
                     <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
                 </form>
             </span>
@@ -20,7 +20,7 @@
             {% endfor %}
         {% else %}
             <form method="get" action="{{url_for('entradas', valor_=valor_)}}">
-                <label for="tabela">Tabela</label>
+                <label for="tabela" style="color: white">Tabela</label>
                 <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
             </form>
             <table class="tabela">
