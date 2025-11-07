@@ -29,28 +29,25 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Item 1</th>
-                        <th>Item 2</th>
-                        <th>Item 3</th>
-                        <th>Item 4</th>
-                        <th>Item 5</th>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>PAPEL</th>
+                        <th>EMAIL</th>
+                        <th>SALÁRIO</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <th>Item 1</th>
-                        <th>Item 2</th>
-                        <th>Item 3</th>
-                        <th>Item 4</th>
-                        <th>Item 5</th>
-                    </tr>
-                    <tr>
-                        <th>Item 1</th>
-                        <th>Item 2</th>
-                        <th>Item 3</th>
-                        <th>Item 4</th>
-                        <th>Item 5</th>
-                    </tr>
+                    {% for p in pessoas %}
+                        {% if p['nome_pessoa'] != session['username'] %}
+                            <tr>
+                                <th>#{{p['id_pessoa']}}</th>
+                                <th>{{p['nome_pessoa']}}</th>
+                                <th>{{p['papel']}}</th>
+                                <th>{{p['email']}}</th>
+                                <th>{{p['salario']}} R$</th>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
                 </tbody>
             </table>
         {% endif %}
