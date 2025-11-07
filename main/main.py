@@ -198,8 +198,11 @@ def pedidos():
         return redirect(url_for(session['funcao_rota_anterior']))
 
     get_pedidos = routes.get_pedidos(session['token'])
-    if 'pedidos' in get_pedidos:
-        return render_template('pedidos', pedidos=get_pedidos['pedidos'])
+    if 'pedidos' not in get_pedidos:
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    session['funcao_rota_anterior'] = 'pedidos'
+    return render_template('pedidos.html', pedidos=get_pedidos['pedidos'])
 
     # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
 
