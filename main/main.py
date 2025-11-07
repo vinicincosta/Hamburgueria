@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import routes
-from main.routes import get_vendas
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
