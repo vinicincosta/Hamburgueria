@@ -278,14 +278,12 @@ main {
 /**/
 /* From Uiverse.io by gharsh11032000 */
 .animated-button {
-    position: absolute;
-    top: 73vh;
-    left: 47.1vw;
+
     display: inline-block;
     padding: 12px 24px;
     border: none;
     font-size: 16px;
-    background-color: rgba(248, 248, 248, 0.68);
+    background-color: rgba(255, 255, 255, 0.68);
     border-radius: 100px;
     font-weight: 600;
     color: rgba(0, 0, 0, 0.25);
@@ -302,7 +300,7 @@ main {
     transform: translate(-50%, -50%);
     width: 20px;
     height: 20px;
-    background-color: #267c96;
+    background-color:gold;
     border-radius: 50%;
     opacity: 0;
     transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
@@ -314,7 +312,7 @@ main {
 }
 
 .animated-button:hover {
-    box-shadow: 0 0 0 5px #2195f360;
+    box-shadow: 0 0 0 5px gold;
     color: #ffffff;
 }
 
@@ -360,7 +358,7 @@ main {
     display: flex;
     align-items: center;
     padding-left: 30px;
-    color: #00bfff;
+    color:gold;
 }
 
 .title::before {
@@ -382,7 +380,7 @@ main {
     width: 16px;
     border-radius: 50%;
     left: 0px;
-    background-color: #00bfff;
+    background-color:gold;
 }
 
 .message,
@@ -396,11 +394,11 @@ main {
 }
 
 .signin a:hover {
-    text-decoration: underline royalblue;
+    text-decoration: underline gold;
 }
 
 .signin a {
-    color: #00bfff;
+    color: gold;
 }
 
 .flex {
@@ -413,7 +411,7 @@ main {
     position: relative;
 }
 
-.form label .input {
+.form label .inputt {
     background-color: #333;
     color: #fff;
     width: 100%;
@@ -423,7 +421,7 @@ main {
     border-radius: 10px;
 }
 
-.form label .input + span {
+.form label .inputt + span {
     color: rgba(255, 255, 255, 0.5);
     position: absolute;
     left: 10px;
@@ -433,20 +431,20 @@ main {
     transition: 0.3s ease;
 }
 
-.form label .input:placeholder-shown + span {
+.form label .inputt:placeholder-shown + span {
     top: 12.5px;
     font-size: 0.9em;
 }
 
-.form label .input:focus + span,
-.form label .input:valid + span {
-    color: #00bfff;
+.form label .inputt:focus + span,
+.form label .inputt:valid + span {
+    color: gold;
     top: 0px;
     font-size: 0.7em;
     font-weight: 600;
 }
 
-.input {
+.inputt {
     font-size: medium;
 }
 
@@ -458,11 +456,11 @@ main {
     color: #fff;
     font-size: 16px;
     transform: .3s ease;
-    background-color: #00bfff;
+    background-color: gold;
 }
 
 .submit:hover {
-    background-color: #00bfff96;
+    background-color: rgba(255, 215, 0, 0.7);
 }
 
 @keyframes pulse {

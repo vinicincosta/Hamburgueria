@@ -1,38 +1,38 @@
 {% extends 'inicio.html' %}
 {% block content %}
-<div></div>
+<!--<div></div>-->
 <!-- From Uiverse.io by ammarsaa -->
 <div class="div_pai_cadastrar_pessoa">
-<form class="form">
+<form class="form" action="{{ url_for('cadastrar_pessoas') }}" >
     <p class="title">Register </p>
-    <p class="message">Signup now and get full access to our app. </p>
+    <p class="message">Cadastrar Funcionario </p>
         <div class="flex">
         <label>
-            <input class="input" type="text" placeholder="" required="">
-            <span>Firstname</span>
+            <input name="Nome" class="inputt" type="text" placeholder="" required="">
+            <span>Nome</span>
         </label>
 
         <label>
-            <input class="input" type="text" placeholder="" required="">
-            <span>Lastname</span>
+            <input name="CPF" class="inputt" type="text" placeholder="" required="">
+            <span>CPF</span>
         </label>
     </div>
 
     <label>
-        <input class="input" type="email" placeholder="" required="">
+        <input name="Email" class="inputt" type="email" placeholder="" required="">
         <span>Email</span>
     </label>
 
     <label>
-        <input class="input" type="password" placeholder="" required="">
-        <span>Password</span>
+        <input name="Senha" class="inputt" type="password" placeholder="" required="">
+        <span>Senha</span>
     </label>
     <label>
-        <input class="input" type="password" placeholder="" required="">
-        <span>Confirm password</span>
+        <input name="Cargo" class="inputt" type="password" placeholder="" required="">
+        <span>Cargo</span>
     </label>
-    <button class="submit">Submit</button>
-    <p class="signin">Already have an acount ? <a href="#">Signin</a> </p>
+    <button class="submit">Logar</button>
+    <p class="signin">Já tem uma conta <a href="{{url_for('login')}}">Logar</a> </p>
 </form>
 </div>
 {% endblock %}
