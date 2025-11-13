@@ -159,9 +159,20 @@ def main(page: ft.Page):
             # Chama a rota de update para cada insumo
             update_insumo(id_insumo)
 
+    def atualizar_bebidas_estoque():
+        token = page.client_storage.get('token')
+        bebidas = listar_bebidas(token)  # pega todos os insumos
+
+        for bebida in bebidas:
+            id_bebida = bebida["id_bebida"]
+            # Chama a rota de update para cada insumo
+            update_bebida(id_bebida)
+
     def cardapio_bebidas(e):
         lv_bebidas.controls.clear()
 
+        # Primeiro atualiza o estoque de todos as bebidas
+        atualizar_bebidas_estoque()
 
         token = page.client_storage.get('token')
         resultado_bebidas = listar_bebidas(token)
@@ -170,6 +181,7 @@ def main(page: ft.Page):
 
         for bebida in resultado_bebidas:
             # Mostra só os ativos
+            if bebida["status_bebida"] == True:
                 lv_bebidas.controls.append(
                     ft.Card(
                         content=ft.Container(
@@ -367,7 +379,8 @@ def main(page: ft.Page):
     def cardapio_delivery_bebida(e):
         lv_bebidas.controls.clear()  # limpa antes de carregar
 
-        # Primeiro atualiza o estoque de todos os insumos
+        # Primeiro atualiza o estoque de todos as bebidas
+        atualizar_bebidas_estoque()
 
         token = page.client_storage.get('token')
         resultado_bebidas = listar_bebidas(token)
@@ -410,6 +423,7 @@ def main(page: ft.Page):
 
         # renderiza cada lanche
         for bebida in resultado_bebidas:
+            if bebida["status_bebida"] == True:
                 lv_bebidas.controls.append(
                     ft.Card(
                         content=ft.Container(
