@@ -71,7 +71,7 @@ def logout():
 @app.route('/pessoas', methods=['GET'])
 @app.route('/pessoas/<valor_>', methods=['GET'])
 def pessoas(valor_=None):
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
     
@@ -103,7 +103,7 @@ def pessoas(valor_=None):
 @app.route('/entradas<valor_>', methods=['GET'])
 def entradas(valor_=None):
     # noinspection PyInconsistentReturns
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
     if session['papel'] != 'admin':
@@ -132,7 +132,7 @@ def entradas(valor_=None):
 
 @app.route('/lanches', methods=['GET'])
 def lanches():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
 
@@ -168,7 +168,7 @@ def lanches():
 @app.route('/insumos/<id_insumo>', methods=['GET'])
 def insumos(id_insumo=None):
     try:
-        if not session['token']:
+        if 'token' not in session:
             flash('Você deve entrar com uma conta para visualizar esta página', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -199,7 +199,7 @@ def insumos(id_insumo=None):
 
 @app.route('/categorias', methods=['GET'])
 def categorias():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
     if session['papel'] == "cliente" or session['papel'] == "garcom":
@@ -216,7 +216,7 @@ def categorias():
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -233,7 +233,7 @@ def pedidos():
 
 @app.route('/vendas', methods=['GET'])
 def vendas():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -327,19 +327,22 @@ def cadastrar_entradas():
     if session['papel'] != "admin":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
+    if request.method == 'POST':
+        qtd_entrada = request.form['qtd_entradas']
+        insumo_id = request.form['insumo_id']
+        data_entrada = request.form['data_entrada']
+        nota_fiscal = request.form['nota_fiscal']
+        valor_entrada = request.form['valor_entrada']
 
-    qtd_entrada = request.form['qtd_entradas']
-    insumo_id = request.form['insumo_id']
-    data_entrada = request.form['data_entrada']
-    nota_fiscal = request.form['nota_fiscal']
-    valor_entrada = request.form['valor_entrada']
+        salvar_entrada = routes.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
+        if 'success' in salvar_entrada:
+            flash('Entrada adicionada com sucesso', 'success')
+            return redirect(url_for('entradas'))
 
-    salvar_entrada = routes.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
-    if 'success' in salvar_entrada:
-        flash('Entrada adicionada com sucesso', 'success')
-        return redirect(url_for('entradas'))
-
-    return redirect(url_for('cadastrar_entradas'))
+        return redirect(url_for('cadastrar_entradas'))
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_entradas'
+        return render_template('cadastrar_entradas.html')
 
 # @app.route('/pedidos', methods=['GET'])
 # def pedidos():
