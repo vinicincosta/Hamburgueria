@@ -120,15 +120,15 @@ def get_insumo_by_id_insumo(id_insumo, token_): # Feito
 
 # POST
 
-def post_cadastro_pessoas(nome, cpf, email, senha, salario, papel):
+def post_cadastro_pessoas(token_, nome, cpf, email, senha, salario, papel):
     response = requests.post(f"{url}/cadastro_pessoas_login", json={
         "email":email,
         "senha":senha,
         "nome_pessoa":nome,
         "cpf":cpf,
         "salario":salario,
-        "papel":papel})
-    # }, headers={'Authorization': f'Bearer {token_}'})
+        "papel":papel
+    }, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 201:
         return response.json()
     else:
