@@ -205,6 +205,16 @@ def get_insumo(id_insumo):
         return response.json()
 
 
+def update_bebida(id_bebida):
+    url = f"{base_url}/update_bebida/{id_bebida}"
+    response = requests.put(url)
+
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f'Erro9: {response.status_code}')
+        return response.json()
+
 def update_insumo(id_insumo):
     url = f"{base_url}/update_insumo/{id_insumo}"
     response = requests.put(url)
@@ -214,7 +224,6 @@ def update_insumo(id_insumo):
     else:
         print(f'Erro7: {response.status_code}')
         return response.json()
-
 
 def listar_insumos(token):
     try:
