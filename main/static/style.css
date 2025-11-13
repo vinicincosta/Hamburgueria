@@ -43,6 +43,7 @@ main {
     flex-wrap: wrap;
     position: fixed;
     top: 10vh;
+    color: white;
 }
 
 #fundo_da_main {
