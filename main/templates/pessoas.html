@@ -15,7 +15,7 @@
                 {% endif %}
             </form>
         </span>
-        {% if valor_ in ['False', False] %}
+        {% if exibir in ['False', False] %}
             {% for p in pessoas %}
                 {% if p['nome_pessoa'] != session['username'] %}
                     <card class="card">
