@@ -15,6 +15,7 @@ from flet.core.buttons import ButtonStyle, RoundedRectangleBorder
 from flet.core.colors import Colors
 from flet.core.dropdown import Option
 from flet.core.elevated_button import ElevatedButton
+from flet.core.icon import Icon
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle, TextThemeStyle
 from flet.core.theme import TextTheme
@@ -637,7 +638,6 @@ def main(page: ft.Page):
             return
 
 
-
         token = page.client_storage.get("token")
         insumos = listar_insumos(token)
         preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
@@ -861,44 +861,59 @@ def main(page: ft.Page):
                         content=ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Image(src="imagemdolanche.png", height=80),
+                                    ft.Image(src="imagemdolanche.png", height=50, width=50, border_radius=5),
                                     ft.Column(
                                         [
-                                            ft.Text(item["nome_lanche"], color=Colors.ORANGE_900, size=16),
-                                            ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
-                                            ft.Text(f"Mesa {item['mesa']}", color=Colors.PURPLE_200),
+                                            ft.Text(
+                                                item["nome_lanche"],
+                                                color=Colors.ORANGE_900,
+                                                size=14,
+                                                weight=ft.FontWeight.BOLD,
+                                            ),
+                                            ft.Text(
+                                                f'R$ {item["valor_lanche"]:.2f}',
+                                                color=Colors.YELLOW_800,
+                                                size=12,
+                                            ),
+                                            ft.Text(
+                                                f"Mesa {item['mesa']}",
+                                                color=Colors.PURPLE_200,
+                                                size=11,
+                                            ),
                                             ft.Row(
                                                 [
-                                                    ft.OutlinedButton(
-                                                        "Remover",
+                                                    ft.IconButton(
+                                                        icon=ft.icons.REMOVE_CIRCLE_OUTLINE,
+                                                        icon_color=Colors.RED_500,
+                                                        tooltip="Remover",
                                                         on_click=lambda e, id_lanche=item["id_lanche"]: remover_item(
                                                             id_lanche),
-                                                        style=ft.ButtonStyle(
-                                                            color=Colors.RED_600,
-                                                            side=ft.BorderSide(1, Colors.RED_600)
-                                                        )
                                                     ),
-                                                    ft.ElevatedButton(
-                                                        "Observações",
-                                                        on_click=lambda e, item=item: page.go(
-                                                            f"/observacoes_garcom/?id={item['id_lanche']}"
+                                                    ft.IconButton(
+                                                        icon=ft.icons.NOTE_ALT_OUTLINED,
+                                                        icon_color=Colors.ORANGE_600,
+                                                        tooltip="Observações",
+                                                        on_click=lambda e, lanche=item: page.go(
+                                                            f"/observacoes_garcom/?id={lanche['id_lanche']}"
                                                         ),
-                                                        bgcolor=Colors.ORANGE_700,
-                                                        color=Colors.BLACK
                                                     ),
                                                 ],
-                                                spacing=10
-                                            )
-                                        ]
-                                    )
-                                ]
+                                                spacing=2,
+                                            ),
+                                        ],
+                                        spacing=2,
+                                        alignment=ft.MainAxisAlignment.CENTER,
+                                    ),
+                                ],
+                                spacing=8,
+                                alignment=ft.MainAxisAlignment.CENTER,
                             ),
                             bgcolor=Colors.BLACK,
-                            height=150,
-                            border_radius=10,
-                            padding=10,
+                            height=90,
+                            border_radius=8,
+                            padding=8,
                         ),
-                        shadow_color=Colors.YELLOW_900
+                        shadow_color=Colors.YELLOW_900,
                     )
                 )
 
@@ -1131,11 +1146,11 @@ def main(page: ft.Page):
             mesas.add(str(item["mesa"]))
         return sorted(list(mesas))
 
-    # 🔔 Modal de Confirmação (Pedido Presencial)
+    # Modal de Confirmação (Pedido Presencial)
     def fechar_dialogo(e):
         dlg_modal.open = False
         page.update()
-        print("✅ Pedido confirmado!")  # Aqui pode chamar cadastrar_vendas()
+        print("Pedido confirmado!")  # Aqui pode chamar cadastrar_vendas()
 
     dlg_modal = ft.AlertDialog(
         title=ft.Text("ALERTA‼️", color=Colors.BLACK),
@@ -1185,23 +1200,41 @@ def main(page: ft.Page):
                 View(
                     "/login",
                     [
-                        AppBar(title=logo, center_title=True, bgcolor=Colors.BLACK, color=Colors.PURPLE, title_spacing=5
-                               ),
                         ft.Container(
                             width=page.window.width,
                             height=page.window.height,
                             image=ft.DecorationImage(
-                                src="fundo.jpg", opacity=0.8
+                                src="fundo.jpg",
+                                opacity=0.8
                             ),
-                            content=ft.Column([
-                                input_email,
-                                input_senha,
-                                btn_login,
-                                btn_cadastro_login,
-                            ], horizontal_alignment=ft.CrossAxisAlignment.CENTER, spacing=5)
+                            content=ft.Column(
+                                [
+                                    input_email,
+                                    input_senha,
+                                    btn_login,
+                                    btn_cadastro_login,
+                                ],
+                                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                                spacing=5,
+                            ),
                         ),
-                    ], bgcolor=Colors.BLACK, horizontal_alignment=ft.CrossAxisAlignment.CENTER, padding=11,
-                    vertical_alignment=ft.MainAxisAlignment.CENTER
+                    ],
+                    bgcolor=Colors.BLACK,
+                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                    padding=11,
+                    vertical_alignment=ft.MainAxisAlignment.CENTER,
+                    appbar=ft.AppBar(
+                        leading=ft.IconButton(
+                            icon=ft.Icons.ARROW_BACK,
+                            icon_color=ft.Colors.PURPLE,
+                            on_click=lambda e: page.go("/")  # volta pra rota principal
+                        ),
+                        title=logo,
+                        center_title=True,
+                        bgcolor=ft.Colors.BLACK,
+                        color=ft.Colors.PURPLE,
+                        title_spacing=5,
+                    )
                 )
             )
 
@@ -1285,8 +1318,6 @@ def main(page: ft.Page):
 
         # Carrinho Garçom
         if page.route.startswith("/carrinho_garcom"):
-            print("carrinho garcom")
-
             query = urlparse(page.route).query
             params = parse_qs(query)
             mesa_num = params.get("mesa", [""])[0]  # pega o valor após ?mesa=
@@ -1386,8 +1417,6 @@ def main(page: ft.Page):
 
         # Rota observação Garçom, igual o delivery
         if page.route.startswith("/observacoes_garcom"):
-            print("observacoes_garcom")
-
             def get_lanche_por_id():
                 query = urlparse(page.route).query
                 params = parse_qs(query)
@@ -1838,31 +1867,33 @@ def main(page: ft.Page):
             cardapio(e)
             page.views.append(
                 View(
-                    "/cardapio",
+                    "/cardapio_presencial",
                     [
                         AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
-                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
-
-                                t
-
-
-
+                               color=Colors.PURPLE, title_spacing=5, leading=ft.GestureDetector(
+        on_tap=lambda e: page.go("/presencial_delivery"),
+        mouse_cursor=ft.MouseCursor.CLICK,
+        content=ft.Icon(Icons.ARROW_BACK_OUTLINED)
+    ), actions=[btn_logout]),
                     ],
                     bgcolor=Colors.BLACK,
                 )
             )
 
         if page.route == "/cardapio_delivery":
-            print("cardapio delivery")
             cardapio_delivery(e)
             cardapio_delivery_bebida(e)
 
             page.views.append(
                 View(
-                    "/cardapio",
+                    "/cardapio_delivery",
                     [
                         AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
-                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout]),
+                               color=Colors.PURPLE, title_spacing=5, leading=ft.GestureDetector(
+        on_tap=lambda e: page.go("/presencial_delivery"),
+        mouse_cursor=ft.MouseCursor.CLICK,
+        content=ft.Icon(Icons.ARROW_BACK_OUTLINED)
+    ), actions=[btn_logout]),
 
                         t
 
@@ -1879,7 +1910,11 @@ def main(page: ft.Page):
                     "/carrinho",
                     [
                         AppBar(title=ft.Image(src="imgdois.png", width=90), center_title=True, bgcolor=Colors.BLACK,
-                               color=Colors.PURPLE, title_spacing=5, leading=logo, actions=[btn_logout_carrinho]),
+                               color=Colors.PURPLE, title_spacing=5, leading=ft.GestureDetector(
+        on_tap=lambda e: page.go("/cardapio_delivery"),
+        mouse_cursor=ft.MouseCursor.CLICK,
+        content=ft.Icon(Icons.ARROW_BACK_OUTLINED)
+    ), actions=[btn_logout_carrinho]),
 
                         lv_carrinho,
 
@@ -1890,8 +1925,6 @@ def main(page: ft.Page):
             )
 
         if page.route.startswith("/observacoes/"):
-            print("observacoes")
-            print("CARRINHO AO ENTRAR NA ROTA:", page.client_storage.get("carrinho"))
             # ==========================
             # Funções auxiliares
             # ==========================
@@ -1931,7 +1964,6 @@ def main(page: ft.Page):
             receita_original = carregar_receita_base(lanche_id) if lanche_id else {}
 
             lanches = listar_lanche(token)
-            print("lanches: ", lanches)
             for lanche in lanches:
                 if lanche_id == lanche["id_lanche"]:
                     valor_base_original = lanche["valor_lanche"]
@@ -2051,9 +2083,6 @@ def main(page: ft.Page):
 
                     preco_total = atualizar_preco()
 
-                    print("ANTES DE SALVAR:", valores_atualizados)
-                    print("RECEITA ORIGINAL:", receita_original)
-                    print("INGREDIENTES SALVOS:", ingredientes_salvos)
 
                     item_copy.update({
                         "observacoes_texto": obs_input.value or "Nenhuma",
@@ -2080,7 +2109,11 @@ def main(page: ft.Page):
                     "/observacoes",
                     [
                         ft.AppBar(title=ft.Text("Personalizar Lanche", size=22, color=Colors.ORANGE_900, weight="bold"),
-                                  center_title=True, bgcolor=Colors.BLACK, actions=[btn_logout_observacoes_garcom]),
+                                  center_title=True, bgcolor=Colors.BLACK,leading=ft.GestureDetector(
+        on_tap=lambda e: page.go("/carrinho"),
+        mouse_cursor=ft.MouseCursor.CLICK,
+        content=ft.Icon(Icons.ARROW_BACK_OUTLINED,color=ft.colors.ORANGE_900)
+    ), actions=[btn_logout_observacoes_garcom]),
                         ft.Column([
                             ft.Text(f"Você está editando: {item['nome_lanche']}", color=Colors.YELLOW_800, size=22,
                                     weight="bold"),
@@ -2396,7 +2429,7 @@ def main(page: ft.Page):
     )
 
     fundo = ft.GestureDetector(
-        on_tap=lambda e: page.go("/"),  # substitua "/inicio" pela rota que quiser
+        on_tap=lambda e: page.go("/login"),  # substitua "/inicio" pela rota que quiser
         content=ft.Image(
             src="fundo.jpg",  # troque para o caminho da sua imagem local ou URL
             fit=ft.ImageFit.CONTAIN
