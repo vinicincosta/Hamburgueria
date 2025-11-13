@@ -260,21 +260,25 @@ def cadastrar_pessoas():
     if session['papel'] != "admin":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-    cpf = request.form['cpf']
-    nome = request.form['nome']
-    email = request.form['email']
-    senha = request.form['senha']
-    salario = request.form['salario']
-    papel = request.form['papel']
+    if request.method == 'POST':
+        cpf = request.form['cpf']
+        nome = request.form['nome']
+        email = request.form['email']
+        senha = request.form['senha']
+        salario = request.form['salario']
+        papel = request.form['papel']
 
-    cadastrar = routes.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
-    if 'success' in cadastrar:
-        flash('Pessoa adicionada com sucesso', 'success')
-        return redirect(url_for('pessoas'))
+        cadastrar = routes.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
+        if 'success' in cadastrar:
+            flash('Pessoa adicionada com sucesso', 'success')
+            return redirect(url_for('pessoas'))
 
-    # Verificar na documentação possiveis erros para tratar
-    return redirect(url_for('cadastrar_pessoas'))
+        # Verificar na documentação possiveis erros para tratar
+        return redirect(url_for('cadastrar_pessoas'))
     # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_pessoas'
+        return render_template('cadastar_pessoas.html')
 
 @app.route('/lanches/cadastrar', methods=['POST'])
 def cadastrar_lanches():
@@ -285,17 +289,20 @@ def cadastrar_lanches():
     if session['papel'] != "admin":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
+    if request.method == 'POST':
+        nome_lanche = request.form['nome_lanche']
+        descricao_lanche = request.form['descricao_lanche']
+        valor_lanche = request.form['valor_lanche']
+        salvar_lanche = routes.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
+        if 'success' in salvar_lanche:
+            flash('Pessoa adicionada com sucesso', 'success')
+            return redirect(url_for('pessoas'))
 
-    nome_lanche = request.form['nome_lanche']
-    descricao_lanche = request.form['descricao_lanche']
-    valor_lanche = request.form['valor_lanche']
-    salvar_lanche = routes.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
-    if 'success' in salvar_lanche:
-        flash('Pessoa adicionada com sucesso', 'success')
-        return redirect(url_for('pessoas'))
-
-    # Verificar na documentação possiveis erros para tratar
-    return redirect(url_for('cadastrar_pessoas'))
+        # Verificar na documentação possiveis erros para tratar
+        return redirect(url_for('cadastrar_pessoas'))
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_lanches'
+        return render_template('cadastrar_lanches.html')
 
 @app.route('/insumos/cadastrar', methods=['POST'])
 def cadastrar_insumos():
@@ -306,16 +313,20 @@ def cadastrar_insumos():
     if session['papel'] != "admin":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-    nome_insumo = request.form['nome_insumo']
-    custo_insumo = request.form['custo_insumo']
-    categoria_id = request.form['categoria_id']
-    salvar_insumo = routes.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
-    if 'success' in salvar_insumo:# 201
-        flash('Insumo adicionada com sucesso', 'success')
-        return redirect(url_for('insumos'))
+    if request.method == 'POST':
+        nome_insumo = request.form['nome_insumo']
+        custo_insumo = request.form['custo_insumo']
+        categoria_id = request.form['categoria_id']
+        salvar_insumo = routes.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
+        if 'success' in salvar_insumo:# 201
+            flash('Insumo adicionada com sucesso', 'success')
+            return redirect(url_for('insumos'))
 
-    # Verificar na documentação possiveis erros para tratar
-    return redirect(url_for('cadastrar_insumos'))
+        # Verificar na documentação possiveis erros para tratar
+        return redirect(url_for('cadastrar_insumos'))
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_insumos'
+        return render_template('cadastrar_insumo.html')
 
 
 @app.route('/entradas/cadastrar_entradas', methods=['POST'])
@@ -343,6 +354,29 @@ def cadastrar_entradas():
     else:
         session['funcao_rota_anterior'] = 'cadastrar_entradas'
         return render_template('cadastrar_entradas.html')
+
+@app.route('/categorias/cadastrar', methods=['POST'])
+def cadastrar_categorias():
+    if 'token' not in session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    if request.method == 'POST':
+        nome_categoria = request.form['nome_categoria']
+        salvar_categoria = routes.post_categorias(session['token'], nome_categoria)
+        if 'success' in salvar_categoria:
+            flash('Categoria adicionada com sucesso', 'success')
+            return redirect(url_for('categorias'))
+        return redirect(url_for('cadastrar_categorias'))
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_categorias'
+        return render_template('cadastrar_categorias.html')
+
+
+@
 
 # @app.route('/pedidos', methods=['GET'])
 # def pedidos():
