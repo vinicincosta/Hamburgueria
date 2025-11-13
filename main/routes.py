@@ -1,7 +1,7 @@
 import requests
 
 # url = "http://10.135.233.139:5002"
-url = "http://10.135.233.162:5002"
+url = "http://10.135.232.11:5002"
 # url ="http://192.168.15.9:5002"
 
 def get_lanches(token_): # Feito
@@ -128,7 +128,7 @@ def post_cadastro_pessoas(token_, nome, cpf, email, senha, salario, papel):
         "cpf":cpf,
         "salario":salario,
         "papel":papel
-    }, headers={'Authorization': f'Bearer {token_}'})
+    })#, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 201:
         return response.json()
     else:
@@ -237,7 +237,7 @@ def get_id_pessoa_by_token(token_):
         print(response.status_code)
         # print({'erro':response.json()})
         return {'erro':response.status_code}
-
+# post_cadastro_pessoas('','dener','47816718888','d@','123',1,'admin')
 # pessoa = post_cadastro_pessoas("vini", "47811718900", "v@", "123", 20.0, "admin")
 # print(pessoa)
 # token = post_login('vini@', '123')

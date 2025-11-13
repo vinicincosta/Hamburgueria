@@ -4,61 +4,75 @@
     <main>
         <h1 style="color: white">valor {{valor_}} </h1>
         <h1 style="color: white"> exibir {{exibir}}</h1>
-        {% if not valor_ or valor_ == 'False' %}
-            {% if exibir or exibir in ['True', 'true'] %}
-                <span style="display: block">
-                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='True')}}">
-                        <input type="hidden" name="form_id" value="valor">
-                        <label for="tabela2" style="color: white">Tabela</label>
-                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
-                    </form>
-                </span>
-                <span style="display: block">
-                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='True')}}">
-                        <input type="hidden" name="form_id" value="exibir">
-                        <label for="oculto" style="color: white">Exibir ocultos</label>
-                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="oculto">
-                    </form>
-                </span>
+        <form method="get" action="{{ url_for('lanches') }}">
+            <input type="hidden" name="form_id" value="valor">  <!-- identifica qual foi alterado -->
+            <input type="hidden" name="valor_" value="{{ valor_ }}">
+            <input type="hidden" name="exibir" value="{{ exibir }}">
+
+            {% if valor_ in ['True', True] %}
+                <label for="tabela" style="color: white">Tabela</label>
+                <input type="checkbox"
+                       id="tabela"
+                       name="tabela"
+                       onchange="this.form.submit()"
+                       checked
+                >
             {% else %}
-                <span style="display: block">
-                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='False')}}">
-                        <input type="hidden" name="form_id" value="valor">
-                        <label for="tabela2" style="color: white">Tabela</label>
-                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
-                    </form>
-                </span>
-                <span style="display: block">
-                    <form method="get" action="{{url_for('lanches', valor_='False', exibir='False')}}">
-                        <input type="hidden" name="form_id" value="exibir">
-                        <label for="oculto" style="color: white">Exibir ocultos</label>
-                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="oculto">
-                    </form>
-                </span>
+                <label for="tabela2" style="color: white">Tabela</label>
+                <input type="checkbox"
+                       id="tabela2"
+                       name="tabela"
+                       onchange="this.form.submit()"
+                >
             {% endif %}
+        </form>
+
+        <!-- Checkbox "Exibir ocultos" -->
+        <form method="get" action="{{ url_for('lanches') }}">
+            <input type="hidden" name="form_id" value="exibir">  <!-- identifica qual foi alterado -->
+            <input type="hidden" name="valor_" value="{{ valor_ }}">
+            <input type="hidden" name="exibir" value="{{ exibir }}">
+            {% if exibir in ['True', True] %}
+                <label for="oculto" style="color: white">Exibir ocultos</label>
+                <input type="checkbox"
+                       id="oculto"
+                       name="tabela"
+                       onchange="this.form.submit()"
+                       checked
+                >
+            {% else %}
+                <label for="oculto2" style="color: white">Exibir ocultos</label>
+                <input type="checkbox"
+                       id="oculto2"
+                       name="tabela"
+                       onchange="this.form.submit()"
+
+                >
+            {% endif %}
+        </form>
+        {% if not valor_ or valor_ == 'False' %}
             {% for l in lanches %}
-
-                <card class="card">
-                    <h1>#{{l['id_lanche']}}</h1>
-                    <h2>{{l['nome_lanche']}}</h2>
-                    <p>{{l['valor_lanches']}}</p>
-                </card>
-
+                {% if exibir in ['True', True] %}
+                    {% if l['status'] in ['True', True] %}
+                        <card class="card">
+                    {% else %}
+                        <card class="card-user">
+                    {% endif %}
+                        <h1>#{{l['id_lanche']}}</h1>
+                        <h2>{{l['nome_lanche']}}</h2>
+                        <p>{{l['valor_lanches']}}</p>
+                    </card>
+                {% else %}
+                    {% if l['status'] in [True, 'True'] %}
+                        <card class="card">
+                            <h1>#{{l['id_lanche']}}</h1>
+                            <h2>{{l['nome_lanche']}}</h2>
+                            <p>{{l['valor_lanches']}}</p>
+                        </card>
+                    {% endif %}
+                {% endif %}
             {% endfor %}
         {% else %}
-            {% if exibir or exibir == 'True' %}
-                <form method="get" action="{{url_for('entradas', valor_='True',  exibir='True')}}">
-                    <input type="hidden" name="form_id" value="exibir">
-                    <label for="tabela" style="color: white">Tabela</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
-                </form>
-            {% else %}
-                <form method="get" action="{{url_for('lanches', valor_='True', exibir='False')}}">
-                    <input type="hidden" name="form_id" value="exibir">
-                    <label for="oculto2" style="color: white">Exibir ocultos</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="oculto2">
-                </form>
-            {% endif %}
             <table class="tabela">
                 <thead>
                     <tr>
@@ -66,23 +80,34 @@
                         <th>DATA</th>
                         <th>QUANTIDADE</th>
                         <th>VALOR</th>
-<!--                        <th>SALÁRIO</th>-->
                     </tr>
                 </thead>
                 <tbody>
                     {% for l in lanches %}
-
-                        <tr>
-                            <th>#{{l['id_entrada']}}</th>
-                            <th>{{l['data_entrada']}}</th>
-                            <th>{{l['qtd_entrada']}}</th>
-                            <th>{{l['valor_entrada']}}</th>
-
-                        </tr>
-
+                        {% if exibir in ['True', True] %}
+                            {%  if l['status'] in ['True', True] %}
+                                <tr>
+                            {% else %}
+                                <tr class="tr-desativado">
+                                    <th>#{{l['id_entrada']}}</th>
+                                    <th>{{l['data_entrada']}}</th>
+                                    <th>{{l['qtd_entrada']}}</th>
+                                    <th>{{l['valor_entrada']}}</th>
+                                </tr>
+                            {% endif %}
+                        {% else %}
+                            {% if l['status'] in ['True', True] %}
+                                <tr class="tr-desativado">
+                                    <th>#{{l['id_entrada']}}</th>
+                                    <th>{{l['data_entrada']}}</th>
+                                    <th>{{l['qtd_entrada']}}</th>
+                                    <th>{{l['valor_entrada']}}</th>
+                                </tr>
+                            {% endif %}
+                        {% endif %}
                     {% endfor %}
                 </tbody>
-            </table>
+            </table>]
         {% endif %}
     </main>
 {% endblock %}

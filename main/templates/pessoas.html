@@ -2,14 +2,20 @@
 
 {% block content %}
     <main>
-<!--        <h1>{{pessoas}}</h1>-->
-        {% if not valor_ or valor_ == 'False' %}
-            <span style="display: block">
-                <form method="get" action="{{url_for('pessoas', valor_=valor_)}}">
+        <span style="display: block">
+            <form method="get" action="{{url_for('pessoas')}}">
+                <input type="hidden" name="exibir" value="{{exibir}}">
+                <input type="hidden" name="form" value="pessoas">
+                {% if exibir in ['True', True] %}
+                    <label for="tabela" style="color: white">Tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
+                {% else %}
                     <label for="tabela2" style="color: white">Tabela</label>
                     <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
-                </form>
-            </span>
+                {% endif %}
+            </form>
+        </span>
+        {% if valor_ in ['False', False] %}
             {% for p in pessoas %}
                 {% if p['nome_pessoa'] != session['username'] %}
                     <card class="card">
@@ -27,10 +33,6 @@
                     </card>
             {% endfor %}
         {% else %}
-            <form method="get" action="{{url_for('pessoas', valor_=valor_)}}">
-                <label for="tabela" style="color: white">Tabela</label>
-                <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
-            </form>
             <table class="tabela">
                 <thead>
                     <tr>

@@ -69,8 +69,7 @@ def logout():
 
 
 @app.route('/pessoas', methods=['GET'])
-@app.route('/pessoas/<valor_>', methods=['GET'])
-def pessoas(valor_=None):
+def pessoas():
     if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
@@ -87,17 +86,19 @@ def pessoas(valor_=None):
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'pessoas'
-
-    if valor_ is None:
-        return render_template('pessoas.html', valor_=False, pessoas=var_pessoas['pessoas'])
-    else:
-        if valor_ in ['true', 'True', True, 1, '1']:
-            booleano = True
+    form = request.args.get('form', None)
+    exibir = request.args.get('exibir', False)
+    if form is not None:
+        if exibir is None:
+            return render_template('pessoas.html', valor_=False, pessoas=var_pessoas['pessoas'])
         else:
-            booleano = False
+            if exibir in ['true', 'True', True, 1, '1']:
+                exibir = False
+            else:
+                exibir = True
     # page = request.args.get("page", 1, type=int)
     # per_page = request.args.get("per_page", 10, type=int)
-    return render_template('pessoas.html', valor_=not booleano, pessoas=var_pessoas['pessoas'])
+    return render_template('pessoas.html', exibir=exibir, pessoas=var_pessoas['pessoas'])
 
 @app.route('/entradas', methods=['GET'])
 @app.route('/entradas<valor_>', methods=['GET'])
@@ -150,18 +151,20 @@ def lanches():
     exibir = request.args.get('exibir', False)
     print('exibir', exibir)
     session['funcao_rota_anterior'] = 'lanches'
+    print(form_id)
     if form_id is not None:
         if form_id == 'exibir':
-            if not exibir or exibir ['False', 'false']:
+            if not exibir or exibir in ['False', 'false']:
                 exibir = True
             else:
                 exibir = False
         elif form_id == 'valor':
             if not valor_ or valor_ in ['false', 'False']:
-                valor_ = False
-            else:
                 valor_ = True
-
+            else:
+                valor_ = False
+    print('valor_222', valor_)
+    print('exibir_22222', exibir)
     return render_template('lanches.html', lanches=var_lanches['lanches'], valor_=valor_, exibir=exibir)
 
 @app.route('/insumos', methods=['GET'])
@@ -376,7 +379,7 @@ def cadastrar_categorias():
         return render_template('cadastrar_categorias.html')
 
 
-@
+
 
 # @app.route('/pedidos', methods=['GET'])
 # def pedidos():
