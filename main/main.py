@@ -19,7 +19,7 @@ def verificar_token():
 
 @app.route('/')
 def index():
-    session['funcao_rota_anterior'] = 'index'
+    session['funcao_rota_anterior'] = 'login'
     return render_template('inicio.html')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -259,12 +259,12 @@ def cadastrar_pessoas():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
-        cpf = request.form['cpf']
-        nome = request.form['nome']
-        email = request.form['email']
-        senha = request.form['senha']
+        cpf = request.form['CPF']
+        nome = request.form['Nome']
+        email = request.form['Email']
+        senha = request.form['Senha']
         salario = request.form['salario']
-        papel = request.form['papel']
+        papel = request.form['Cargo']
 
         cadastrar = routes.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
         if 'success' in cadastrar:
