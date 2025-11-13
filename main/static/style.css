@@ -2,6 +2,7 @@
     margin: 0;
     padding: 0;
     font-family: "Arial Black", sans-serif;
+    /*background-color: black;*/
 }
 
 header {
@@ -64,6 +65,7 @@ main {
     background-color: #161E25;
     border-radius: 15px;
 }
+
 .card-user {
     color: #868484;
     text-align: center;
@@ -168,6 +170,18 @@ main {
     color: #F2D43D;
 }
 
+.titulo_marca {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+#form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20vh;
+}
+
 .content-nav a {
     text-align: center;
     align-content: center;
@@ -191,27 +205,31 @@ main {
 
 #card {
     display: flex;
+    justify-content: center;
     align-items: center;
+    flex-direction: column;
     margin-top: 1vh;
     width: 40vw;
     height: 85vh;
     border-radius: 30px;
-
-    box-shadow: 15px 15px 30px #bebebe,
-    -15px -5px 30px #ffffff;
+    box-shadow: 15px 15px 30px #9f0505,
+    -15px -5px 30px #d00707;
 }
-.tabela{
+
+.tabela {
     color: white;
     background-color: #161E25;
     /*padding: 1vh;*/
 }
-.tabela thead{
+
+.tabela thead {
     background-color: #2b3a48;
 }
 
-.tabela tbody tr:hover{
+.tabela tbody tr:hover {
     background-color: #318dde;
 }
+
 #txt {
     color: #ffffff;
     font-weight: bold;
@@ -221,32 +239,37 @@ main {
     text-shadow: 15px 15px 30px #9d0000,
     -15px -15px 30px #981212;
 }
-.titulo_form_login{
+
+.titulo_form_login {
     width: max-content; /* largura mínima para o conteúdo */
     margin: 0 auto;
-    color: white;
-    font-weight: bold;
-    font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
+    color: #ffffff;
+    font-family: "Georgia";
+
+
 }
+
 /* From Uiverse.io by ercnersoy */
 .input {
- border: none;
- padding: 1rem;
- border-radius: 1rem;
- background: #e8e8e8;
- box-shadow: 2px 5px 10px #d03434,
-		5px 5px 20px #3a0101;
- transition: 0.3s;
+    margin: 10px;
+    border: none;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: #e8e8e8;
+    box-shadow: 2px 5px 10px #d03434,
+    5px 5px 20px #3a0101;
+    transition: 0.3s;
 }
 
 .input:focus {
- outline-color: #e8e8e8;
- background: #e8e8e8;
- box-shadow: inset 20px 20px 60px #c5c5c5,
-		inset -20px -20px 60px #ffffff;
- transition: 0.3s;
+    outline-color: #e8e8e8;
+    background: #ffffff;
+    box-shadow: inset 20px 20px 60px #ffffff,
+    inset -20px -20px 60px #ffffff;
+    transition: 1s;
 }
-.buton_enviar_login{
+
+.buton_enviar_login {
     display: flex;
     width: max-content; /* largura mínima para o conteúdo */
     margin: 0 auto;
@@ -255,57 +278,206 @@ main {
 /**/
 /* From Uiverse.io by gharsh11032000 */
 .animated-button {
-  position: absolute;
-  top: 57vh;
-    left: 45vw;
-  display: inline-block;
-  padding: 12px 24px;
-  border: none;
-  font-size: 16px;
- background-color: rgba(248, 248, 248, 0.68);
-  border-radius: 100px;
-  font-weight: 600;
-  color: rgba(0, 0, 0, 0.25);
-  box-shadow: 0 0 0 2px #ffffff20;
-  cursor: pointer;
-  overflow: hidden;
-  transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
+    position: absolute;
+    top: 73vh;
+    left: 47.1vw;
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    font-size: 16px;
+    background-color: rgba(248, 248, 248, 0.68);
+    border-radius: 100px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0 0 2px #ffffff20;
+    cursor: pointer;
+    overflow: hidden;
+    transition: all 0.6s cubic-bezier(0.23, 1, 0.320, 1);
 }
 
 .animated-button span:last-child {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 20px;
-  height: 20px;
-  background-color: #267c96;
-  border-radius: 50%;
-  opacity: 0;
-  transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background-color: #267c96;
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);
 }
 
 .animated-button span:first-child {
-  position: relative;
-  z-index: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .animated-button:hover {
-  box-shadow: 0 0 0 5px #2195f360;
-  color: #ffffff;
+    box-shadow: 0 0 0 5px #2195f360;
+    color: #ffffff;
 }
 
 .animated-button:active {
-  scale: 0.95;
+    scale: 0.95;
 }
 
 .animated-button:hover span:last-child {
-  width: 150px;
-  height: 150px;
-  opacity: 1;
+    width: 150px;
+    height: 150px;
+    opacity: 1;
 }
 
+/*editar pessoa*/
+/* From Uiverse.io by ammarsaa */
+.div_pai_cadastrar_pessoa {
+    background-color: black;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center; /* alinha no eixo horizontal */
+    align-items: center;
+}
 
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 350px;
+    padding: 20px;
+    border-radius: 20px;
+    position: relative;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding-left: 30px;
+    color: #00bfff;
+}
+
+.title::before {
+    width: 18px;
+    height: 18px;
+}
+
+.title::after {
+    width: 18px;
+    height: 18px;
+    animation: pulse 1s linear infinite;
+}
+
+.title::before,
+.title::after {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    left: 0px;
+    background-color: #00bfff;
+}
+
+.message,
+.signin {
+    font-size: 14.5px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.signin {
+    text-align: center;
+}
+
+.signin a:hover {
+    text-decoration: underline royalblue;
+}
+
+.signin a {
+    color: #00bfff;
+}
+
+.flex {
+    display: flex;
+    width: 100%;
+    gap: 6px;
+}
+
+.form label {
+    position: relative;
+}
+
+.form label .input {
+    background-color: #333;
+    color: #fff;
+    width: 100%;
+    padding: 20px 05px 05px 10px;
+    outline: 0;
+    border: 1px solid rgba(105, 105, 105, 0.397);
+    border-radius: 10px;
+}
+
+.form label .input + span {
+    color: rgba(255, 255, 255, 0.5);
+    position: absolute;
+    left: 10px;
+    top: 0px;
+    font-size: 0.9em;
+    cursor: text;
+    transition: 0.3s ease;
+}
+
+.form label .input:placeholder-shown + span {
+    top: 12.5px;
+    font-size: 0.9em;
+}
+
+.form label .input:focus + span,
+.form label .input:valid + span {
+    color: #00bfff;
+    top: 0px;
+    font-size: 0.7em;
+    font-weight: 600;
+}
+
+.input {
+    font-size: medium;
+}
+
+.submit {
+    border: none;
+    outline: none;
+    padding: 10px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    transform: .3s ease;
+    background-color: #00bfff;
+}
+
+.submit:hover {
+    background-color: #00bfff96;
+}
+
+@keyframes pulse {
+    from {
+        transform: scale(0.9);
+        opacity: 1;
+    }
+
+    to {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}
+
+/*--*/
 
 /**/
 .flash-message {
