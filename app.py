@@ -528,29 +528,64 @@ def main(page: ft.Page):
     #Função para remover item do carrinho
     def remover_item(index):
         carrinho = page.client_storage.get("carrinho") or []
-        if 0 <= index < len(carrinho):
-            # pop é usado para remover e retornar
 
-            item_removido = carrinho.pop(index)  # remove o item
-            page.client_storage.set("carrinho", carrinho)
-            snack_sucesso(f"{item_removido['nome_lanche']} removido do carrinho!")
-            carrinho_view(None)  # recarrega a tela
+        if isinstance(carrinho, str):
+            try:
+                carrinho = json.loads(carrinho)
+            except:
+                carrinho = []
+
+        # Filtra somente os itens válidos
+        carrinho = [i for i in carrinho if i.get("id_lanche") or i.get("id_bebida")]
+
+        # Proteção contra índices inválidos
+        if index < 0 or index >= len(carrinho):
+            snack_error("Índice de lanche inválido.")
+            return
+
+        # Verifica se o item é mesmo um lanche antes de remover
+        if carrinho[index].get("tipo") != "lanche":
+            snack_error("Esse item não é um lanche.")
+            return
+
+        # Remove o lanche
+        removido = carrinho.pop(index)
+        snack_sucesso(f"Lanche '{removido.get('nome_lanche', 'sem nome')}' removido do carrinho!")
+
+        # Atualiza o armazenamento e recarrega a tela
+        page.client_storage.set("carrinho", carrinho)
+        carrinho_view(None)
 
     #
     def remover_item_b(index):
         carrinho = page.client_storage.get("carrinho") or []
-        if 0 <= index < len(carrinho):
-            # pop é usado para remover e retornar
 
-            item_removido = carrinho.pop(index)  # remove o item
-            page.client_storage.set("carrinho", carrinho)
-            snack_sucesso(f"{item_removido['nome_bebida']} removido do carrinho!")
-            carrinho_view(None)  # recarrega a tela
+        if isinstance(carrinho, str):
+            try:
+                carrinho = json.loads(carrinho)
+            except:
+                carrinho = []
+
+        carrinho = [i for i in carrinho if i.get("id_lanche") or i.get("id_bebida")]
+
+        if index < 0 or index >= len(carrinho):
+            snack_error("Índice de bebida inválido.")
+            return
+
+        if carrinho[index].get("tipo") != "bebida":
+            snack_error("Esse item não é uma bebida.")
+            return
+
+        removido = carrinho.pop(index)
+        snack_sucesso(f"Bebida '{removido.get('nome_bebida', 'sem nome')}' removida do carrinho!")
+
+        page.client_storage.set("carrinho", carrinho)
+        carrinho_view(None)
 
     def carrinho_view(e):
         lv_carrinho.controls.clear()
 
-        # Garante que o carrinho é sempre uma lista válida
+        # --- Recupera e garante lista válida ---
         carrinho = page.client_storage.get("carrinho") or []
         if isinstance(carrinho, str):
             try:
@@ -558,135 +593,231 @@ def main(page: ft.Page):
             except:
                 carrinho = []
 
+        # --- Limpa itens inválidos (sem ID de lanche ou bebida) ---
+        carrinho = [i for i in carrinho if i.get("id_lanche") or i.get("id_bebida")]
+
+        # Atualiza o carrinho limpo no client_storage
+        page.client_storage.set("carrinho", carrinho)
+
+        # --- Verifica se o carrinho está vazio ---
         if not carrinho:
             lv_carrinho.controls.append(
                 ft.Text("Seu carrinho está vazio!", color=Colors.YELLOW_800, size=18)
             )
-        else:
-            total = 0.0
+            page.update()
+            return
 
-            # --- Exibe LANCHES ---
-            for index, item in enumerate(carrinho):
-                if item.get("tipo") == "lanche":
-                    total += float(item.get("valor_lanche", 0))
+        total = 0.0
 
-                    lv_carrinho.controls.append(
-                        ft.Card(
-                            content=ft.Container(
-                                content=ft.Row(
-                                    [
-                                        ft.Image(src="imagemdolanche.png", height=80),
-                                        ft.Column(
-                                            [
-                                                ft.Text(item.get("nome_lanche", "Lanche"), color=Colors.ORANGE_900,
-                                                        size=16),
-                                                ft.Text(f'R$ {item.get("valor_lanche", 0):.2f}',
-                                                        color=Colors.YELLOW_900),
-                                                ft.Row(
-                                                    [
-                                                        ft.ElevatedButton(
-                                                            "Observações",
-                                                            on_click=lambda e, idx=index: page.go(
-                                                                f"/observacoes/?index={idx}"),
-                                                            bgcolor=Colors.ORANGE_700,
-                                                            color=Colors.BLACK
-                                                        ),
-                                                        ft.OutlinedButton(
-                                                            "Remover",
-                                                            on_click=lambda e, idx=index: remover_item(idx),
-                                                            style=ft.ButtonStyle(
-                                                                color=Colors.RED_600,
-                                                                side=ft.BorderSide(1, Colors.RED_600)
-                                                            )
+        # --- Exibe todos os itens (lanches e bebidas juntos) ---
+        for index, item in enumerate(carrinho):
+            tipo = item.get("tipo")
+
+            # --- Caso seja um LANCHE ---
+            if tipo == "lanche":
+                total += float(item.get("valor_lanche", 0))
+
+                lv_carrinho.controls.append(
+                    ft.Card(
+                        content=ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Image(src="imagemdolanche.png", height=80),
+                                    ft.Column(
+                                        [
+                                            ft.Text(item.get("nome_lanche", "Lanche"),
+                                                    color=Colors.ORANGE_900, size=16),
+                                            ft.Text(f'R$ {item.get("valor_lanche", 0):.2f}',
+                                                    color=Colors.YELLOW_900),
+                                            ft.Row(
+                                                [
+                                                    ft.ElevatedButton(
+                                                        "Observações",
+                                                        on_click=lambda e, idx=index: page.go(
+                                                            f"/observacoes/?index={idx}"),
+                                                        bgcolor=Colors.ORANGE_700,
+                                                        color=Colors.BLACK
+                                                    ),
+                                                    ft.OutlinedButton(
+                                                        "Remover",
+                                                        on_click=lambda e, idx=index: remover_item(idx),
+                                                        style=ft.ButtonStyle(
+                                                            color=Colors.RED_600,
+                                                            side=ft.BorderSide(1, Colors.RED_600)
                                                         )
-                                                    ],
-                                                    spacing=10
-                                                )
-                                            ]
-                                        )
-                                    ]
-                                ),
-                                bgcolor=Colors.BLACK,
-                                height=150,
-                                border_radius=10,
-                                padding=10,
+                                                    )
+                                                ],
+                                                spacing=10
+                                            )
+                                        ]
+                                    )
+                                ]
                             ),
-                            shadow_color=Colors.YELLOW_900
-                        )
+                            bgcolor=Colors.BLACK,
+                            height=150,
+                            border_radius=10,
+                            padding=10,
+                        ),
+                        shadow_color=Colors.YELLOW_900
                     )
-
-            # --- Exibe BEBIDAS ---
-            for index, item in enumerate(carrinho):
-                if item.get("tipo") == "bebida":
-                    total += float(item.get("valor", 0))
-
-                    lv_carrinho.controls.append(
-                        ft.Card(
-                            content=ft.Container(
-                                content=ft.Row(
-                                    [
-                                        ft.Image(src="istockphoto-459361585-170667a.jpg", height=80),
-                                        ft.Column(
-                                            [
-                                                ft.Text(item.get("nome_bebida", "Bebida"), color=Colors.ORANGE_900),
-                                                ft.Text(f'R$ {item.get("valor", 0):.2f}', color=Colors.YELLOW_900),
-                                                ft.Row(
-                                                    [
-                                                        ft.OutlinedButton(
-                                                            "Remover",
-                                                            on_click=lambda e, idx=index: remover_item_b(idx),
-                                                            style=ft.ButtonStyle(
-                                                                color=Colors.RED_600,
-                                                                side=ft.BorderSide(1, Colors.RED_600)
-                                                            )
-                                                        )
-                                                    ],
-                                                    spacing=10
-                                                )
-                                            ]
-                                        )
-                                    ]
-                                ),
-                                bgcolor=Colors.BLACK,
-                                height=150,
-                                border_radius=10,
-                                padding=10,
-                            ),
-                            shadow_color=Colors.YELLOW_900
-                        )
-                    )
-
-            # --- Total e botão Finalizar ---
-            lv_carrinho.controls.append(
-                ft.Container(
-                    content=ft.Column(
-                        [
-                            ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
-                            ft.ElevatedButton(
-                                "Finalizar Pedido",
-                                on_click=lambda e: page.go("/vendas"),
-                                style=ft.ButtonStyle(
-                                    bgcolor=Colors.ORANGE_700,
-                                    color=Colors.BLACK,
-                                    padding=15,
-                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
-                                )
-                            )
-                        ]
-                    ),
-                    padding=20
                 )
+
+            # --- Caso seja uma BEBIDA ---
+            elif tipo == "bebida":
+                total += float(item.get("valor", 0))
+
+                lv_carrinho.controls.append(
+                    ft.Card(
+                        content=ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Image(src="istockphoto-459361585-170667a.jpg", height=80),
+                                    ft.Column(
+                                        [
+                                            ft.Text(item.get("nome_bebida", "Bebida"), color=Colors.ORANGE_900),
+                                            ft.Text(f'R$ {item.get("valor", 0):.2f}', color=Colors.YELLOW_900),
+                                            ft.Row(
+                                                [
+                                                    ft.OutlinedButton(
+                                                        "Remover",
+                                                        on_click=lambda e, idx=index: remover_item_b(idx),
+                                                        style=ft.ButtonStyle(
+                                                            color=Colors.RED_600,
+                                                            side=ft.BorderSide(1, Colors.RED_600)
+                                                        )
+                                                    )
+                                                ],
+                                                spacing=10
+                                            )
+                                        ]
+                                    )
+                                ]
+                            ),
+                            bgcolor=Colors.BLACK,
+                            height=150,
+                            border_radius=10,
+                            padding=10,
+                        ),
+                        shadow_color=Colors.YELLOW_900
+                    )
+                )
+
+        # --- Total e botão Finalizar ---
+        lv_carrinho.controls.append(
+            ft.Container(
+                content=ft.Column(
+                    [
+                        ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
+                        ft.ElevatedButton(
+                            "Finalizar Pedido",
+                            on_click=lambda e: page.go("/vendas"),
+                            style=ft.ButtonStyle(
+                                bgcolor=Colors.ORANGE_700,
+                                color=Colors.BLACK,
+                                padding=15,
+                                shape={"": ft.RoundedRectangleBorder(radius=10)}
+                            )
+                        )
+                    ]
+                ),
+                padding=20
             )
+        )
 
         page.update()
 
-
+    # def confirmar_pedido_cozinha(e):
+    #
+    #     id_pessoa = page.client_storage.get("pessoa_id")
+    #     if not id_pessoa:
+    #         snack_error("Garcom não logado!")
+    #         page.go("/login")
+    #         return
+    #
+    #     # Usa o carrinho correto (garçom)
+    #     carrinho = page.client_storage.get("carrinho_garcom") or []
+    #     if not carrinho:
+    #         snack_error("Nenhum item no carrinho da mesa!")
+    #         page.update()
+    #         return
+    #
+    #
+    #
+    #     token = page.client_storage.get("token")
+    #     insumos = listar_insumos(token)
+    #     preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
+    #
+    #     # Pega número da mesa do primeiro item (todos têm o mesmo)
+    #     numero_mesa = carrinho[0].get("mesa")
+    #
+    #     for item in carrinho:
+    #         id_lanche = item.get("id_lanche")
+    #         id_bebida = page.client_storage.get("id_bebida")
+    #         qtd_lanche = int(item.get("qtd", 1))
+    #         ingredientes = item.get("ingredientes", {})
+    #
+    #         # Receita base do lanche
+    #         receita_original = carregar_receita_base(id_lanche)
+    #         observacoes = {"adicionar": [], "remover": []}
+    #
+    #         # Verifica modificações
+    #         for ing_id, qtd in ingredientes.items():
+    #             qtd_base = receita_original.get(ing_id, 0)
+    #             if qtd > qtd_base:
+    #                 observacoes["adicionar"].append({
+    #                     "insumo_id": ing_id,
+    #                     "qtd": qtd - qtd_base,
+    #                     "valor": preco_ingredientes.get(ing_id, 0) * (qtd - qtd_base)
+    #                 })
+    #             elif qtd < qtd_base:
+    #                 observacoes["remover"].append({
+    #                     "insumo_id": ing_id,
+    #                     "qtd": qtd_base - qtd # apenas registro, não desconta do preço
+    #                 })
+    #
+    #         # Calcula valor final do lanche
+    #         valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
+    #         valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
+    #         valor_final = (valor_base + valor_extra) * qtd_lanche
+    #
+    #         # Atualiza item
+    #         item.update({
+    #             "valor_venda": valor_final,
+    #             "valor_lanche": valor_final,
+    #             "observacoes": observacoes
+    #         })
+    #
+    #         obs_texto = str(item.get("observacoes_texto", "Nenhuma"))
+    #         detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {obs_texto}"
+    #
+    #         # Chama API para cadastrar pedido
+    #         response = cadastrar_pedido_app(
+    #             id_lanche=id_lanche,
+    #             id_bebida=id_bebida,
+    #             qtd_lanche=qtd_lanche,
+    #             detalhamento=detalhamento,
+    #             observacoes=observacoes,
+    #             numero_mesa=numero_mesa,
+    #             id_pessoa=id_pessoa
+    #
+    #         )
+    #
+    #     # Verifica resposta
+    #         if "error" in response:
+    #             snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
+    #             page.update()
+    #             return
+    #
+    #     # Limpa o carrinho da mesa e confirma sucesso
+    #     page.client_storage.set("carrinho_garcom", [])
+    #     snack_sucesso("Pedido enviado para a cozinha com sucesso!")
+    #     page.go("/mesa")
+    #     page.update()
 
     def confirmar_pedido_cozinha(e):
-
         id_pessoa = page.client_storage.get("pessoa_id")
         if not id_pessoa:
-            snack_error("Garcom não logado!")
+            snack_error("Garçom não logado!")
             page.go("/login")
             return
 
@@ -697,79 +828,84 @@ def main(page: ft.Page):
             page.update()
             return
 
-
-
         token = page.client_storage.get("token")
         insumos = listar_insumos(token)
         preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
 
-        # Pega número da mesa do primeiro item (todos têm o mesmo)
+        # Número da mesa (todos itens da mesma mesa)
         numero_mesa = carrinho[0].get("mesa")
 
         for item in carrinho:
             id_lanche = item.get("id_lanche")
-            id_bebida = page.client_storage.get("id_bebida")
-            qtd_lanche = int(item.get("qtd", 1))
-            ingredientes = item.get("ingredientes", {})
+            id_bebida = item.get("id_bebida")
+            qtd = int(item.get("qtd", 1))
 
-            # Receita base do lanche
-            receita_original = carregar_receita_base(id_lanche)
             observacoes = {"adicionar": [], "remover": []}
+            valor_final = 0
 
-            # Verifica modificações
-            for ing_id, qtd in ingredientes.items():
-                qtd_base = receita_original.get(ing_id, 0)
-                if qtd > qtd_base:
-                    observacoes["adicionar"].append({
-                        "insumo_id": ing_id,
-                        "qtd": qtd - qtd_base,
-                        "valor": preco_ingredientes.get(ing_id, 0) * (qtd - qtd_base)
-                    })
-                elif qtd < qtd_base:
-                    observacoes["remover"].append({
-                        "insumo_id": ing_id,
-                        "qtd": qtd_base - qtd # apenas registro, não desconta do preço
-                    })
+            # --- Caso 1: Pedido contém LANCHE ---
+            if id_lanche:
+                receita_original = carregar_receita_base(id_lanche) or {}
+                ingredientes = item.get("ingredientes", {})
 
-            # Calcula valor final do lanche
-            valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-            valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
-            valor_final = (valor_base + valor_extra) * qtd_lanche
+                # Ajusta observações de ingredientes (adições e remoções)
+                for ing_id, qtd_ajustada in ingredientes.items():
+                    qtd_base = receita_original.get(ing_id, 0)
+                    if qtd_ajustada > qtd_base:
+                        observacoes["adicionar"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_ajustada - qtd_base,
+                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_ajustada - qtd_base)
+                        })
+                    elif qtd_ajustada < qtd_base:
+                        observacoes["remover"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_base - qtd_ajustada
+                        })
 
-            # Atualiza item
-            item.update({
-                "valor_venda": valor_final,
-                "valor_lanche": valor_final,
-                "observacoes": observacoes
-            })
+                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
+                valor_extra = sum(obs.get("valor", 0) for obs in observacoes["adicionar"])
+                valor_final += (valor_base + valor_extra) * qtd
 
+            # --- Caso 2: Pedido contém BEBIDA ---
+            if id_bebida:
+                valor_bebida = float(item.get("valor", 0))
+                valor_final += valor_bebida * qtd
+
+            # Se não há lanche nem bebida, ignora
+            if not id_lanche and not id_bebida:
+                print("Item ignorado: não contém lanche nem bebida.")
+                continue
+
+            # Monta detalhamento
             obs_texto = str(item.get("observacoes_texto", "Nenhuma"))
-            detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {obs_texto}"
+            detalhamento = (
+                f"Lanche: {item.get('nome_lanche', '---')} | "
+                f"Bebida: {item.get('nome_bebida', '---')} | "
+                f"Obs: {obs_texto}"
+            )
 
-            # Chama API para cadastrar pedido
+            # Chama API para cadastrar o pedido
             response = cadastrar_pedido_app(
                 id_lanche=id_lanche,
                 id_bebida=id_bebida,
-                qtd_lanche=qtd_lanche,
+                qtd_lanche=qtd,
                 detalhamento=detalhamento,
                 observacoes=observacoes,
                 numero_mesa=numero_mesa,
                 id_pessoa=id_pessoa
-
             )
 
-        # Verifica resposta
             if "error" in response:
-                snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
+                snack_error(f"Erro ao cadastrar pedido: {response['error']}")
                 page.update()
                 return
 
-        # Limpa o carrinho da mesa e confirma sucesso
+        # --- Sucesso ---
         page.client_storage.set("carrinho_garcom", [])
         snack_sucesso("Pedido enviado para a cozinha com sucesso!")
         page.go("/mesa")
         page.update()
-
 
     def confirmar_venda(e):
         pessoa_id = page.client_storage.get("pessoa_id")
@@ -790,75 +926,133 @@ def main(page: ft.Page):
             page.update()
             return
 
+        # pega o carrinho de delivery (não o do garçom)
         carrinho = page.client_storage.get("carrinho") or []
-        if not carrinho:
-            snack_error("Seu carrinho está vazio!")
+        if isinstance(carrinho, str):
+            try:
+                carrinho = json.loads(carrinho)
+            except:
+                carrinho = []
+
+        # Normaliza/filtra itens inválidos (compatível com formatos antigos)
+        carrinho_normalizado = []
+        for it in carrinho:
+            item = dict(it)  # cópia defensiva
+
+            # normaliza ids
+            item["id_lanche"] = item.get("id_lanche") if item.get("id_lanche") not in [None, ""] else None
+            item["id_bebida"] = item.get("id_bebida") if item.get("id_bebida") not in [None, ""] else None
+
+            # tenta converter strings numéricas para int
+            if item["id_lanche"] not in [None, ""]:
+                try:
+                    item["id_lanche"] = int(item["id_lanche"])
+                except:
+                    pass
+            if item["id_bebida"] not in [None, ""]:
+                try:
+                    item["id_bebida"] = int(item["id_bebida"])
+                except:
+                    pass
+
+            # define tipo se não existir
+            if "tipo" not in item or not item["tipo"]:
+                if item["id_lanche"] not in [None, ""]:
+                    item["tipo"] = "lanche"
+                elif item["id_bebida"] not in [None, ""]:
+                    item["tipo"] = "bebida"
+                else:
+                    item["tipo"] = None
+
+            # aceita somente itens que contenham lanche ou bebida válidos
+            if item["id_lanche"] not in [None, ""] or item["id_bebida"] not in [None, ""]:
+                carrinho_normalizado.append(item)
+            else:
+                print("Ignorado item inválido no carrinho:", it)
+
+        if not carrinho_normalizado:
+            snack_error("Nenhum item válido no carrinho!")
             page.update()
             return
 
         token = page.client_storage.get("token")
         insumos = listar_insumos(token)
-
-        # Tabela fixa de preços
         preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
 
-        for item in carrinho:
+        # processa item por item
+        for item in carrinho_normalizado:
+            tipo = item.get("tipo")
             id_lanche = item.get("id_lanche")
             id_bebida = item.get("id_bebida")
-            qtd_lanche = item.get("qtd", 1)
-            ingredientes = item.get("ingredientes", {})
+            qtd = int(item.get("qtd", 1))
 
-            # Recupera receita base do lanche
-            receita_original = carregar_receita_base(id_lanche)
-            observacoes = {"adicionar": [], "remover": []}
+            # lanche
+            if tipo == "lanche" or (id_lanche is not None):
+                ingredientes = item.get("ingredientes", {}) or {}
+                receita_original = carregar_receita_base(id_lanche)
+                observacoes = {"adicionar": [], "remover": []}
 
-            # Verifica modificações
-            for ing_id, qtd in ingredientes.items():
-                qtd_base = receita_original.get(ing_id, 0)
-                if qtd > qtd_base:
-                    observacoes["adicionar"].append({
-                        "insumo_id": ing_id,
-                        "qtd": qtd - qtd_base,
-                        "valor": preco_ingredientes.get(ing_id, 0) * (qtd - qtd_base)
-                    })
-                elif qtd < qtd_base:
-                    observacoes["remover"].append({
-                        "insumo_id": ing_id,
-                        "qtd": qtd_base - qtd  # apenas registro, não desconta do preço
-                    })
+                for ing_id, qtd_atual in ingredientes.items():
+                    qtd_base = receita_original.get(ing_id, 0)
+                    if qtd_atual > qtd_base:
+                        observacoes["adicionar"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_atual - qtd_base,
+                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_atual - qtd_base)
+                        })
+                    elif qtd_atual < qtd_base:
+                        observacoes["remover"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_base - qtd_atual
+                        })
 
-            # Recalcula valor do lanche considerando apenas os extras
-            valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-            valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
-            valor_final = (valor_base + valor_extra) * qtd_lanche
+                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
+                valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
+                valor_final = (valor_base + valor_extra) * qtd
 
-            # Atualiza item no carrinho
-            item["valor_venda"] = valor_final
-            item["valor_lanche"] = valor_final
-            item["observacoes"] = observacoes
+                detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {item.get('observacoes_texto', 'Nenhuma')}"
 
-            obs_texto = item.get("observacoes_texto", "Nenhuma")
-            detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {obs_texto}"
+                response = cadastrar_venda_app(
+                    lanche_id=id_lanche if id_lanche is not None else None,
+                    pessoa_id=pessoa_id,
+                    bebida_id=None,
+                    qtd_lanche=qtd,
+                    forma_pagamento=forma_pagamento_valor,
+                    endereco=endereco_valor,
+                    detalhamento=detalhamento,
+                    observacoes=observacoes,
+                    valor_venda=valor_final
+                )
 
-            # Chama a API para cadastrar venda
-            response = cadastrar_venda_app(
-                lanche_id=id_lanche,
-                pessoa_id=pessoa_id,
-                bebida_id=id_bebida,
-                qtd_lanche=qtd_lanche,
-                forma_pagamento=forma_pagamento_valor,
-                endereco=endereco_valor,
-                detalhamento=detalhamento,
-                observacoes=observacoes,
-                valor_venda=valor_final
-            )
+            # bebida
+            elif tipo == "bebida" or (id_bebida is not None):
+                valor_final = float(item.get("valor", 0)) * qtd
+                detalhamento = f"Bebida: {item.get('nome_bebida', 'Sem nome')}"
 
-            if "error" in response:
-                snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
+                response = cadastrar_venda_app(
+                    lanche_id=None,
+                    pessoa_id=pessoa_id,
+                    bebida_id=id_bebida if id_bebida is not None else None,
+                    qtd_lanche=qtd,
+                    forma_pagamento=forma_pagamento_valor,
+                    endereco=endereco_valor,
+                    detalhamento=detalhamento,
+                    observacoes={},
+                    valor_venda=valor_final
+                )
+            else:
+                snack_error(f"Item inválido no carrinho: {item}")
                 page.update()
                 return
 
-        # Limpa carrinho após confirmação
+            # checa resposta
+            if "error" in response:
+                snack_error(
+                    f"Erro ao cadastrar {item.get('nome_lanche', item.get('nome_bebida', 'item'))}: {response['error']}")
+                page.update()
+                return
+
+        # tudo ok -> limpa carrinho de delivery
         page.client_storage.set("carrinho", [])
         snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
         page.go("/")
@@ -1038,6 +1232,10 @@ def main(page: ft.Page):
         # Carrinho do garçom (vinculado à mesa)
         carrinho = page.client_storage.get("carrinho_garcom") or []
 
+        if not carrinho:
+            snack_error("Nenhum item no carrinho!")
+            page.update()
+            return
 
         # Forma de pagamento
         forma_pagamento_valor = getattr(input_forma_pagamento, "value", None)
@@ -1049,7 +1247,7 @@ def main(page: ft.Page):
         # Endereço fixo: venda presencial
         endereco = "Presencial"
 
-        # Busca insumos para calcular preços extras
+        # Busca insumos para cálculo de preço extra
         token = page.client_storage.get("token")
         insumos = listar_insumos(token)
         preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
@@ -1057,62 +1255,68 @@ def main(page: ft.Page):
         for item in carrinho:
             id_lanche = item.get("id_lanche")
             id_bebida = item.get("id_bebida")
-            qtd_lanche = item.get("qtd", 1)
-            ingredientes = item.get("ingredientes", {})
+            qtd_lanche = int(item.get("qtd", 1))
 
-            # Receita original do lanche
-            receita_original = carregar_receita_base(id_lanche)
             observacoes = {"adicionar": [], "remover": []}
+            valor_final = 0.0
+            detalhamento = ""
 
-            # Verifica modificações feitas no lanche
-            for ing_id, qtd in ingredientes.items():
-                qtd_base = receita_original.get(ing_id, 0)
-                if qtd > qtd_base:
-                    observacoes["adicionar"].append({
-                        "insumo_id": ing_id,
-                        "qtd": qtd - qtd_base,
-                        "valor": preco_ingredientes.get(ing_id, 0) * (qtd - qtd_base)
-                    })
-                elif qtd < qtd_base:
-                    observacoes["remover"].append({
-                        "insumo_id": ing_id,
-                        "qtd": qtd_base - qtd
-                    })
+            # 🥪 Caso seja lanche
+            if id_lanche:
+                ingredientes = item.get("ingredientes", {})
+                receita_original = carregar_receita_base(id_lanche)
 
-            # Calcula o valor final (base + extras)
-            valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-            valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
-            valor_final = (valor_base + valor_extra) * qtd_lanche
+                # Calcula modificações
+                for ing_id, qtd in ingredientes.items():
+                    qtd_base = receita_original.get(ing_id, 0)
+                    if qtd > qtd_base:
+                        observacoes["adicionar"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd - qtd_base,
+                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd - qtd_base)
+                        })
+                    elif qtd < qtd_base:
+                        observacoes["remover"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_base - qtd
+                        })
 
-            # Atualiza item
-            item["valor_venda"] = valor_final
-            item["valor_lanche"] = valor_final
-            item["observacoes"] = observacoes
+                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
+                valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
+                valor_final = (valor_base + valor_extra) * qtd_lanche
 
-            obs_texto = item.get("observacoes_texto", "Nenhuma")
-            detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {obs_texto}"
+                detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {item.get('observacoes_texto', 'Nenhuma')}"
 
-            # Chama API para registrar a venda
+            #  Caso seja bebida
+            elif id_bebida:
+                valor_final = float(item.get("valor", 0)) * qtd_lanche
+                detalhamento = f"Bebida: {item.get('nome_bebida', 'Sem nome')}"
+
+            else:
+                snack_error("Item inválido no carrinho (sem lanche nem bebida).")
+                continue
+
+            #  Chama a API para registrar a venda
             response = cadastrar_venda_app(
-                lanche_id=id_lanche,
+                lanche_id=id_lanche if id_lanche else None,
                 pessoa_id=pessoa_id,
-                bebida_id=id_bebida,
+                bebida_id=id_bebida if id_bebida else None,
                 qtd_lanche=qtd_lanche,
                 forma_pagamento=forma_pagamento_valor,
-                endereco=endereco,  # sempre "Presencial"
+                endereco=endereco,  # sempre presencial
                 detalhamento=detalhamento,
-                observacoes=observacoes,
+                observacoes=observacoes if id_lanche else {},
                 valor_venda=valor_final
             )
 
             if "error" in response:
-                snack_error(f"Erro ao cadastrar {item.get('nome_lanche', 'lanche')}: {response['error']}")
+                snack_error(f"Erro ao cadastrar item: {response['error']}")
                 page.update()
                 return
 
-        # Limpa carrinho após confirmação
+        #  Limpa carrinho e volta à tela de resumo
         page.client_storage.set("carrinho_garcom", [])
-        snack_sucesso("Pedido confirmado! Venda presencial registrada com sucesso.")
+        snack_sucesso("Venda presencial registrada com sucesso!")
         page.go("/vendas_garcom")
         page.update()
 
@@ -1123,56 +1327,63 @@ def main(page: ft.Page):
         lanche_id = lanche_dropdown.value
         bebida_id = bebidas_dropdow.value
 
-        # A mesa é obrigatória, mas lanche e bebida não
         if not mesa_valor:
             snack_error("Informe o número da mesa antes de salvar.")
             return
 
-        # Se nenhum lanche nem bebida for selecionado, não deixa salvar
         if not lanche_id and not bebida_id:
             snack_error("Selecione pelo menos um lanche ou uma bebida.")
             return
 
         carrinho = page.client_storage.get("carrinho_garcom") or []
 
-        # Busca o lanche selecionado (se houver)
-        lanche = None
+        # Busca o lanche selecionado
         if lanche_id:
             lanche = next((l for l in lanches_disponiveis if l["id_lanche"] == int(lanche_id)), None)
             if not lanche:
                 snack_error("Lanche selecionado não foi encontrado.")
                 return
 
-        # Busca a bebida selecionada (se houver)
-        bebida = None
+            # Verifica se o lanche já está no carrinho dessa mesa
+            ja_existe = any(
+                i.get("id_lanche") == lanche["id_lanche"] and i.get("mesa") == mesa_valor
+                for i in carrinho
+            )
+            if not ja_existe:
+                carrinho.append({
+                    "id_lanche": lanche["id_lanche"],
+                    "nome_lanche": lanche["nome_lanche"],
+                    "valor_lanche": lanche["valor_lanche"],
+                    "mesa": mesa_valor,
+                })
+            else:
+                snack_error(f"O lanche '{lanche['nome_lanche']}' já está no carrinho dessa mesa.")
+                return
+
+        # Busca a bebida selecionada
         if bebida_id:
             bebida = next((b for b in bebidas_disponiveis if b["id_bebida"] == int(bebida_id)), None)
             if not bebida:
                 snack_error("Bebida selecionada não foi encontrada.")
                 return
 
-        # Cria um ou dois itens no carrinho, conforme a seleção
-        if lanche:
-            item_lanche = {
-                "id_lanche": lanche["id_lanche"],
-                "nome_lanche": lanche["nome_lanche"],
-                "valor_lanche": lanche["valor_lanche"],
-                "mesa": mesa_valor,
-            }
-            carrinho.append(item_lanche)
+            ja_existe = any(
+                i.get("id_bebida") == bebida["id_bebida"] and i.get("mesa") == mesa_valor
+                for i in carrinho
+            )
+            if not ja_existe:
+                carrinho.append({
+                    "id_bebida": bebida["id_bebida"],
+                    "nome_bebida": bebida["nome_bebida"],
+                    "valor": bebida["valor"],
+                    "mesa": mesa_valor,
+                })
+            else:
+                snack_error(f"A bebida '{bebida['nome_bebida']}' já está no carrinho dessa mesa.")
+                return
 
-        if bebida:
-            item_bebida = {
-                "id_bebida": bebida["id_bebida"],
-                "nome_bebida": bebida["nome_bebida"],
-                "valor": bebida["valor"],
-                "mesa": mesa_valor,
-            }
-            carrinho.append(item_bebida)
-
-        # Atualiza o carrinho salvo
+        # Atualiza o carrinho
         page.client_storage.set("carrinho_garcom", carrinho)
-
         snack_sucesso(f"Pedido da Mesa {mesa_valor} adicionado com sucesso!")
 
         # Limpa campos
@@ -1180,48 +1391,10 @@ def main(page: ft.Page):
         lanche_dropdown.value = ""
         bebidas_dropdow.value = ""
 
-        # Atualiza dropdown de mesas abertas
         mesa_dropdown_aberta.options = [
             ft.dropdown.Option(m, f"Mesa {m}") for m in listar_mesas_abertas()
         ]
         page.update()
-
-    # def salvar_carrinho(e):
-    #     numero_mesaa = numero_mesa.value.strip()
-    #     lanche_id = lanche_dropdown.value
-    #     # pessoa_id_cliente = cliente_dropdown.value
-    #
-    #     if not numero_mesa or not lanche_id:
-    #         snack_error("Preencha todos os campos antes de salvar.")
-    #         return
-    #
-    #     carrinho = page.client_storage.get("carrinho_garcom") or []
-    #     lanche = next((l for l in lanches_disponiveis if l["id_lanche"] == int(lanche_id)), None)
-    #
-    #     if not lanche:
-    #         snack_error("Lanche não encontrado.")
-    #         return
-    #
-    #     item_carrinho = {
-    #         "id_lanche": lanche["id_lanche"],
-    #         "nome_lanche": lanche["nome_lanche"],
-    #         "valor_lanche": lanche["valor_lanche"],
-    #         "mesa": numero_mesaa,  # importante: salvar a mesa
-    #     }
-    #
-    #     snack_sucesso(f"Pedido da Mesa {numero_mesa} adicionado com sucesso!")
-    #     numero_mesa.value = ""
-    #     lanche_dropdown.value = ""
-    #     # cliente_dropdown.value = ""
-    #
-    #     carrinho.append(item_carrinho)
-    #     page.client_storage.set("carrinho_garcom", carrinho)
-    #
-    #     # Atualiza dropdown de mesas abertas
-    #     mesa_dropdown_aberta.options = [ft.dropdown.Option(m, f"Mesa {m}") for m in listar_mesas_abertas()]
-    #
-    #     page.update()
-
 
     def listar_mesas_abertas():
         carrinho = page.client_storage.get("carrinho_garcom") or []
@@ -1502,9 +1675,6 @@ def main(page: ft.Page):
                         return item
                 return None
 
-
-            print("não passou")
-
             def carregar_insumos_disponiveis(token):
                 insumos = [i for i in listar_insumos(token) if i.get("qtd_insumo", 0) > 5]
                 return (
@@ -1512,15 +1682,11 @@ def main(page: ft.Page):
                     {i["id_insumo"]: i["custo"] for i in insumos}  # preços
                 )
 
-            print("passou")
-
             # ==========================
             # Inicialização
             # ==========================
             lanche_id = get_lanche_por_id()
-            print(lanche_id)
             item = carregar_carrinho_item(lanche_id)
-            print("passei por aqui", item)
             token = page.client_storage.get("token")
 
             if not item:
@@ -1718,178 +1884,105 @@ def main(page: ft.Page):
             input_forma_pagamento.value = ""
             input_endereco.value = ""
 
-            # --- Pega o carrinho do garçom e filtra pelo número da mesa ---
-            carrinho = page.session.get("carrinho_garcom") or []
+            # Recupera o carrinho da mesa atual
+            carrinho = page.client_storage.get("carrinho_garcom") or []
             carrinho_mesa = [item for item in carrinho if str(item.get("mesa")) == str(mesa_num)]
 
-            # --- Verifica se há itens no carrinho ---
             if not carrinho_mesa:
-                page.dialog = ft.AlertDialog(
-                    title=ft.Text("Erro"),
-                    content=ft.Text(f"Carrinho da mesa {mesa_num} está vazio."),
-                    actions=[ft.ElevatedButton("Ok", on_click=lambda e: page.dialog.close())]
-                )
-                page.dialog.open = True
-                page.update()
+                snack_error(f"Carrinho da mesa {mesa_num} está vazio.")
+                page.go("/mesa")
                 return
 
-            # --- Verifica se todos os pedidos foram enviados para a cozinha ---
-            if not all(item.get("enviado_cozinha", False) for item in carrinho_mesa):
-                page.dialog = ft.AlertDialog(
-                    title=ft.Text("Atenção"),
-                    content=ft.Text("Todos os pedidos devem ser enviados para a cozinha antes de fechar a mesa."),
-                    actions=[ft.ElevatedButton("Ok", on_click=lambda e: page.dialog.close())]
-                )
-                page.dialog.open = True
-                page.update()
-                return
-
-            # --- Lista de ingredientes disponíveis ---
-            token = page.client_storage.get("token")
-            insumos = listar_insumos(token)
-            ingredientes_disponiveis = {i["id_insumo"]: i["nome_insumo"] for i in insumos}
-
-            lista_itens = []
-            total = 0
-
+            # === Monta resumo de itens ===
+            resumo_itens = []
             for item in carrinho_mesa:
-                total += item.get("valor_lanche", 0)
-                item["valor_venda"] = item.get("valor_lanche", 0)
+                nome_lanche = item.get("nome_lanche")
+                nome_bebida = item.get("nome_bebida")
 
-                obs_texto = item.get("observacoes_texto", "Nenhuma")
-                receita_base = carregar_receita_base(item.get("id_lanche"))
-                ingredientes_atual = item.get("ingredientes", {})
-
-                adicionados, removidos = [], []
-                for ing_id, qtd_atual in ingredientes_atual.items():
-                    qtd_base = receita_base.get(ing_id, 0)
-                    if qtd_atual > qtd_base:
-                        adicionados.append(
-                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{(qtd_atual - qtd_base) * 100}g)"
+                # Se o item tem lanche
+                if nome_lanche:
+                    resumo_itens.append(
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Text(f"🍔 {nome_lanche}", color=Colors.ORANGE_900, size=16),
+                                    ft.Text(f"R$ {float(item.get('valor_lanche', 0)):.2f}", color=Colors.YELLOW_800,
+                                            size=16),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            ),
+                            padding=ft.padding.symmetric(vertical=4),
                         )
-                    elif qtd_atual < qtd_base:
-                        removidos.append(
-                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{(qtd_base - qtd_atual) * 100}g)"
+                    )
+
+                # Se o item tem bebida
+                if nome_bebida:
+                    resumo_itens.append(
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Text(f"🥤 {nome_bebida}", color=Colors.BLUE_900, size=16),
+                                    ft.Text(f"R$ {float(item.get('valor', 0)):.2f}", color=Colors.YELLOW_800, size=16),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            ),
+                            padding=ft.padding.symmetric(vertical=4),
                         )
-
-                lista_itens.append(
-                    ft.Container(
-
-                        content=ft.Column(
-
-                            [
-                                ft.Row(
-                                    [
-
-                                        ft.Text(item.get("nome_lanche", "Lanche"), color=Colors.ORANGE_700, size=16),
-                                        ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900, size=14),
-
-                                    ],
-                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                ),
-
-                                ft.Text(f"Obs: {obs_texto}", color=Colors.YELLOW_800, size=12),
-                                ft.Text(
-                                    "Adicionados: " + (", ".join(adicionados) if adicionados else "Nenhum"),
-                                    color=Colors.GREEN_700, size=12
-                                ),
-                                ft.Text(
-                                    "Removidos: " + (", ".join(removidos) if removidos else "Nenhum"),
-                                    color=Colors.RED_700, size=12
-                                ),
-
-
-                            ]
-                        ),
-                        padding=15,
-                        bgcolor=Colors.BLACK,
-                        border_radius=10,
-
-
                     )
-                )
 
-            lista_itens_bebida = []
-
-            for item in carrinho_mesa:
-                total += item.get("valor", 0)
-                item["valor_venda"] = item.get("valor", 0)
-
-                lista_itens_bebida.append(
-                    ft.Container(
-
-                        content=ft.Column(
-                            [
-                                ft.Row(
-
-                                    [
-
-                                        ft.Text(item.get("nome_bebida", "bebida"), color=Colors.ORANGE_700, size=16),
-                                        ft.Text(f'R$ {item["valor"]:.2f}', color=Colors.YELLOW_900, size=14),
-
-
-                                    ],
-                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                ),
-
-
-
-                            ]
-                        ),
-                        padding=15,
-                        bgcolor=Colors.BLACK,
-                        border_radius=10,
-
-                    )
-                )
-
+            # === Total ===
+            total = sum(float(item.get("valor_lanche", 0)) + float(item.get("valor", 0)) for item in carrinho_mesa)
 
             total_label = ft.Text(
-                f"Total da Mesa {mesa_num}: R$ {total:.2f}",
-                font_family="Arial",
+                f"💰 Total da Mesa {mesa_num}: R$ {total:.2f}",
                 color=Colors.ORANGE_700,
                 size=20,
+                weight=ft.FontWeight.BOLD
             )
 
+            # === Botões ===
             btn_fechar_venda = ft.ElevatedButton(
                 "Confirmar Venda",
                 bgcolor=Colors.ORANGE_700,
+                color=Colors.BLACK,
                 on_click=lambda e: confirmar_venda_garcom(e)
             )
 
             btn_voltar = ft.ElevatedButton(
                 "Voltar",
                 bgcolor=Colors.ORANGE_100,
+                color=Colors.BLACK,
                 on_click=lambda e: page.go("/mesa")
             )
 
-            # --- Monta a view ---
+            # === Monta tela ===
             page.views.append(
                 ft.View(
-                    "/carrinho_garcom",
+                    "/vendas_garcom",
                     [
                         ft.AppBar(
-                            title=ft.Text(f"Carrinho - Mesa {mesa_num}", color=Colors.ORANGE_700 ),
+                            title=ft.Text(f"Fechamento - Mesa {mesa_num}", color=Colors.ORANGE_700),
                             center_title=True,
                             bgcolor=Colors.BLACK,
                         ),
-                        ft.Text(f"Resumo", color=Colors.BLACK, size=20, font_family="Arial"),
-
-                        ft.Column(
-                            [
-                                ft.ListView(controls=lista_itens, expand=True),
-                                ft.ListView(controls=lista_itens_bebida, expand=True),
-                                total_label,
-                                input_forma_pagamento,
-                                ft.Row(
-                                    [btn_fechar_venda, btn_voltar],
-                                    alignment=ft.MainAxisAlignment.CENTER,
-                                    spacing=20,
-                                ),
-                            ],
-                            spacing=20,
-                            expand=True,
-                            scroll=True,
+                        ft.Container(
+                            content=ft.Column(
+                                [
+                                    ft.Text("Resumo do Pedido:", color=Colors.BLACK, size=18,
+                                            weight=ft.FontWeight.BOLD),
+                                    *resumo_itens,
+                                    ft.Divider(thickness=1, color=Colors.GREY_700),
+                                    total_label,
+                                    ft.Divider(thickness=1, color=Colors.GREY_700),
+                                    input_forma_pagamento,
+                                    ft.Row([btn_fechar_venda, btn_voltar], alignment=ft.MainAxisAlignment.CENTER,
+                                           spacing=20),
+                                ],
+                                spacing=10,
+                                scroll=ft.ScrollMode.AUTO
+                            ),
+                            padding=20,
+                            bgcolor=Colors.YELLOW_100,
                         ),
                     ],
                     bgcolor=Colors.YELLOW_100,
@@ -1997,6 +2090,8 @@ def main(page: ft.Page):
 
         if page.route.startswith("/observacoes/"):
             print("observacoes")
+            print("CARRINHO AO ENTRAR NA ROTA:", page.client_storage.get("carrinho"))
+
             # ==========================
             # Funções auxiliares
             # ==========================
@@ -2029,14 +2124,21 @@ def main(page: ft.Page):
             token = page.client_storage.get("token")
             ingredientes_disponiveis, preco_ingredientes = carregar_insumos_disponiveis(token)
 
-            valor_base_original = item.get("valor_original_lanche", item.get("valor_lanche", 0))
-            item["valor_original_lanche"] = valor_base_original
+            valor_base_carrinho = item.get("valor_original_lanche", item.get("valor_lanche", 0))
+            item["valor_original_lanche"] = valor_base_carrinho
 
             lanche_id = item.get("id_lanche")
             receita_original = carregar_receita_base(lanche_id) if lanche_id else {}
 
+            lanches = listar_lanche(token)
+            print("lanches: ", lanches)
+            for lanche in lanches:
+                if lanche_id == lanche["id_lanche"]:
+                    valor_base_original = lanche["valor_lanche"]
+
             # Mantém alterações salvas ou receita original
-            ingredientes_salvos = item.get("ingredientes") or {}
+            ingredientes_salvos_raw = item.get("ingredientes") or {}
+            ingredientes_salvos = {int(k): v for k, v in ingredientes_salvos_raw.items()}
             item["ingredientes"] = {ing_id: ingredientes_salvos.get(ing_id, receita_original.get(ing_id, 0))
                                     for ing_id in ingredientes_disponiveis}
 
@@ -2044,7 +2146,7 @@ def main(page: ft.Page):
             # UI e funções de controle
             # ==========================
             ingrediente_controls = {}
-            preco_label = ft.Text(f"Preço total: R$ {valor_base_original:.2f}", color=Colors.ORANGE_900, size=18)
+            preco_label = ft.Text(f"Preço total: R$ {valor_base_carrinho:.2f}", color=Colors.ORANGE_900, size=18)
             MAX_ADICIONAIS = 3
 
             def atualizar_preco():
@@ -2129,7 +2231,11 @@ def main(page: ft.Page):
                 carrinho = page.client_storage.get("carrinho") or []
                 if 0 <= lanche_index < len(carrinho):
                     item_copy = carrinho[lanche_index].copy()
-                    valores_atualizados = {ing_id: int(txt.value) for ing_id, txt in ingrediente_controls.items()}
+
+                    valores_atualizados = {
+                        ing_id: int(txt.value or 0)
+                        for ing_id, txt in ingrediente_controls.items()
+                    }
 
                     observacoes = {"adicionar": [], "remover": []}
                     for ing_id, qtd_base in receita_original.items():
@@ -2143,11 +2249,17 @@ def main(page: ft.Page):
                         if ing_id not in receita_original and qtd_nova > 0:
                             observacoes["adicionar"].append({"insumo_id": ing_id, "qtd": qtd_nova})
 
+                    preco_total = atualizar_preco()
+
+                    print("ANTES DE SALVAR:", valores_atualizados)
+                    print("RECEITA ORIGINAL:", receita_original)
+                    print("INGREDIENTES SALVOS:", ingredientes_salvos)
+
                     item_copy.update({
                         "observacoes_texto": obs_input.value or "Nenhuma",
                         "ingredientes": valores_atualizados,
-                        "valor_lanche": atualizar_preco(),
-                        "valor_venda": atualizar_preco(),
+                        "valor_lanche": preco_total,
+                        "valor_venda": preco_total,
                         "observacoes": observacoes
                     })
                     carrinho[lanche_index] = item_copy
@@ -2159,8 +2271,6 @@ def main(page: ft.Page):
                     )
                     page.update()
                 page.go("/carrinho")
-
-            atualizar_preco()
 
             # ==========================
             # Montagem da view
@@ -2190,118 +2300,93 @@ def main(page: ft.Page):
             )
 
         if page.route == "/vendas":
-            input_forma_pagamento.value = ""
-            input_endereco.value = ""
+            #  Limpa o histórico de views antigas
+            page.views.clear()
 
+            # --- Recupera carrinho ---
             carrinho = page.client_storage.get("carrinho") or []
 
-            # Ingredientes disponíveis
+            # Garante que é sempre uma lista
+            if isinstance(carrinho, str):
+                try:
+                    carrinho = json.loads(carrinho)
+                except:
+                    carrinho = []
+
+            if not carrinho:
+                snack_error("Carrinho vazio! Adicione itens antes de finalizar.")
+                page.go("/carrinho")
+                return
+
+            # --- Filtra por tipo ---
+            lanches = [i for i in carrinho if i.get("tipo") == "lanche"]
+            bebidas = [i for i in carrinho if i.get("tipo") == "bebida"]
+
+            # --- Carrega insumos ---
             token = page.client_storage.get("token")
             insumos = listar_insumos(token)
             ingredientes_disponiveis = {i["id_insumo"]: i["nome_insumo"] for i in insumos}
 
             lista_itens = []
+            lista_itens_bebida = []
             total = 0.0
-            # lanches = [i for i in carrinho if []]
-            lanches = [i for i in carrinho if "valor_lanche" in i]
 
-
+            # --- Lanches ---
             for item in lanches:
                 total += item.get("valor_lanche", 0)
-                item["valor_venda"] = item.get("valor_lanche", 0)
-                # ... resto do código de lanche
-
-                obs_texto = item.get("observacoes_texto", "Nenhuma")
                 receita_base = carregar_receita_base(item.get("id_lanche"))
                 ingredientes_atual = item.get("ingredientes", {})
+                obs_texto = item.get("observacoes_texto", "Nenhuma")
 
-                adicionados = []
-                removidos = []
-
+                adicionados, removidos = [], []
                 for ing_id, qtd_atual in ingredientes_atual.items():
                     qtd_base = receita_base.get(ing_id, 0)
                     if qtd_atual > qtd_base:
                         adicionados.append(
-                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{(qtd_atual - qtd_base) * 100}g)"
-                        )
+                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{(qtd_atual - qtd_base) * 100}g)")
                     elif qtd_atual < qtd_base:
                         removidos.append(
-                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{(qtd_base - qtd_atual) * 100}g)"
-                        )
+                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{(qtd_base - qtd_atual) * 100}g)")
 
                 lista_itens.append(
                     ft.Container(
-
-                        content=ft.Column(
-
-                            [
-                                ft.Row(
-                                    [
-
-                                        ft.Text(item.get("nome_lanche", "Lanche"), color=Colors.ORANGE_700, size=16),
-                                        ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900, size=14),
-
-                                    ],
-                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                ),
-
-                                ft.Text(f"Obs: {obs_texto}", color=Colors.YELLOW_800, size=12),
-                                ft.Text(
-                                    "Adicionados: " + (", ".join(adicionados) if adicionados else "Nenhum"),
-                                    color=Colors.GREEN_700, size=12
-                                ),
-                                ft.Text(
-                                    "Removidos: " + (", ".join(removidos) if removidos else "Nenhum"),
-                                    color=Colors.RED_700, size=12
-                                ),
-
-                            ]
-                        ),
+                        content=ft.Column([
+                            ft.Row([
+                                ft.Text(item.get("nome_lanche", "Lanche"), color=Colors.ORANGE_700, size=16),
+                                ft.Text(f"R$ {item['valor_lanche']:.2f}", color=Colors.YELLOW_900, size=14),
+                            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                            ft.Text(f"Obs: {obs_texto}", color=Colors.YELLOW_800, size=12),
+                            ft.Text("Adicionados: " + (", ".join(adicionados) if adicionados else "Nenhum"),
+                                    color=Colors.GREEN_700, size=12),
+                            ft.Text("Removidos: " + (", ".join(removidos) if removidos else "Nenhum"),
+                                    color=Colors.RED_700, size=12),
+                        ]),
                         padding=15,
                         bgcolor=Colors.BLACK,
                         border_radius=10,
-
                     )
                 )
 
-            lista_itens_bebida = []
-
-            bebidas = [i for i in carrinho if "valor" in i]
-
+            # --- Bebidas ---
             for item in bebidas:
                 total += item.get("valor", 0)
-                item["valor_venda"] = item.get("valor", 0)
-                # ... resto do código de bebida
-
                 lista_itens_bebida.append(
                     ft.Container(
-
-                        content=ft.Column(
-                            [
-                                ft.Row(
-
-                                    [
-
-                                        ft.Text(item.get("nome_bebida", "bebida"), color=Colors.ORANGE_700, size=16),
-                                        ft.Text(f'R$ {item["valor"]:.2f}', color=Colors.YELLOW_900, size=14),
-
-                                    ],
-                                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN
-                                ),
-
-                            ]
-                        ),
+                        content=ft.Column([
+                            ft.Row([
+                                ft.Text(item.get("nome_bebida", "Bebida"), color=Colors.ORANGE_700, size=16),
+                                ft.Text(f"R$ {item['valor']:.2f}", color=Colors.YELLOW_900, size=14),
+                            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                        ]),
                         padding=15,
                         bgcolor=Colors.BLACK,
                         border_radius=10,
-
                     )
                 )
 
-            page.client_storage.set("carrinho", carrinho)
             total_label = ft.Text(f"Total do Pedido: R$ {total:.2f}", color=Colors.ORANGE_700, size=20)
 
-            # Monta a view final
+            # --- Exibe tela ---
             page.views.append(
                 ft.View(
                     "/vendas",
@@ -2328,9 +2413,8 @@ def main(page: ft.Page):
                                                 text="Confirmar Venda",
                                                 bgcolor=Colors.ORANGE_800,
                                                 color=Colors.BLACK,
-                                                on_click=confirmar_venda(e),
+                                                on_click=confirmar_venda,  # ✅ sem () aqui!
                                             ),
-                                            print("asdfghjkj"),
                                             ft.OutlinedButton(
                                                 "Voltar",
                                                 on_click=lambda e: page.go("/carrinho"),
@@ -2338,9 +2422,8 @@ def main(page: ft.Page):
                                         ],
                                         alignment=ft.MainAxisAlignment.CENTER,
                                         spacing=20,
-                                    )]
-                                ),
-
+                                    )
+                                ]),
                             ],
                             alignment=ft.MainAxisAlignment.CENTER,
                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
