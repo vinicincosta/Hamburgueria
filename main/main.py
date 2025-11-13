@@ -94,13 +94,10 @@ def pessoas():
     form = request.args.get('form', None)
     exibir = request.args.get('exibir', False)
     if form is not None:
-        if exibir is None:
-            return render_template('pessoas.html', valor_=False, pessoas=var_pessoas['pessoas'])
+        if exibir in ['true', 'True', True, 1, '1']:
+            exibir = False
         else:
-            if exibir in ['true', 'True', True, 1, '1']:
-                exibir = False
-            else:
-                exibir = True
+            exibir = True
     # page = request.args.get("page", 1, type=int)
     # per_page = request.args.get("per_page", 10, type=int)
     return render_template('pessoas.html', exibir=exibir, pessoas=var_pessoas['pessoas'])

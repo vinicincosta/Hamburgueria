@@ -50,7 +50,7 @@
                 >
             {% endif %}
         </form>
-        {% if not valor_ or valor_ == 'False' %}
+        {% if not exibir or exibir == 'False' %}
             {% for l in lanches %}
                 {% if exibir in ['True', True] %}
                     {% if l['status'] in ['True', True] %}
