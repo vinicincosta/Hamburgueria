@@ -71,7 +71,7 @@ def logout():
 @app.route('/pessoas', methods=['GET'])
 @app.route('/pessoas/<valor_>', methods=['GET'])
 def pessoas(valor_=None):
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
     
@@ -103,7 +103,7 @@ def pessoas(valor_=None):
 @app.route('/entradas<valor_>', methods=['GET'])
 def entradas(valor_=None):
     # noinspection PyInconsistentReturns
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
     if session['papel'] != 'admin':
@@ -132,7 +132,7 @@ def entradas(valor_=None):
 
 @app.route('/lanches', methods=['GET'])
 def lanches():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
 
@@ -142,16 +142,33 @@ def lanches():
         flash('Parece que algo ocorreu errado :/', 'error')
 
         return redirect(url_for(session['funcao_rota_anterior']))
-
-
+    # return jsonify({'lanches': var_lanches['lanches']})
+    form_id = request.args.get('form_id', None)
+    print('form_id', form_id)
+    valor_ = request.args.get('valor_', False)
+    print('valor_', valor_)
+    exibir = request.args.get('exibir', False)
+    print('exibir', exibir)
     session['funcao_rota_anterior'] = 'lanches'
-    return render_template('lanches.html', lanches=var_lanches['lanches'])
+    if form_id is not None:
+        if form_id == 'exibir':
+            if not exibir or exibir ['False', 'false']:
+                exibir = True
+            else:
+                exibir = False
+        elif form_id == 'valor':
+            if not valor_ or valor_ in ['false', 'False']:
+                valor_ = False
+            else:
+                valor_ = True
+
+    return render_template('lanches.html', lanches=var_lanches['lanches'], valor_=valor_, exibir=exibir)
 
 @app.route('/insumos', methods=['GET'])
 @app.route('/insumos/<id_insumo>', methods=['GET'])
 def insumos(id_insumo=None):
     try:
-        if not session['token']:
+        if 'token' not in session:
             flash('Você deve entrar com uma conta para visualizar esta página', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -182,7 +199,7 @@ def insumos(id_insumo=None):
 
 @app.route('/categorias', methods=['GET'])
 def categorias():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
     if session['papel'] == "cliente" or session['papel'] == "garcom":
@@ -199,7 +216,7 @@ def categorias():
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -216,7 +233,7 @@ def pedidos():
 
 @app.route('/vendas', methods=['GET'])
 def vendas():
-    if not session['token']:
+    if 'token' not in session:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -232,7 +249,100 @@ def vendas():
 
     session['funcao_rota_anterior'] = 'vendas'
     return render_template('vendas.html', pedidos=var_vendas['pedidos'])
+
+
+@app.route('/pessoas/cadastrar', methods=['POST'])
+def cadastrar_pessoas():
+    if 'token' not in session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    cpf = request.form['cpf']
+    nome = request.form['nome']
+    email = request.form['email']
+    senha = request.form['senha']
+    salario = request.form['salario']
+    papel = request.form['papel']
+
+    cadastrar = routes.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
+    if 'success' in cadastrar:
+        flash('Pessoa adicionada com sucesso', 'success')
+        return redirect(url_for('pessoas'))
+
+    # Verificar na documentação possiveis erros para tratar
+    return redirect(url_for('cadastrar_pessoas'))
     # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
+
+@app.route('/lanches/cadastrar', methods=['POST'])
+def cadastrar_lanches():
+    if 'token' not in session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    nome_lanche = request.form['nome_lanche']
+    descricao_lanche = request.form['descricao_lanche']
+    valor_lanche = request.form['valor_lanche']
+    salvar_lanche = routes.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
+    if 'success' in salvar_lanche:
+        flash('Pessoa adicionada com sucesso', 'success')
+        return redirect(url_for('pessoas'))
+
+    # Verificar na documentação possiveis erros para tratar
+    return redirect(url_for('cadastrar_pessoas'))
+
+@app.route('/insumos/cadastrar', methods=['POST'])
+def cadastrar_insumos():
+    if 'token' not in session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    nome_insumo = request.form['nome_insumo']
+    custo_insumo = request.form['custo_insumo']
+    categoria_id = request.form['categoria_id']
+    salvar_insumo = routes.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
+    if 'success' in salvar_insumo:# 201
+        flash('Insumo adicionada com sucesso', 'success')
+        return redirect(url_for('insumos'))
+
+    # Verificar na documentação possiveis erros para tratar
+    return redirect(url_for('cadastrar_insumos'))
+
+
+@app.route('/entradas/cadastrar_entradas', methods=['POST'])
+def cadastrar_entradas():
+    if 'token' not in session:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    if request.method == 'POST':
+        qtd_entrada = request.form['qtd_entradas']
+        insumo_id = request.form['insumo_id']
+        data_entrada = request.form['data_entrada']
+        nota_fiscal = request.form['nota_fiscal']
+        valor_entrada = request.form['valor_entrada']
+
+        salvar_entrada = routes.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
+        if 'success' in salvar_entrada:
+            flash('Entrada adicionada com sucesso', 'success')
+            return redirect(url_for('entradas'))
+
+        return redirect(url_for('cadastrar_entradas'))
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_entradas'
+        return render_template('cadastrar_entradas.html')
 
 # @app.route('/pedidos', methods=['GET'])
 # def pedidos():
