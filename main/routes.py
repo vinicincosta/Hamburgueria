@@ -1,10 +1,8 @@
 import requests
-from flask_jwt_extended import get_jwt
-
 
 # url = "http://10.135.233.139:5002"
-#url = "http://10.135.233.150:5002"
-url ="http://192.168.15.9:5002"
+url = "http://10.135.233.162:5002"
+# url ="http://192.168.15.9:5002"
 
 def get_lanches(token_): # Feito
     base_url = f"{url}/lanches"
@@ -26,6 +24,17 @@ def get_insumos(token_): # Feito
         print(response.json())
         return {'erro':response.status_code}
 
+def get_pedidos(token_): # Feito
+    base_url = f"{url}/pedidos"
+    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+
 def get_receita(token_):
     base_url = f"{url}/vendas/receitas"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
@@ -46,7 +55,7 @@ def get_lanche_insumos(token_):
         print(response.json())
         return {'erro':response.status_code}
 
-def get_categorias(token_):
+def get_categorias(token_): # Feito
     base_url = f"{url}/categorias"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -96,7 +105,7 @@ def get_pessoas(token_): # Feito
         print(response.json())
         return {'erro':response.status_code}
 
-def get_insumo_by_id_insumo(id_insumo, token_):
+def get_insumo_by_id_insumo(id_insumo, token_): # Feito
     base_url = f"{url}/get_insumo_id/{id_insumo}"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -215,8 +224,8 @@ def post_login(email, password):
         print(response)
         return {'erro':response.status_code}
 
-def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
-    response = requests.post(f"{url}/pedidos", json={})
+# def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
+#     response = requests.post(f"{url}/pedidos", json={})
 
 # print(get_insumos(post_login('vini@', '123')))
 

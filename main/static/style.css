@@ -63,6 +63,15 @@ main {
     background-color: #161E25;
     border-radius: 15px;
 }
+.card-user {
+    color: #868484;
+    text-align: center;
+    margin: 10px;
+    width: 250px;
+    height: 200px;
+    background-color: #161E25;
+    border-radius: 15px;
+}
 
 /* From Uiverse.io by adamgiebl */
 
@@ -190,7 +199,18 @@ main {
     box-shadow: 15px 15px 30px #bebebe,
     -15px -5px 30px #ffffff;
 }
+.tabela{
+    color: white;
+    background-color: #161E25;
+    /*padding: 1vh;*/
+}
+.tabela thead{
+    background-color: #2b3a48;
+}
 
+.tabela tbody tr:hover{
+    background-color: #318dde;
+}
 #txt {
     color: #ffffff;
     font-weight: bold;

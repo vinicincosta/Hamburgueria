@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import routes
 
 app = Flask(__name__)
@@ -23,9 +23,9 @@ def login():
         password = request.form.get('senha')
         print(email, password, 'EMAILSENHA')
         user = routes.post_login(email, password)
-        print(routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa'])
+        # print(routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa'])
         if 'access_token' in user:
-            print()
+            # print()
             # session['id'] = routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa']
             session['token'] = user['access_token']
             session['username'] = user['nome']
@@ -33,10 +33,10 @@ def login():
 
             if session['papel'] == 'admin':
                 flash('Bem vindo administrador', 'success')
-                return redirect(url_for('pessoas'))  # pagina do admin
+                return redirect(url_for('index'))  # pagina do admin
             elif session['papel'] == 'cozinha':
                 flash('Bem vindo cozinheiro', 'success')
-                return redirect(url_for('pessoas'))  # pagina da cozinha
+                return redirect(url_for('index'))  # pagina da cozinha
             else:
                 flash('Você não tem acesso a esse sistema', "error")
                 print('flasssshhh')
@@ -71,8 +71,7 @@ def logout():
 @app.route('/pessoas', methods=['GET'])
 @app.route('/pessoas/<valor_>', methods=['GET'])
 def pessoas(valor_=None):
-    if 'papel' not in session:
-
+    if not session['token']:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
     
@@ -81,16 +80,16 @@ def pessoas(valor_=None):
         return redirect(url_for(session['funcao_rota_anterior']))
         
 
-    get_pessoas = routes.get_pessoas(session['token'])
+    var_pessoas = routes.get_pessoas(session['token'])
 
-    if 'pessoas' not in get_pessoas:
+    if 'pessoas' not in var_pessoas:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'pessoas'
 
     if valor_ is None:
-        return render_template('pessoas.html', valor_=False, pessoas=get_pessoas['pessoas'])
+        return render_template('pessoas.html', valor_=False, pessoas=var_pessoas['pessoas'])
     else:
         if valor_ in ['true', 'True', True, 1, '1']:
             booleano = True
@@ -98,50 +97,78 @@ def pessoas(valor_=None):
             booleano = False
     # page = request.args.get("page", 1, type=int)
     # per_page = request.args.get("per_page", 10, type=int)
-    return render_template('pessoas.html', valor_=not booleano, pessoas=get_pessoas['pessoas'])
+    return render_template('pessoas.html', valor_=not booleano, pessoas=var_pessoas['pessoas'])
 
 @app.route('/entradas', methods=['GET'])
-def entradas():
+@app.route('/entradas<valor_>', methods=['GET'])
+def entradas(valor_=None):
     # noinspection PyInconsistentReturns
-    if 'papel' not in session:
+    if not session['token']:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
     if session['papel'] != 'admin':
         flash('Você deve ser um admin para visualizar esta página', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-        
 
-    get_entradas = routes.get_entradas(session['token'])
 
-    if 'entradas' not in get_entradas:
+    var_entradas = routes.get_entradas(session['token'])
+
+    if 'entradas' not in var_entradas:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'entradas'
-    return render_template('entradas', entradas=get_entradas['entradas'])
+
+    # return jsonify({"entradas": var_entradas['entradas']})
+    if valor_ is None:
+       return render_template('entradas.html', valor_=False, entradas=var_entradas['entradas'])
+    else:
+       if valor_ in ['true', 'True', True, 1, '1']:
+           booleano = True
+       else:
+           booleano = False
+
+    return render_template('entradas.html', entradas=var_entradas['entradas'], valor_=not booleano)
 
 @app.route('/lanches', methods=['GET'])
 def lanches():
-    if 'papel' not in session:
+    if not session['token']:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for('login'))
 
-    get_lanches = routes.get_lanches(session['token'])
+    var_lanches = routes.get_lanches(session['token'])
 
-    if 'lanches' not in get_lanches:
+    if 'lanches' not in var_lanches:
         flash('Parece que algo ocorreu errado :/', 'error')
 
         return redirect(url_for(session['funcao_rota_anterior']))
-
-
+    # return jsonify({'lanches': var_lanches['lanches']})
+    form_id = request.args.get('form_id', None)
+    print('form_id', form_id)
+    valor_ = request.args.get('valor_', False)
+    print('valor_', valor_)
+    exibir = request.args.get('exibir', False)
+    print('exibir', exibir)
     session['funcao_rota_anterior'] = 'lanches'
-    return render_template('lanches.html', lanches=get_lanches['lanches'])
+    if form_id is not None:
+        if form_id == 'exibir':
+            if not exibir or exibir ['False', 'false']:
+                exibir = True
+            else:
+                exibir = False
+        elif form_id == 'valor':
+            if not valor_ or valor_ in ['false', 'False']:
+                valor_ = False
+            else:
+                valor_ = True
+
+    return render_template('lanches.html', lanches=var_lanches['lanches'], valor_=valor_, exibir=exibir)
 
 @app.route('/insumos', methods=['GET'])
 @app.route('/insumos/<id_insumo>', methods=['GET'])
 def insumos(id_insumo=None):
     try:
-        if 'papel' not in session:
+        if not session['token']:
             flash('Você deve entrar com uma conta para visualizar esta página', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
 
@@ -154,44 +181,74 @@ def insumos(id_insumo=None):
             return redirect(url_for(session['funcao_rota_anterior']))
 
         if id_insumo is None:
-            get_insumos = routes.get_insumos(session['token'])
+            var_insumos = routes.get_insumos(session['token'])
 
         else:
             id_insumo = int(id_insumo)
-            get_insumos = routes.get_insumo_by_id_insumo(id_insumo, session['token'])
+            var_insumos = routes.get_insumo_by_id_insumo(id_insumo, session['token'])
 
-        if 'insumos' not in get_insumos:
+        if 'insumos' not in var_insumos:
             flash('Parece que algo ocorreu errado :/', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
 
         session['funcao_rota_anterior'] = 'insumos'
-        return render_template('insumos.html', lanches=get_insumos['insumos'])
+        return render_template('insumos.html', lanches=var_insumos['insumos'])
     except ValueError:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
 @app.route('/categorias', methods=['GET'])
 def categorias():
-    if 'papel' not in session:
+    if not session['token']:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
     if session['papel'] == "cliente" or session['papel'] == "garcom":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-    get_categorias = routes.get_categorias(session['token'])
+    var_categorias = routes.get_categorias(session['token'])
 
-    if 'categorias' not in get_categorias:
+    if 'categorias' not in var_categorias:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'categorias'
-    return render_template('categorias.html', lanches=get_categorias['categorias'])
+    return render_template('categorias.html', lanches=var_categorias['categorias'])
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
-    if not session:
+    if not session['token']:
         flash('Você deve entrar com uma conta para visualizar esta página', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] == "cliente":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    var_pedidos = routes.get_pedidos(session['token'])
+    if 'pedidos' not in var_pedidos:
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    session['funcao_rota_anterior'] = 'pedidos'
+    return render_template('pedidos.html', pedidos=var_pedidos['pedidos'])
+
+@app.route('/vendas', methods=['GET'])
+def vendas():
+    if not session['token']:
+        flash('Você deve entrar com uma conta para visualizar esta página', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if session['papel'] == "cliente":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    var_vendas = routes.get_vendas(session['token'])
+
+    if 'vendas' not in var_vendas:
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    session['funcao_rota_anterior'] = 'vendas'
+    return render_template('vendas.html', pedidos=var_vendas['pedidos'])
     # if session['papel'] == "cliente" or session['papel'] == "garcom"]:
 
 # @app.route('/pedidos', methods=['GET'])
@@ -201,9 +258,6 @@ def pedidos():
 #     get_vendas = routes.get_vendas(session['token'])
 #
 #     return render_template('vendas.html', vendas=get_vendas['vendas'], papel=session['papel'])
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
