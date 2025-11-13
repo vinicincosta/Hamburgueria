@@ -190,20 +190,20 @@ def post_lanche_insumos(token_, lanche_id, insumo_id, qtd_insumo):
         print(response.json())
         return {'erro':response.status_code}
 
-def post_vendas(token_, data_venda, lanche_id, pessoa_id, qtd_lanche, detalhamento):
-    response = requests.post(f"{url}/vendas", json={
-        "data_venda":data_venda,
-        "lanche_id":lanche_id,
-        "pessoa_id":pessoa_id,
-        "qtd_lanche":qtd_lanche,
-        "detalhamento":detalhamento
-    }, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+# def post_vendas(token_, data_venda, lanche_id, pessoa_id, qtd_lanche, detalhamento):
+#     response = requests.post(f"{url}/vendas", json={
+#         "data_venda":data_venda,
+#         "lanche_id":lanche_id,
+#         "pessoa_id":pessoa_id,
+#         "qtd_lanche":qtd_lanche,
+#         "detalhamento":detalhamento
+#     }, headers={'Authorization': f'Bearer {token_}'})
+#     if response.status_code == 201:
+#         return response.json()
+#     else:
+#         print(response.status_code)
+#         print(response.json())
+#         return {'erro':response.status_code}
 
 def post_categorias(token_, nome_categoria):
     response = requests.post(f"{url}/categorias", json={"nome_categoria":nome_categoria}, headers={'Authorization': f'Bearer {token_}'})
