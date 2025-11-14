@@ -2736,7 +2736,7 @@ def main(page: ft.Page):
             lanches = [i for i in carrinho if i.get("tipo") == "lanche"]
             bebidas = [i for i in carrinho if i.get("tipo") == "bebida"]
 
-            # --- Carrega insumos ---
+            #  Carrega insumos
             token = page.client_storage.get("token")
             insumos = listar_insumos(token)
             ingredientes_disponiveis = {i["id_insumo"]: i["nome_insumo"] for i in insumos}
