@@ -160,7 +160,14 @@ def main(page: ft.Page):
             # Chama a rota de update para cada insumo
             update_insumo(id_insumo)
 
+    def atualizar_bebidas_estoque():
+        token = page.client_storage.get('token')
+        bebidas = listar_bebidas(token)  # pega todos os insumos
 
+        for bebida in bebidas:
+            id_bebida = bebida["id_bebida"]
+            # Chama a rota de update para cada insumo
+            update_bebida(id_bebida)
 
     # FUNÇÕES CARDÁPIO
     # def cardapio_porcoes(e):
@@ -221,7 +228,7 @@ def main(page: ft.Page):
         lv_bebidas.controls.clear()
 
         # Primeiro atualiza o estoque de todos os insumos
-
+        atualizar_bebidas_estoque()
 
         token = page.client_storage.get('token')
         resultado_bebidas = listar_bebidas(token)
@@ -2439,11 +2446,14 @@ def main(page: ft.Page):
 
                 page.client_storage.set("carrinho_garcom", carrinho)
 
-                page.snack_bar = ft.SnackBar(
-                    ft.Text("Observações salvas com sucesso!"),
-                    open=True, bgcolor=Colors.GREEN_700, duration=1500
-                )
+
+                snack_sucesso("Observações salvas com sucesso!")
                 page.update()
+                # page.snack_bar = ft.SnackBar(
+                #     ft.Text("Observações salvas com sucesso!"),
+                #     open=True, bgcolor=Colors.GREEN_700, duration=1500
+                # )
+                # page.update()
                 page.go(f"/carrinho_garcom?mesa={item['mesa']}")
 
             atualizar_preco()
@@ -2893,10 +2903,13 @@ def main(page: ft.Page):
                     carrinho[lanche_index] = item_copy
                     page.client_storage.set("carrinho", carrinho)
 
-                    page.snack_bar = ft.SnackBar(
-                        ft.Text("Observações salvas com sucesso!"),
-                        open=True, bgcolor=Colors.GREEN_700, duration=1500
-                    )
+
+                    snack_sucesso("Observações salvas com sucesso!")
+                    page.update()
+                    # page.snack_bar = ft.SnackBar(
+                    #     ft.Text(),
+                    #     open=True, bgcolor=Colors.GREEN_700, duration=1500
+                    # )
                     page.update()
                 page.go("/carrinho")
 
