@@ -1,35 +1,58 @@
 {% extends 'inicio.html' %}
 
 {% block content %}
-    <main id="fundo_da_main" >
-        <div>
+<main id="fundo_da_main">
+    <div>
+
+
+        <div class="div_pai_cadastrar_pessoa">
+            <form class="form" action="{{url_for('login')}}" method="POST" >
+                <p class="title">Register </p>
+                <p class="message">Cadastrar Funcionario </p>
+                <div class="flex" style="flex-direction: column">
+                    <label>
+                        <input name="email" class="inputt" type="text" placeholder="" required="">
+                        <span>email</span>
+                    </label>
+                    <label>
+                        <input name="senha" class="inputt" type="text" placeholder="" required="">
+                        <span>Senha</span>
+                    </label>
+                </div>
 
 
 
-            <div id="card">
-                <form id="form" action="{{url_for('login')}}" method="POST">
-                <h1 class="titulo_form_login" >Login</h1>
-                <label for="email">E-mail</label>
-                <input class="input" type="text" name="email" id="email">
-                <label for="senha"></label>
-                <input class="input" type="password" name="senha" id="senha">
-                <label for="lembrar"></label>
-                <input type="checkbox" name="lembrar" id="lembrar">
 
-<!--                <input class="buton_enviar_login" type="submit" value="Entrar">-->
-                <!-- From Uiverse.io by gharsh11032000 -->
+
+                <button class="animated-button">Logar</button>
+<!--                <button class="submit">Logar</button>-->
+                <p class="signin">Não tem uma conta?  <a style="text-decoration: none" href="{{url_for('cadastrar_pessoas')}}">Cadastrar</a></p>
+            </form>
+        </div>
+<!--        <div id="card">-->
+<!--            <form id="form" action="{{url_for('login')}}" method="POST">-->
+<!--                <label style="color: gold; text-shadow: black 3px 3px 3px" for="email">E-mail</label>-->
+<!--                <input class="input" type="text" name="email" id="email">-->
+<!--                <label style="color: gold; text-shadow: black 3px 3px 3px" for="senha">Senha</label>-->
+<!--                <input class="input" type="password" name="senha" id="senha">-->
+<!--                <label for="lembrar"></label>-->
+<!--                <input type="checkbox" name="lembrar" id="lembrar">-->
+
+<!--                &lt;!&ndash;                <input class="buton_enviar_login" type="submit" value="Entrar">&ndash;&gt;-->
+<!--                &lt;!&ndash; From Uiverse.io by gharsh11032000 &ndash;&gt;-->
                 <button class="animated-button">
-                  <span>Hover me</span>
-                  <span></span>
+                    <span>Logar</span>
+                    <span></span>
                 </button>
 
 
+<!--                <p style="color: gold; text-shadow: black 3px 3px 3px" id="txt">Não tem uma conta? <a-->
+<!--                        style="color: gold; text-decoration: none; text-shadow: black 3px 3px 3px"-->
+<!--                        href="{{url_for('cadastrar_pessoas')}}">Cadastrar</a></p>-->
+<!--            </form>-->
 
-                <p id="txt" >Não tem uma conta? <a>Cadastrar-se</a></p>
-            </form>
+<!--        </div>-->
 
-            </div>
-
-        </div>
-    </main>
+    </div>
+</main>
 {% endblock %}
