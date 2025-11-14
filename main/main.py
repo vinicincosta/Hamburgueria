@@ -1,14 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
-import routes
+import routes_web
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
-
-
-# def verificar_login():
-    # if not session:
-    #     flash('Você deve estar logado para visualizar esta página', 'error')
-    #     return redirect(url_for('login'))
 
 
 def verificar_token():
