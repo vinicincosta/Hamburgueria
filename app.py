@@ -3463,7 +3463,6 @@ def main(page: ft.Page):
         on_change=lambda e: page.go(f"/carrinho_garcom?mesa={mesa_dropdown_aberta.value}")
     )
 
-
     # Componentes não utlizados, mas necessários para o cadastrar pessoas
     slider_salario = ft.Slider(min=0, max=50000, divisions=485, label="{value}",
                                active_color=Colors.ORANGE_800,
