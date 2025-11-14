@@ -1,0 +1,52 @@
+{% extends 'inicio.html' %}
+{% block content %}
+    <main>
+        {% if not valor_ or valor_ == 'False' %}
+            <span style="display: block">
+                <form method="get" action="{{url_for('entradas', valor_=valor_)}}">
+                    <label for="tabela2" style="color: white">Tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
+                </form>
+            </span>
+            {% for e in entradas %}
+
+                <card class="card">
+                    <h1>#{{e['id_entrada']}}</h1>
+                    <h2>{{e['data_entrada']}}</h2>
+                    <p>{{e['qtd_entrada']}}</p>
+                    <p>{{e['valor_entrada']}}</p>
+                </card>
+
+            {% endfor %}
+        {% else %}
+            <form method="get" action="{{url_for('entradas', valor_=valor_)}}">
+                <label for="tabela" style="color: white">Tabela</label>
+                <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
+            </form>
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>DATA</th>
+                        <th>QUANTIDADE</th>
+                        <th>VALOR</th>
+<!--                        <th>SALÁRIO</th>-->
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in entradas %}
+
+                        <tr>
+                            <th>#{{e['id_entrada']}}</th>
+                            <th>{{e['data_entrada']}}</th>
+                            <th>{{e['qtd_entrada']}}</th>
+                            <th>{{e['valor_entrada']}}</th>
+
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}
