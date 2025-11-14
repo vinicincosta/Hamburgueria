@@ -1,237 +1,333 @@
+
+import json
+from datetime import datetime
+
 import requests
-from flask_jwt_extended import get_jwt
+
+base_url = "http://10.135.232.6:5002"
 
 
-# url = "http://10.135.233.139:5002"
-#url = "http://10.135.233.150:5002"
-url ="http://192.168.15.9:5002"
+# LOGIN
+def post_login(email, senha):
+    url = f"{base_url}/login"
+    try:
+        # Verifica se os campos estão preenchidos
+        if not email or not senha:
+            return None, None, None, "Email e senha são obrigatórios"
 
-def get_lanches(token_): # Feito
-    base_url = f"{url}/lanches"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+        response = requests.post(
+            url,
+            json={'email': email, 'senha': senha},
+            timeout=10  # Timeout de 10 segundos
+        )
 
-def get_insumos(token_): # Feito
-    base_url = f"{url}/insumos"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+        # Tratamento dos códigos de status
+        if response.status_code == 200:
+            dados = response.json()
+            print(f"Dados retornados: {dados}")  # Adicione este print para depuração
+            token = dados.get('access_token')
+            papel = dados.get('papel')
+            nome = dados.get('nome')  # Captura o nome
 
-def get_receita(token_):
-    base_url = f"{url}/vendas/receitas"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+            # Verifica se o nome está presente
+            if nome is None:
+                print("Nome não encontrado na resposta da API.")
+                nome = "Nome não disponível"  # Ou qualquer valor padrão que você queira
 
-def get_lanche_insumos(token_):
-    base_url = f"{url}/lanche_insumos"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+            return token, papel, nome, None
+        elif response.status_code == 401:
+            return None, None, None, "Email ou senha incorretos"
+        elif response.status_code == 400:
+            return None, None, None, "Credenciais inválidas"
+        else:
+            return None, None, None, f"Erro no servidor: {response.status_code}"
 
-def get_categorias(token_):
-    base_url = f"{url}/categorias"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+    except requests.exceptions.RequestException as e:
+        return None, None, None, f"Erro de conexão: {str(e)}"
+    except Exception as e:
+        return None, None, None, f"Erro inesperado: {str(e)}"
 
-def get_entradas(token_): # Feito
-    base_url = f"{url}/entradas"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
 
-def listar_vendas_by_id_mesa(id_mesa, token_):
-    base_url = f"{url}/vendas/{id_mesa}"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+def post_pessoas(nome_pessoa, cpf, papel, senha, salario, email, status_pessoa):
+    url = f"{base_url}/cadastro_pessoas_login"
+    nova_pessoa = {
+        'nome_pessoa': nome_pessoa,
+        'cpf': cpf,
+        'papel': papel,  # O papel pode ser 'Admin' ou 'usuario', conforme a API
+        'senha': senha,
+        'salario': salario,
+        'status_pessoa': status_pessoa,
+        'email': email,
+    }
 
-def get_vendas(token_):
-    base_url = f"{url}/vendas"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+    try:
+        response = requests.post(url, json=nova_pessoa)
 
-def get_pessoas(token_): # Feito
-    base_url = f"{url}/pessoas"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+        if response.status_code == 201:
+            return response.json(), None  # Cadastro bem-sucedido
+        else:
+            return None, response.json().get('msg', 'Erro desconhecido')  # Mensagem de erro da API
+    except requests.exceptions.RequestException as e:
+        return None, f'Erro de conexão: {str(e)}'
 
-def get_insumo_by_id_insumo(id_insumo, token_):
-    base_url = f"{url}/get_insumo_id/{id_insumo}"
-    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
 
-########################
-########################
+def cadastrar_lanche_post(novo_lanche):
+    url = f"{base_url}/lanches"
 
-# POST
-
-def post_cadastro_pessoas(nome, cpf, email, senha, salario, papel):
-    response = requests.post(f"{url}/cadastro_pessoas_login", json={
-        "email":email,
-        "senha":senha,
-        "nome_pessoa":nome,
-        "cpf":cpf,
-        "salario":salario,
-        "papel":papel})
-    # }, headers={'Authorization': f'Bearer {token_}'})
+    response = requests.post(url, json=novo_lanche)
+    print(response.json())
     if response.status_code == 201:
-        return response.json()
+        dados_post_lanche = response.json()
+
+        print(f'Nome Lanche: {dados_post_lanche["nome_lanche"]}\n'
+              f'Valor: {dados_post_lanche["valor"]}\n'
+              f'Descrição: {dados_post_lanche["descricao"]}\n')
     else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+        print(f'Erro: {response.status_code}')
 
 
-def post_lanches(token_, nome_lanche, descricao, valor):
-    response = requests.post(f"{url}/lanches", json={
-        "nome_lanche":nome_lanche,
-        "descricao_lanche":descricao,
-        "valor_lanche":valor,
+def listar_lanche(token):
+    url = f'{base_url}/lanches'
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
 
-    }, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
-        return response.json()
+    if response.status_code == 200:
+        dados_get_lanche = response.json()
+        print(dados_get_lanche)
+        return dados_get_lanche['lanches']
     else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
-
-def post_insumos(token_, nome_insumo, custo, categoria_id):
-    response = requests.post(f"{url}/insumos", json={
-        "nome_insumo":nome_insumo,
-        "categoria_id":categoria_id,
-        "custo": custo
-    }, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
+        print(f'Erro: {response.status_code}')
         return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
 
-def post_entradas(token_, insumo_id, qtd_entrada, data_entrada, nota_fiscal, valor_entrada):
-    response = requests.post(f"{url}/entradas", json={
-        "insumo_id":insumo_id,
-        "qtd_entrada":qtd_entrada,
-        "data_entrada":data_entrada,
-        "nota_fiscal":nota_fiscal,
-        "valor_entrada":valor_entrada
-    }, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
+
+# listar_lanche()
+
+def listar_pedidos(token):
+    url = f'{base_url}/pedidos'
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+
+    if response.status_code == 200:
+        dados_get_pedidos_ = response.json()
+        print(dados_get_pedidos_)
+        return dados_get_pedidos_
+    else:
+        print(f'Erro: {response.status_code}')
         return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
 
-def post_lanche_insumos(token_, lanche_id, insumo_id, qtd_insumo):
-    response = requests.post(f"{url}/lanche_insumos",
-                             json={"lanche_id":lanche_id, "insumo_id":insumo_id, "qtd_insumo":qtd_insumo},
-                             headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
+
+def listar_bebidas(token):
+    url = f'{base_url}/bebidas'
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+
+    if response.status_code == 200:
+        dados_get_bebidas = response.json()
+        print(dados_get_bebidas)
+        return dados_get_bebidas['bebidas']
+    else:
+        print(f'Erro: {response.status_code}')
         return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
 
-def post_vendas(token_, data_venda, lanche_id, pessoa_id, qtd_lanche, detalhamento):
-    response = requests.post(f"{url}/vendas", json={
-        "data_venda":data_venda,
-        "lanche_id":lanche_id,
-        "pessoa_id":pessoa_id,
-        "qtd_lanche":qtd_lanche,
-        "detalhamento":detalhamento
-    }, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
+
+def listar_pessoas():
+    url = f'{base_url}/pessoas'
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        dados_get_pessoa = response.json()
+        print(dados_get_pessoa)
+        return dados_get_pessoa['pessoas']
+    else:
+        print(f'Erro: {response.status_code}')
         return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
 
-def post_categorias(token_, nome_categoria):
-    response = requests.post(f"{url}/categorias", json={"nome_categoria":nome_categoria}, headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 201:
+
+# def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
+#     url = f"{base_url}/pedidos"
+#
+#     payload = {
+#         "data_pedido": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+#         "numero_mesa": numero_mesa,
+#         "id_pessoa": id_pessoa,
+#         "qtd_lanche": qtd_lanche,
+#         "detalhamento": detalhamento,
+#         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
+#     }
+#
+#     if id_lanche is not None:
+#         payload["id_lanche"] = int(id_lanche)
+#     if id_bebida is not None:
+#         payload["id_bebida"] = int(id_bebida)
+#
+#     print("DEBUG payload enviar pedido:", json.dumps(payload, indent=2, ensure_ascii=False))  # 👈 ADICIONE ISSO
+#
+#     try:
+#         response = requests.post(url, json=payload)
+#         if response.status_code != 201:
+#             print("DEBUG cadastrar_pedido_app:", response.status_code, response.text)
+#             return {"error": response.text}
+#         return response.json()
+#     except Exception as e:
+#         print("ERRO cadastrar_pedido_app:", str(e))
+#         return {"error": str(e)}
+
+
+def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
+    url = f"{base_url}/pedidos"
+
+    # 🔧 Monta o payload base
+    payload = {
+        "data_pedido": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "numero_mesa": int(numero_mesa),
+        "id_pessoa": int(id_pessoa),
+        "qtd_lanche": int(qtd_lanche),
+        "detalhamento": detalhamento or "",
+        "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
+    }
+
+    #  Adiciona lanche apenas se existir
+    if id_lanche not in [None, "", 0, "0"]:
+        try:
+            payload["id_lanche"] = int(id_lanche)
+        except Exception:
+            print(f"id_lanche inválido: {id_lanche}")
+
+    #  Adiciona bebida apenas se existir
+    if id_bebida not in [None, "", 0, "0"]:
+        try:
+            payload["id_bebida"] = int(id_bebida)
+        except Exception:
+            print(f" id_bebida inválido: {id_bebida}")
+
+    #  Se não tiver lanche nem bebida, não envia
+    if "id_lanche" not in payload and "id_bebida" not in payload:
+        return {"error": "É necessário informar pelo menos um lanche ou uma bebida"}
+
+    # 🔁 Faz a requisição
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 201:
+            print("DEBUG cadastrar_pedido_app:", response.status_code, response.text)
+            return {"error": response.text}
+
         return response.json()
+
+    except Exception as e:
+        print("ERRO cadastrar_pedido_app:", str(e))
+        return {"error": str(e)}
+
+
+
+def cadastrar_venda_app(lanche_id, pessoa_id, bebida_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None,
+                        valor_venda=0.0):
+    url = f"{base_url}/vendas"  # rota da API
+
+    payload = {
+        "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "lanche_id": lanche_id if lanche_id else None,
+        "pessoa_id": pessoa_id,
+        "bebida_id": bebida_id if bebida_id else None,
+        "qtd_lanche": qtd_lanche,
+        "detalhamento": detalhamento,
+        "endereco": endereco,
+        "forma_pagamento": forma_pagamento,
+        "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
+        "valor_venda": valor_venda,
+    }
+
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code != 201:
+            print("DEBUG cadastrar_venda_app:", response.status_code, response.text)
+            return {"error": response.text}
+        return response.json()
+    except Exception as e:
+        print("ERRO cadastrar_venda_app:", str(e))
+        return {"error": str(e)}
+
+
+def get_insumo(id_insumo):
+    url = f"{base_url}/get_insumo_id/{id_insumo}"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        dados_get_postagem = response.json()
+        print(dados_get_postagem)
+        return dados_get_postagem
     else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+        print(f'Erro: {response.status_code}')
+        return response.json()
 
 
-def post_login(email, password):
-    response = requests.post(f"{url}/login", json={"email": email, "senha": password})
+def update_insumo(id_insumo):
+    url = f"{base_url}/update_insumo/{id_insumo}"
+    response = requests.put(url)
+
     if response.status_code == 200:
         return response.json()
     else:
-        print(response.status_code)
-        print(response)
-        return {'erro':response.status_code}
-
-def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
-    response = requests.post(f"{url}/pedidos", json={})
-
-# print(get_insumos(post_login('vini@', '123')))
-
-def get_id_pessoa_by_token(token_):
-    response = requests.get(f"{url}/teste", headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
+        print(f'Erro: {response.status_code}')
         return response.json()
-    else:
-        print(response.status_code)
-        # print({'erro':response.json()})
-        return {'erro':response.status_code}
 
-# pessoa = post_cadastro_pessoas("vini", "47811718900", "v@", "123", 20.0, "admin")
-# print(pessoa)
-# token = post_login('vini@', '123')
-# print(token)
-# print(get_jwt())
-# print(get_pessoas(token['access_token']))
+
+def listar_insumos(token):
+    try:
+        headers = {"Authorization": f"Bearer {token}"}
+        response = requests.get(f"{base_url}/insumos", headers=headers)
+        data = response.json()
+        if "insumos" in data:
+            return data["insumos"]
+        else:
+            print("Erro ao listar insumos:", data)
+            return []
+    except Exception as e:
+        print("Erro de conexão:", e)
+        return []
+
+
+# Função global
+# Função global
+def listar_receita_lanche(lanche_id):
+    """
+    Retorna a receita base de um lanche: {insumo_id: quantidade_base}
+    """
+    try:
+        # Consulta os insumos que fazem parte do lanche
+        response = requests.get(f"{base_url}/lanche_receita/{lanche_id}")  # crie esta rota se não existir
+
+        if response.status_code == 200:
+            dados = response.json()
+            receita_lista = dados["receita"]
+            receita = {item["insumo_id"]: item["quantidade_base"] // 100 for item in receita_lista}
+            return receita
+
+        else:
+            print(f"Erro ao buscar receita: {response.status_code}")
+            return {}
+
+    except Exception as e:
+        print(f"Erro de conexão ao buscar receita: {e}")
+        return {}
+
+def carregar_receita_base(lanche_id):
+    try:
+        print("lanche_id: ", lanche_id)
+        dados_receita = listar_receita_lanche(lanche_id) or {}
+        print("dados_receita: ", dados_receita)
+        receita = {}
+        for ing_id, qtd in dados_receita.items():
+            ing_id, qtd = int(ing_id), int(qtd)
+            if ing_id > 0:
+                receita[ing_id] = qtd
+        return receita
+    except Exception as e:
+        print("Erro ao buscar receita:", e)
+        return {}
+
+
+def listar_vendas_mesa(token, numero_mesa):
+    url = f"{base_url}/vendas_garcom/{numero_mesa}"
+    response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
+    if response.status_code == 200:
+        return response.json().get("vendas", [])
+    else:
+        print("Erro ao buscar pedidos da mesa:", response.text)
+        return []
