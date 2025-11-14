@@ -22,11 +22,9 @@ def login():
         email = request.form.get('email')
         password = request.form.get('senha')
         print(email, password, 'EMAILSENHA')
-        user = routes.post_login(email, password)
-        # print(routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa'])
+        user = routes_web.post_login(email, password)
         if 'access_token' in user:
             # print()
-            # session['id'] = routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa']
             session['token'] = user['access_token']
             session['username'] = user['nome']
             session['papel'] = user['papel']
@@ -78,7 +76,7 @@ def pessoas():
         return redirect(url_for(session['funcao_rota_anterior']))
         
 
-    var_pessoas = routes.get_pessoas(session['token'])
+    var_pessoas = routes_web.get_pessoas(session['token'])
 
     if 'pessoas' not in var_pessoas:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -108,7 +106,7 @@ def entradas(valor_=None):
         return redirect(url_for(session['funcao_rota_anterior']))
 
 
-    var_entradas = routes.get_entradas(session['token'])
+    var_entradas = routes_web.get_entradas(session['token'])
 
     if 'entradas' not in var_entradas:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -132,7 +130,7 @@ def lanches():
     retorno = verificar_token()
     if retorno:
         return retorno
-    var_lanches = routes.get_lanches(session['token'])
+    var_lanches = routes_web.get_lanches(session['token'])
 
     if 'lanches' not in var_lanches:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -176,11 +174,11 @@ def insumos(id_insumo=None):
             return redirect(url_for(session['funcao_rota_anterior']))
 
         if id_insumo is None:
-            var_insumos = routes.get_insumos(session['token'])
+            var_insumos = routes_web.get_insumos(session['token'])
 
         else:
             id_insumo = int(id_insumo)
-            var_insumos = routes.get_insumo_by_id_insumo(id_insumo, session['token'])
+            var_insumos = routes_web.get_insumo_by_id_insumo(id_insumo, session['token'])
 
         if 'insumos' not in var_insumos:
             flash('Parece que algo ocorreu errado :/', 'error')
@@ -200,7 +198,7 @@ def categorias():
     if session['papel'] == "cliente" or session['papel'] == "garcom":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-    var_categorias = routes.get_categorias(session['token'])
+    var_categorias = routes_web.get_categorias(session['token'])
 
     if 'categorias' not in var_categorias:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -218,7 +216,7 @@ def pedidos():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
-    var_pedidos = routes.get_pedidos(session['token'])
+    var_pedidos = routes_web.get_pedidos(session['token'])
     if 'pedidos' not in var_pedidos:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
@@ -234,7 +232,7 @@ def vendas():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
-    var_vendas = routes.get_vendas(session['token'])
+    var_vendas = routes_web.get_vendas(session['token'])
 
     if 'vendas' not in var_vendas:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -260,7 +258,7 @@ def cadastrar_pessoas():
         salario = request.form['salario']
         papel = request.form['Cargo']
 
-        cadastrar = routes.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
+        cadastrar = routes_web.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
         if 'success' in cadastrar:
             flash('Pessoa adicionada com sucesso', 'success')
             return redirect(url_for('pessoas'))
@@ -284,7 +282,7 @@ def cadastrar_lanches():
         nome_lanche = request.form['nome_lanche']
         descricao_lanche = request.form['descricao_lanche']
         valor_lanche = request.form['valor_lanche']
-        salvar_lanche = routes.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
+        salvar_lanche = routes_web.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
         if 'success' in salvar_lanche:
             flash('Pessoa adicionada com sucesso', 'success')
             return redirect(url_for('pessoas'))
@@ -307,7 +305,7 @@ def cadastrar_insumos():
         nome_insumo = request.form['nome_insumo']
         custo_insumo = request.form['custo_insumo']
         categoria_id = request.form['categoria_id']
-        salvar_insumo = routes.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
+        salvar_insumo = routes_web.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
         if 'success' in salvar_insumo:# 201
             flash('Insumo adicionada com sucesso', 'success')
             return redirect(url_for('insumos'))
@@ -334,7 +332,7 @@ def cadastrar_entradas():
         nota_fiscal = request.form['nota_fiscal']
         valor_entrada = request.form['valor_entrada']
 
-        salvar_entrada = routes.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
+        salvar_entrada = routes_web.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
         if 'success' in salvar_entrada:
             flash('Entrada adicionada com sucesso', 'success')
             return redirect(url_for('entradas'))
@@ -354,7 +352,7 @@ def cadastrar_categorias():
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
         nome_categoria = request.form['nome_categoria']
-        salvar_categoria = routes.post_categorias(session['token'], nome_categoria)
+        salvar_categoria = routes_web.post_categorias(session['token'], nome_categoria)
         if 'success' in salvar_categoria:
             flash('Categoria adicionada com sucesso', 'success')
             return redirect(url_for('categorias'))
