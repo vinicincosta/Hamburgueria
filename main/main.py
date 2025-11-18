@@ -138,11 +138,8 @@ def lanches():
         return redirect(url_for(session['funcao_rota_anterior']))
     # return jsonify({'lanches': var_lanches['lanches']})
     form_id = request.args.get('form_id', None)
-    print('form_id', form_id)
     valor_ = request.args.get('valor_', False)
-    print('valor_', valor_)
     exibir = request.args.get('exibir', False)
-    print('exibir', exibir)
     session['funcao_rota_anterior'] = 'lanches'
     if form_id is not None:
         if form_id == 'exibir':
@@ -159,33 +156,47 @@ def lanches():
     return render_template('lanches.html', lanches=var_lanches['lanches'], valor_=valor_, exibir=exibir)
 
 @app.route('/insumos', methods=['GET'])
-@app.route('/insumos/<id_insumo>', methods=['GET'])
+#@app.route('/insumos/<id_insumo>', methods=['GET'])
 def insumos(id_insumo=None):
     try:
         retorno = verificar_token()
         if retorno:
             return retorno
-        if session['papel'] == "cliente" or session['papel'] == "garcom":
-            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
-            return redirect(url_for(session['funcao_rota_anterior']))
 
         if session['papel'] == "cliente" or session['papel'] == "garcom":
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
+        
+        id_insumo = request.args.get('id_insumo', None)
+        form = request.args.get('form', None)
+        exibir_todos = request.args.get('exibir_todos', False)
+        exibir_tabela = request.args.get('exibir_tabela', False)
 
         if id_insumo is None:
             var_insumos = routes_web.get_insumos(session['token'])
 
         else:
-            id_insumo = int(id_insumo)
-            var_insumos = routes_web.get_insumo_by_id_insumo(id_insumo, session['token'])
+            #id_insumo = int(id_insumo)
+            var_insumos = routes_web.get_insumo_by_id_insumo(int(id_insumo), session['token'])
 
         if 'insumos' not in var_insumos:
             flash('Parece que algo ocorreu errado :/', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
+        if form is not None:
+            if form == 'exibir_todos':
+                if exibir_todos in ['False', False]:
+                    exibir_todos = True
+                else:
+                    exibir_todos = False
+            else:
+                if exibir_tabela in ['False', False]:
+                    exibir_tabela = True
+                else:
+                    exibir_tabela = False
+                    
 
         session['funcao_rota_anterior'] = 'insumos'
-        return render_template('insumos.html', lanches=var_insumos['insumos'])
+        return render_template('insumos.html', lanches=var_insumos['insumos'], exibir_todos=exibir_todos, exibir_tabela=exibir_tabela)
     except ValueError:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
