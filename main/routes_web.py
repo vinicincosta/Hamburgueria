@@ -1,8 +1,9 @@
 import requests
 
 # url = "http://10.135.233.139:5002"
-url = "http://10.135.232.11:5002"
+url = "http://192.168.15.8:5002"
 # url ="http://192.168.15.9:5002"
+
 
 def get_lanches(token_): # Feito
     base_url = f"{url}/lanches"

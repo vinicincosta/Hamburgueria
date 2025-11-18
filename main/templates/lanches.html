@@ -54,21 +54,21 @@
             {% for l in lanches %}
                 {% if exibir in ['True', True] %}
                     {% if l['status'] in ['True', True] %}
-                        <card class="card">
+                        <div class="card">
                     {% else %}
-                        <card class="card-user">
+                        <div class="card-user">
                     {% endif %}
                         <h1>#{{l['id_lanche']}}</h1>
                         <h2>{{l['nome_lanche']}}</h2>
                         <p>{{l['valor_lanches']}}</p>
-                    </card>
+                        </div>
                 {% else %}
                     {% if l['status'] in [True, 'True'] %}
-                        <card class="card">
+                        <div class="card">
                             <h1>#{{l['id_lanche']}}</h1>
                             <h2>{{l['nome_lanche']}}</h2>
                             <p>{{l['valor_lanches']}}</p>
-                        </card>
+                        </div>
                     {% endif %}
                 {% endif %}
             {% endfor %}
