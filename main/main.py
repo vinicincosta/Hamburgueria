@@ -214,9 +214,9 @@ def categorias():
     if 'categorias' not in var_categorias:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
-
+    exibir_tabela = request.args.get('exibir_tabela', False)
     session['funcao_rota_anterior'] = 'categorias'
-    return render_template('categorias.html', lanches=var_categorias['categorias'])
+    return render_template('categorias.html', lanches=var_categorias['categorias'], exibir_tabela=not exibir_tabela)
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
@@ -231,8 +231,25 @@ def pedidos():
     if 'pedidos' not in var_pedidos:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
+    
+    exibir_tabela = request.args.get('exibir_tabela', False)
+    form = request.args.get('form', None)
+    exibir_concluidos = request.args.get('exibir_concluidos', False)
+
+    if form is not None:
+        if form == 'exibir_tabela':
+            if exibir_tabela in ['False', False]:
+                exibir_tabela = True
+            else:
+                exibir_tabela = False
+        else:
+            if exibir_concluidos in ['False', False]:
+                exibir_concluidos = True
+            else:
+                exibir_concluidos = False
+
     session['funcao_rota_anterior'] = 'pedidos'
-    return render_template('pedidos.html', pedidos=var_pedidos['pedidos'])
+    return render_template('pedidos.html', pedidos=var_pedidos['pedidos'], exibir_tabela=exibir_tabela, exibir_concluidos=exibir_concluidos)
 
 @app.route('/vendas', methods=['GET'])
 def vendas():

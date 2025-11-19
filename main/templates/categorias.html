@@ -1,0 +1,41 @@
+{% extends 'inicio.html' %}
+{% block content %}
+    <main>
+        <span>
+            <form method="get" action="{{url_for('categorias')}}">
+                <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+                {% if exibir_tabela in ['True', True] %}
+                    <label for="exibir_tabela" style="color: white">Exibir tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela" checked>
+                {% else %}
+                    <label for="exibir_tabela2" style="color: white">Exibir tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela2">
+                {% endif %}
+            </form>
+        </span>
+        {% if exibir_tabela in ['False', False] %}
+            {% for c in categorias %}
+                <div class="card">
+                    <h1>#{{c['id_categoria']}}-{{c['nome_categoria']}}</h1>
+                </div>
+            {% endfor %}
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in categorias %}
+                        <tr>
+                            <th>{{c['id_categoria']}}</th>
+                            <th>{{c['nome_categoria']}}</th>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}
