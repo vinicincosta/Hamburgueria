@@ -1,0 +1,48 @@
+{% extends 'incio.html' %}
+{% block content %}
+    <span>
+        <form method="get" action="{{url_for('pedidos')}}">
+            <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+            <input type="hidden" name="exibir_concluidos" value="{{exibir_concluidos}}">
+            <input type="hidden" name="form" value="exibir_concluidos">
+            {% if exibir_tabela in ['True', True] %}
+                <label for="exibir_concluidos" style="color: white">Exibir concluidos</label>
+                <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_concluidos" checked>
+            {% else %}
+                <label for="exibir_concluidos2" style="color: white">Exibir concluidos</label>
+                <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_concluidos2">
+            {% endif %}
+        </form>
+    </span>
+    {% if session['papel'] == 'admin'%}
+        <span>
+            <form method="get" action="{{url_for('pedidos')}}">
+                <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+                <input type="hidden" name="exibir_concluidos" value="{{exibir_concluidos}}">
+                <input type="hidden" name="form" value="exibir_tabela">
+                {% if exibir_tabela in ['True', True] %}
+                    <label for="exibir_tabela" style="color: white">Exibir tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela" checked>
+                {% else %}
+                    <label for="exibir_tabela2" style="color: white">Exibir tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela2">
+                {% endif %}
+            </form>
+        </span>
+        {% if exibir_tabela in ['False', False] %}
+            {% for p in pedidos %}
+                {% if exibir_concluidos in ['False', False] and not p['status'] %}
+                    <div class="card">
+                        <h1></h1>
+                    </div>                    
+                {% else %}
+
+                {% endif %}
+            {% endfor %}
+        {% else %}
+
+        {% endif %}
+    {% else %}
+        
+    {% endif %}
+{% endblock %}

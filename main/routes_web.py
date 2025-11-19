@@ -238,10 +238,7 @@ def get_id_pessoa_by_token(token_):
         print(response.status_code)
         # print({'erro':response.json()})
         return {'erro':response.status_code}
-# post_cadastro_pessoas('','dener','47816718888','d@','123',1,'admin')
-# pessoa = post_cadastro_pessoas("vini", "47811718900", "v@", "123", 20.0, "admin")
-# print(pessoa)
-# token = post_login('vini@', '123')
-# print(token)
-# print(get_jwt())
-# print(get_pessoas(token['access_token']))
+    
+
+
+print(get_pedidos(post_login("d@", "123")['access_token']))

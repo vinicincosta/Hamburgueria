@@ -80,12 +80,13 @@
                             <tr class="tr-desativado">
                         {% elif exibir_todos in ['True', True] and i['qtd_insumo'] != 0 %}
                             <tr>
+                        {% endif %}
                                 <th>{{i['id_insumo']}}</th>
                                 <th>{{i['nome_insumo']}}</th>
                                 <th>{{i['qtd_insumo']}}</th>
                                 <th>{{i['custo']}}</th>
                             </tr>
-                        {% endif %}
+                        
                     {% endfor %}
                 </tbody>
             </table>
