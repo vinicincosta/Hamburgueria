@@ -45,25 +45,22 @@
             <a href="{{url_for('login')}}"><img id="logo" src="../static/imgdois.png" alt="Royal Burger"></a>
         </div>
 
-        <div class="titulo_marca" >
-            {% if session["funcao_rota_anterior"] == "login"%}
 
-                <a class="titulo" href="{{url_for('login')}}"><h1>LOGIN</h1></a>
-            {% else %}
-                <a class="titulo" href="{{url_for('login')}}"><h1>ROYAL BURGER</h1></a>
-            {% endif %}
-
-        </div>
         <!-- <a href="#{{url_for('logout')}}">○</a> -->
         <div id="img-user"></div>
 
 
     </header>
     {% block content %}
+    {% if request.endpoint == 'index' %}
+        <video autoplay muted loop id="bg-video">
+            <source src="../static/hamburguer.mp4" type="video/mp4">
+        </video>
+    {% endif %}
         <main>
-            <a href="{{url_for('pessoas')}}">PESSOAS</a>
-            <a href="{{url_for('pessoas')}}">PESSOAS</a>
-            <a href="{{url_for('cadastrar_pessoas')}}">cadastrar pessoas</a>
+            <a href="{{ url_for('pessoas') }}">PESSOAS</a>
+            <a href="{{ url_for('pessoas') }}">PESSOAS</a>
+            <a href="{{ url_for('cadastrar_pessoas') }}">Cadastrar pessoas</a>
         </main>
     {% endblock %}
 
