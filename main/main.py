@@ -390,7 +390,9 @@ def cadastrar_categorias():
         return render_template('cadastrar_categorias.html')
 
 #
-
+@app.route("/faturamento")
+def faturamento():
+    return render_template("faturamento.html")
 
 
 
