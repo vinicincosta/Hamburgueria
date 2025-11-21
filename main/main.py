@@ -389,6 +389,12 @@ def cadastrar_categorias():
         session['funcao_rota_anterior'] = 'cadastrar_categorias'
         return render_template('cadastrar_categorias.html')
 
+#
+
+
+
+
+#
 
 
 
