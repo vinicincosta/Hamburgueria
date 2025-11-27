@@ -1,0 +1,95 @@
+{% extends 'inicio.html' %}
+
+{% block content %}
+    <main>
+        <h1>tab{{exibir_tabela}}</h1>
+        <h1>tdds{{exibir_todos}}</h1>
+        <span style="display: block">
+            <form method="get" action="{{url_for('insumos')}}">
+                <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
+                <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+                <input type="hidden" name="form" value="exibir_todos">
+                {% if exibir_todos in ['True', True] %}
+                    <label for="exibir_todos" style="color: white">Exibir todos</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos" checked>
+                {% else %}
+                    <label for="exibir_todos2" style="color: white">Exibir todos</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos2">
+                {% endif %}
+            </form>
+        </span>
+        <span style="display: block">
+            <form method="get" action="{{url_for('insumos')}}">
+                <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
+                <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+                <input type="hidden" name="form" value="exibir_tabela">
+                {% if exibir_tabela in ['True', True] %}
+                    <label for="exibir_tabela" style="color: white">Exibir tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela" checked>
+                {% else %}
+                    <label for="exibir_tabela2" style="color: white">Exibir tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela2">
+                {% endif %}
+            </form>
+        </span>
+        {% if exibir_tabela in ['False', False] %}
+            {% if exibir_todos in ['False', False] %}
+                {% for i in insumos %}
+                    {% if i['qtd_insumo'] != 0 %}
+                        <div class="card">
+                            <h1>#{{i['id_insumo']}}-{{i['nome_insumo']}}</h1>
+                            <!--Categoria-->
+                            <p>{{i['custo_insumo']}}R$</p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                {% for i in insumos %}
+                    {% if i['qtd_insumo'] != 0 %}
+                        <div class="card">
+                    {% else %}
+                        <div class="card-user"> <!--Mudar nome para card-desativado-->
+                    {% endif %}
+                            <h1>#{{i['id_insumo']}}-{{i['nome_insumo']}}</h1>
+                            <!--Categoria-->
+                            <p>{{i['custo_insumo']}}R$</p>
+                        </div>
+                {% endfor %}
+            {% endif %}
+        
+        {% else %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>QTD</th>
+                        <th>CUSTO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for i in insumos %}
+                        {% if exibir_todos in ['False', False] and i['qtde_insumo'] != 0 %}
+                            <tr>
+                                <th>{{i['id_insumo']}}</th>
+                                <th>{{i['nome_insumo']}}</th>
+                                <th>{{i['qtd_insumo']}}</th>
+                                <th>{{i['custo']}}</th>
+                            </tr>
+                        {% elif exibir_todos in ['True', True] and i['qtd_insumo'] == 0 %}
+                            <tr class="tr-desativado">
+                        {% elif exibir_todos in ['True', True] and i['qtd_insumo'] != 0 %}
+                            <tr>
+                        {% endif %}
+                                <th>{{i['id_insumo']}}</th>
+                                <th>{{i['nome_insumo']}}</th>
+                                <th>{{i['qtd_insumo']}}</th>
+                                <th>{{i['custo']}}</th>
+                            </tr>
+                        
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}

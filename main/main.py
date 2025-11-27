@@ -22,11 +22,9 @@ def login():
         email = request.form.get('email')
         password = request.form.get('senha')
         print(email, password, 'EMAILSENHA')
-        user = routes.post_login(email, password)
-        # print(routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa'])
+        user = routes_web.post_login(email, password)
         if 'access_token' in user:
             # print()
-            # session['id'] = routes.get_id_pessoa_by_token(user['access_token'])['id_pessoa']
             session['token'] = user['access_token']
             session['username'] = user['nome']
             session['papel'] = user['papel']
@@ -78,7 +76,7 @@ def pessoas():
         return redirect(url_for(session['funcao_rota_anterior']))
         
 
-    var_pessoas = routes.get_pessoas(session['token'])
+    var_pessoas = routes_web.get_pessoas(session['token'])
 
     if 'pessoas' not in var_pessoas:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -108,7 +106,7 @@ def entradas(valor_=None):
         return redirect(url_for(session['funcao_rota_anterior']))
 
 
-    var_entradas = routes.get_entradas(session['token'])
+    var_entradas = routes_web.get_entradas(session['token'])
 
     if 'entradas' not in var_entradas:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -132,7 +130,7 @@ def lanches():
     retorno = verificar_token()
     if retorno:
         return retorno
-    var_lanches = routes.get_lanches(session['token'])
+    var_lanches = routes_web.get_lanches(session['token'])
 
     if 'lanches' not in var_lanches:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -140,11 +138,8 @@ def lanches():
         return redirect(url_for(session['funcao_rota_anterior']))
     # return jsonify({'lanches': var_lanches['lanches']})
     form_id = request.args.get('form_id', None)
-    print('form_id', form_id)
     valor_ = request.args.get('valor_', False)
-    print('valor_', valor_)
     exibir = request.args.get('exibir', False)
-    print('exibir', exibir)
     session['funcao_rota_anterior'] = 'lanches'
     if form_id is not None:
         if form_id == 'exibir':
@@ -161,33 +156,47 @@ def lanches():
     return render_template('lanches.html', lanches=var_lanches['lanches'], valor_=valor_, exibir=exibir)
 
 @app.route('/insumos', methods=['GET'])
-@app.route('/insumos/<id_insumo>', methods=['GET'])
+#@app.route('/insumos/<id_insumo>', methods=['GET'])
 def insumos(id_insumo=None):
     try:
         retorno = verificar_token()
         if retorno:
             return retorno
-        if session['papel'] == "cliente" or session['papel'] == "garcom":
-            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
-            return redirect(url_for(session['funcao_rota_anterior']))
 
         if session['papel'] == "cliente" or session['papel'] == "garcom":
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
+        
+        id_insumo = request.args.get('id_insumo', None)
+        form = request.args.get('form', None)
+        exibir_todos = request.args.get('exibir_todos', False)
+        exibir_tabela = request.args.get('exibir_tabela', False)
 
         if id_insumo is None:
-            var_insumos = routes.get_insumos(session['token'])
+            var_insumos = routes_web.get_insumos(session['token'])
 
         else:
-            id_insumo = int(id_insumo)
-            var_insumos = routes.get_insumo_by_id_insumo(id_insumo, session['token'])
+            #id_insumo = int(id_insumo)
+            var_insumos = routes_web.get_insumo_by_id_insumo(int(id_insumo), session['token'])
 
         if 'insumos' not in var_insumos:
             flash('Parece que algo ocorreu errado :/', 'error')
             return redirect(url_for(session['funcao_rota_anterior']))
+        if form is not None:
+            if form == 'exibir_todos':
+                if exibir_todos in ['False', False]:
+                    exibir_todos = True
+                else:
+                    exibir_todos = False
+            else:
+                if exibir_tabela in ['False', False]:
+                    exibir_tabela = True
+                else:
+                    exibir_tabela = False
+                    
 
         session['funcao_rota_anterior'] = 'insumos'
-        return render_template('insumos.html', lanches=var_insumos['insumos'])
+        return render_template('insumos.html', lanches=var_insumos['insumos'], exibir_todos=exibir_todos, exibir_tabela=exibir_tabela)
     except ValueError:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
@@ -200,14 +209,14 @@ def categorias():
     if session['papel'] == "cliente" or session['papel'] == "garcom":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-    var_categorias = routes.get_categorias(session['token'])
+    var_categorias = routes_web.get_categorias(session['token'])
 
     if 'categorias' not in var_categorias:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
-
+    exibir_tabela = request.args.get('exibir_tabela', False)
     session['funcao_rota_anterior'] = 'categorias'
-    return render_template('categorias.html', lanches=var_categorias['categorias'])
+    return render_template('categorias.html', lanches=var_categorias['categorias'], exibir_tabela=not exibir_tabela)
 
 @app.route('/pedidos', methods=['GET'])
 def pedidos():
@@ -218,12 +227,29 @@ def pedidos():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
-    var_pedidos = routes.get_pedidos(session['token'])
+    var_pedidos = routes_web.get_pedidos(session['token'])
     if 'pedidos' not in var_pedidos:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
+    
+    exibir_tabela = request.args.get('exibir_tabela', False)
+    form = request.args.get('form', None)
+    exibir_concluidos = request.args.get('exibir_concluidos', False)
+
+    if form is not None:
+        if form == 'exibir_tabela':
+            if exibir_tabela in ['False', False]:
+                exibir_tabela = True
+            else:
+                exibir_tabela = False
+        else:
+            if exibir_concluidos in ['False', False]:
+                exibir_concluidos = True
+            else:
+                exibir_concluidos = False
+
     session['funcao_rota_anterior'] = 'pedidos'
-    return render_template('pedidos.html', pedidos=var_pedidos['pedidos'])
+    return render_template('pedidos.html', pedidos=var_pedidos['pedidos'], exibir_tabela=exibir_tabela, exibir_concluidos=exibir_concluidos)
 
 @app.route('/vendas', methods=['GET'])
 def vendas():
@@ -234,7 +260,7 @@ def vendas():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
-    var_vendas = routes.get_vendas(session['token'])
+    var_vendas = routes_web.get_vendas(session['token'])
 
     if 'vendas' not in var_vendas:
         flash('Parece que algo ocorreu errado :/', 'error')
@@ -260,7 +286,7 @@ def cadastrar_pessoas():
         salario = request.form['salario']
         papel = request.form['Cargo']
 
-        cadastrar = routes.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
+        cadastrar = routes_web.post_cadastro_pessoas(session['token'], nome, cpf, email, senha, salario, papel)
         if 'success' in cadastrar:
             flash('Pessoa adicionada com sucesso', 'success')
             return redirect(url_for('pessoas'))
@@ -284,7 +310,7 @@ def cadastrar_lanches():
         nome_lanche = request.form['nome_lanche']
         descricao_lanche = request.form['descricao_lanche']
         valor_lanche = request.form['valor_lanche']
-        salvar_lanche = routes.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
+        salvar_lanche = routes_web.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
         if 'success' in salvar_lanche:
             flash('Pessoa adicionada com sucesso', 'success')
             return redirect(url_for('pessoas'))
@@ -307,7 +333,7 @@ def cadastrar_insumos():
         nome_insumo = request.form['nome_insumo']
         custo_insumo = request.form['custo_insumo']
         categoria_id = request.form['categoria_id']
-        salvar_insumo = routes.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
+        salvar_insumo = routes_web.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
         if 'success' in salvar_insumo:# 201
             flash('Insumo adicionada com sucesso', 'success')
             return redirect(url_for('insumos'))
@@ -334,7 +360,7 @@ def cadastrar_entradas():
         nota_fiscal = request.form['nota_fiscal']
         valor_entrada = request.form['valor_entrada']
 
-        salvar_entrada = routes.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
+        salvar_entrada = routes_web.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
         if 'success' in salvar_entrada:
             flash('Entrada adicionada com sucesso', 'success')
             return redirect(url_for('entradas'))
@@ -354,7 +380,7 @@ def cadastrar_categorias():
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
         nome_categoria = request.form['nome_categoria']
-        salvar_categoria = routes.post_categorias(session['token'], nome_categoria)
+        salvar_categoria = routes_web.post_categorias(session['token'], nome_categoria)
         if 'success' in salvar_categoria:
             flash('Categoria adicionada com sucesso', 'success')
             return redirect(url_for('categorias'))
@@ -363,6 +389,14 @@ def cadastrar_categorias():
         session['funcao_rota_anterior'] = 'cadastrar_categorias'
         return render_template('cadastrar_categorias.html')
 
+#
+@app.route("/faturamento")
+def faturamento():
+    return render_template("faturamento.html")
+
+
+
+#
 
 
 

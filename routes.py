@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.232.47:5002"
+base_url = "http://10.135.232.6:5002"
 
 
 # LOGIN
@@ -172,7 +172,7 @@ def listar_pessoas():
 def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
     url = f"{base_url}/pedidos"
 
-    #  Trata número da mesa / delivery
+    # 🔧 Trata número da mesa / delivery
     if isinstance(numero_mesa, str) and numero_mesa.strip().lower() == "delivery":
         numero_mesa_val = "delivery"
     else:
