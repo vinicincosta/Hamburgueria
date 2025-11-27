@@ -3147,7 +3147,6 @@ def main(page: ft.Page):
 
     txt_salario = ft.Text(value='SALÁRIO: 0', font_family="Consolas", size=18, color=Colors.WHITE, animate_size=20,
                           weight=FontWeight.BOLD, theme_style=TextThemeStyle.HEADLINE_SMALL)
-
     # Eventos
     page.on_route_change = gerencia_rotas
     page.on_close = page.client_storage.remove("auth_token")
