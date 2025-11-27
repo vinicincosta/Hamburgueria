@@ -1,7 +1,7 @@
 import requests
 
 # url = "http://10.135.233.139:5002"
-url = "http://192.168.1.238:5002"
+url = "http://10.135.232.24:5002"
 # url ="http://192.168.15.9:5002"
 
 
@@ -241,4 +241,4 @@ def get_id_pessoa_by_token(token_):
     
 
 
-print(get_pedidos(post_login("d@", "123")['access_token']))
+# print(get_pedidos(post_login("d@", "123")['access_token']))
