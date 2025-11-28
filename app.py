@@ -3071,8 +3071,6 @@ def main(page: ft.Page):
         options=[ft.dropdown.Option(str(c["id_pessoa"]), c["nome_pessoa"]) for c in clientes_disponiveis]
     )
 
-
-
     # mesa_dropdown_aberta = ft.Dropdown(
     #     label="Mesas Abertas",
     #     width=200,
