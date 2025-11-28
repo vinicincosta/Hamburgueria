@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import routes_web
+import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret'
@@ -259,13 +260,14 @@ def vendas():
         return redirect(url_for(session['funcao_rota_anterior']))
 
     var_vendas = routes_web.get_vendas(session['token'])
-
+    # print(var_vendas['vendas']['data_venda'])
+    data_hoje = datetime.date.today()
     if 'vendas' not in var_vendas:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
     session['funcao_rota_anterior'] = 'vendas'
-    return render_template('vendas.html', pedidos=var_vendas['pedidos'])
+    return render_template('vendas.html', vendas=var_vendas['vendas'], data_de_hoje=data_hoje)
 
 
 @app.route('/pessoas/cadastrar', methods=['GET', 'POST'])
