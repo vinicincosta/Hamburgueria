@@ -74,8 +74,6 @@ def pessoas():
     if session['papel'] != 'admin':
         flash('Parece que você não tem acesso a essa página, entre com uma conta que possua acesso', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
-        
-
     var_pessoas = routes_web.get_pessoas(session['token'])
 
     if 'pessoas' not in var_pessoas:
