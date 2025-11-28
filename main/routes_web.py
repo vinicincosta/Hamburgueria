@@ -234,6 +234,12 @@ def post_login(email, password):
         print(response)
         return {'erro':response.status_code}
 
+
+########################################
+########################################
+# PUT
+
+
 # def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
 #     response = requests.post(f"{url}/pedidos", json={})
 
@@ -243,4 +249,4 @@ def post_login(email, password):
     
 
 
-print(get_pedidos(post_login("d@", "123")['access_token']))
+# print(get_pedidos(post_login("d@", "123")['access_token']))
