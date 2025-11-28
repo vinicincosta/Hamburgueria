@@ -486,8 +486,8 @@ def main(page: ft.Page):
                                     ft.Image(src="ChatGPT Image 14 de nov. de 2025, 15_44_16.png", height=70),
                                     ft.Column(
                                         [
-                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial", size=18),
-                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", size=18),
+                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial", size=17),
+                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", size=15),
 
                                             ft.Text(f'{bebida["descricao"]}',
                                                     color=Colors.YELLOW_800, width=200, font_family="Aharoni", size=13),
@@ -577,9 +577,6 @@ def main(page: ft.Page):
 
         page.client_storage.set("carrinho", carrinho)
         carrinho_view(None)
-
-
-
 
     def carrinho_view(e):
         lv_carrinho.controls.clear()
@@ -725,286 +722,6 @@ def main(page: ft.Page):
 
         page.update()
 
-    # def confirmar_pedido_cozinha(e):
-    #     id_pessoa = page.client_storage.get("pessoa_id")
-    #     if not id_pessoa:
-    #         snack_error("Garçom não logado!")
-    #         page.go("/login")
-    #         return
-    #
-    #     # Detecta se é delivery ou mesa
-    #     numero_mesa = page.client_storage.get("mesa_atual")
-    #     is_delivery = numero_mesa is None or numero_mesa == ""
-    #     origem = "delivery" if is_delivery else f"mesa {numero_mesa}"
-    #
-    #     # Pega o carrinho correto
-    #     if is_delivery:
-    #         carrinho = page.client_storage.get("carrinho") or []
-    #     else:
-    #         carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
-    #         carrinho = carrinhos.get(str(numero_mesa), [])
-    #
-    #     if not carrinho:
-    #         snack_error(f"Nenhum item no carrinho ({origem})!")
-    #         return
-    #
-    #     # Filtrar apenas itens NÃO enviados para cozinha
-    #     itens_pendentes = [item for item in carrinho if not item.get("enviado")]
-    #
-    #     if not itens_pendentes:
-    #         snack_error("Todos os itens já foram enviados para a cozinha!")
-    #         return
-    #
-    #     token = page.client_storage.get("token")
-    #     insumos = listar_insumos(token)
-    #     preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
-    #
-    #     for item in itens_pendentes:
-    #         id_lanche = item.get("id_lanche")
-    #         id_bebida = item.get("id_bebida")
-    #         qtd = int(item.get("qtd", 1))
-    #         observacoes = {"adicionar": [], "remover": []}
-    #         valor_final = 0
-    #
-    #         # Monta observações e valores
-    #         if id_lanche:
-    #             receita_original = carregar_receita_base(id_lanche) or {}
-    #             ingredientes = item.get("ingredientes", {})
-    #
-    #             for ing_id, qtd_ajustada in ingredientes.items():
-    #                 qtd_base = receita_original.get(ing_id, 0)
-    #                 if qtd_ajustada > qtd_base:
-    #                     observacoes["adicionar"].append({
-    #                         "insumo_id": ing_id,
-    #                         "qtd": qtd_ajustada - qtd_base,
-    #                         "valor": preco_ingredientes.get(ing_id, 0) * (qtd_ajustada - qtd_base)
-    #                     })
-    #                 elif qtd_ajustada < qtd_base:
-    #                     observacoes["remover"].append({
-    #                         "insumo_id": ing_id,
-    #                         "qtd": qtd_base - qtd_ajustada
-    #                     })
-    #
-    #             valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-    #             valor_extra = sum(obs.get("valor", 0) for obs in observacoes["adicionar"])
-    #             valor_final += (valor_base + valor_extra) * qtd
-    #
-    #         if id_bebida:
-    #             valor_bebida = float(item.get("valor", 0))
-    #             valor_final += valor_bebida * qtd
-    #
-    #         obs_texto = str(item.get("observacoes_texto", "Nenhuma"))
-    #         detalhamento = (
-    #             f"Lanche: {item.get('nome_lanche', '---')} | "
-    #             f"Bebida: {item.get('nome_bebida', '---')} | "
-    #             f"Obs: {obs_texto}"
-    #         )
-    #
-    #         # Envia para API
-    #         response = cadastrar_pedido_app(
-    #             id_lanche=id_lanche,
-    #             id_bebida=id_bebida,
-    #             qtd_lanche=qtd,
-    #             detalhamento=detalhamento,
-    #             numero_mesa="Delivery" if is_delivery else numero_mesa,
-    #             observacoes=observacoes,
-    #             id_pessoa=id_pessoa
-    #         )
-    #
-    #         if "error" in response:
-    #             snack_error(f"Erro ao cadastrar pedido: {response['error']}")
-    #             return
-    #
-    #         #  Marca como enviado (não apaga)
-    #         item["enviado"] = True
-    #
-    #     #  Salva carrinho atualizado
-    #     if is_delivery:
-    #         page.client_storage.set("carrinho", carrinho)
-    #     else:
-    #         carrinhos[str(numero_mesa)] = carrinho
-    #         page.client_storage.set("carrinhos_por_mesa", carrinhos)
-    #
-    #     snack_sucesso(f"Pedidos da {origem} enviados para a cozinha!")
-    #
-    #     if not is_delivery:
-    #         page.go("/mesa")
-    #     else:
-    #         page.go("/")
-    #
-    #     page.update()
-
-    # def confirmar_venda(e):
-    #     pessoa_id = page.client_storage.get("pessoa_id")
-    #     if not pessoa_id:
-    #         snack_error("Usuário não logado!")
-    #         page.go("/login")
-    #         return
-    #
-    #     endereco_valor = input_endereco.value.strip()
-    #     if not endereco_valor:
-    #         snack_error("Por favor, informe o endereço!")
-    #         page.update()
-    #         return
-    #
-    #     forma_pagamento_valor = getattr(input_forma_pagamento, "value", None)
-    #     if not forma_pagamento_valor:
-    #         snack_error("Selecione uma forma de pagamento!")
-    #         page.update()
-    #         return
-    #
-    #     # --- pega o carrinho de delivery ---
-    #     carrinho = page.client_storage.get("carrinho") or []
-    #     if isinstance(carrinho, str):
-    #         try:
-    #             carrinho = json.loads(carrinho)
-    #         except:
-    #             carrinho = []
-    #
-    #     # --- normaliza ---
-    #     carrinho_normalizado = []
-    #     for it in carrinho:
-    #         item = dict(it)
-    #
-    #         item["id_lanche"] = item.get("id_lanche") if item.get("id_lanche") not in [None, ""] else None
-    #         item["id_bebida"] = item.get("id_bebida") if item.get("id_bebida") not in [None, ""] else None
-    #
-    #         try:
-    #             if item["id_lanche"] not in [None, ""]:
-    #                 item["id_lanche"] = int(item["id_lanche"])
-    #             if item["id_bebida"] not in [None, ""]:
-    #                 item["id_bebida"] = int(item["id_bebida"])
-    #         except:
-    #             pass
-    #
-    #         if "tipo" not in item or not item["tipo"]:
-    #             if item["id_lanche"]:
-    #                 item["tipo"] = "lanche"
-    #             elif item["id_bebida"]:
-    #                 item["tipo"] = "bebida"
-    #             else:
-    #                 item["tipo"] = None
-    #
-    #         if item["id_lanche"] or item["id_bebida"]:
-    #             carrinho_normalizado.append(item)
-    #         else:
-    #             print("Ignorado item inválido no carrinho:", it)
-    #
-    #     if not carrinho_normalizado:
-    #         snack_error("Nenhum item válido no carrinho!")
-    #         page.update()
-    #         return
-    #
-    #     # --- carrega dados da API ---
-    #     token = page.client_storage.get("token")
-    #     insumos = listar_insumos(token)
-    #     preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
-    #
-    #     # --- valida se lanche/bebida ainda existem ---
-    #     lanches_validos = {l["id_lanche"]: l["nome_lanche"] for l in listar_lanche(token)}
-    #     bebidas_validas = {b["id_bebida"]: b["nome_bebida"] for b in listar_bebidas(token)}
-    #
-    #     carrinho_filtrado = []
-    #     for item in carrinho_normalizado:
-    #         if item.get("id_lanche") and item["id_lanche"] not in lanches_validos:
-    #             print(
-    #                 f"Removendo lanche inexistente do carrinho: {item.get('nome_lanche')} (id {item.get('id_lanche')})")
-    #             continue
-    #         if item.get("id_bebida") and item["id_bebida"] not in bebidas_validas:
-    #             print(
-    #                 f"Removendo bebida inexistente do carrinho: {item.get('nome_bebida')} (id {item.get('id_bebida')})")
-    #             continue
-    #         carrinho_filtrado.append(item)
-    #
-    #     carrinho_normalizado = carrinho_filtrado
-    #
-    #     if not carrinho_normalizado:
-    #         snack_error("Todos os itens do carrinho foram removidos — alguns produtos não existem mais.")
-    #         page.client_storage.set("carrinho", [])
-    #         page.update()
-    #         return
-    #
-    #     # --- processa os itens válidos ---
-    #     for item in carrinho_normalizado:
-    #         tipo = item.get("tipo")
-    #         id_lanche = item.get("id_lanche")
-    #         id_bebida = item.get("id_bebida")
-    #         qtd = int(item.get("qtd", 1))
-    #
-    #         # --- Lanche ---
-    #         if tipo == "lanche" or id_lanche is not None:
-    #             ingredientes = item.get("ingredientes", {}) or {}
-    #             receita_original = carregar_receita_base(id_lanche) or {}
-    #             observacoes = {"adicionar": [], "remover": []}
-    #
-    #             for ing_id, qtd_atual in ingredientes.items():
-    #                 qtd_base = receita_original.get(ing_id, 0)
-    #                 if qtd_atual > qtd_base:
-    #                     observacoes["adicionar"].append({
-    #                         "insumo_id": ing_id,
-    #                         "qtd": qtd_atual - qtd_base,
-    #                         "valor": preco_ingredientes.get(ing_id, 0) * (qtd_atual - qtd_base)
-    #                     })
-    #                 elif qtd_atual < qtd_base:
-    #                     observacoes["remover"].append({
-    #                         "insumo_id": ing_id,
-    #                         "qtd": qtd_base - qtd_atual
-    #                     })
-    #
-    #             valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-    #             valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
-    #             valor_final = (valor_base + valor_extra) * qtd
-    #
-    #             detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {item.get('observacoes_texto', 'Nenhuma')}"
-    #
-    #             response = cadastrar_venda_app(
-    #                 lanche_id=id_lanche,
-    #                 pessoa_id=pessoa_id,
-    #                 bebida_id=None,
-    #                 qtd_lanche=qtd,
-    #                 forma_pagamento=forma_pagamento_valor,
-    #                 endereco=endereco_valor,
-    #                 detalhamento=detalhamento,
-    #                 observacoes=observacoes,
-    #                 valor_venda=valor_final
-    #             )
-    #
-    #         # --- Bebida ---
-    #         elif tipo == "bebida" or id_bebida is not None:
-    #             valor_final = float(item.get("valor", 0)) * qtd
-    #             detalhamento = f"Bebida: {item.get('nome_bebida', 'Sem nome')}"
-    #
-    #             response = cadastrar_venda_app(
-    #                 lanche_id=None,
-    #                 pessoa_id=pessoa_id,
-    #                 bebida_id=id_bebida,
-    #                 qtd_lanche=qtd,
-    #                 forma_pagamento=forma_pagamento_valor,
-    #                 endereco=endereco_valor,
-    #                 detalhamento=detalhamento,
-    #                 observacoes={},
-    #                 valor_venda=valor_final
-    #             )
-    #         else:
-    #             snack_error(f"Item inválido no carrinho: {item}")
-    #             page.update()
-    #             return
-    #
-    #         if "error" in response:
-    #             snack_error(
-    #                 f"Erro ao cadastrar {item.get('nome_lanche', item.get('nome_bebida', 'item'))}: {response['error']}")
-    #             page.update()
-    #             return
-    #
-    #
-    #     input_forma_pagamento.value = ""
-    #     input_endereco.value = ""
-    #
-    #     # --- limpa carrinho ---
-    #     page.client_storage.set("carrinho", [])
-    #     snack_sucesso("Pedido confirmado! Seu lanche chegará em até 1 hora.")
-    #     page.go("/")
-    #     page.update()
 
     def confirmar_pedido_cozinha(e):
         numero_mesa = page.client_storage.get("mesa_atual")
@@ -1178,114 +895,6 @@ def main(page: ft.Page):
 
         return True
 
-
-    def enviar_pedidos_delivery(page, e):
-        id_pessoa = page.client_storage.get("pessoa_id")
-        if not id_pessoa:
-            snack_error("Usuário não logado!")
-            page.go("/login")
-            return
-
-        # --- Carrinho delivery ---
-        carrinho = page.client_storage.get("carrinho") or []
-        if isinstance(carrinho, str):
-            try:
-                carrinho = json.loads(carrinho)
-            except:
-                carrinho = []
-
-        if not carrinho:
-            snack_error("Nenhum item no carrinho para enviar!")
-            page.update()
-            return
-
-        # Itens não enviados ainda
-        itens_pendentes = [item for item in carrinho if not item.get("enviado")]
-        if not itens_pendentes:
-            snack_error("Todos os itens desse pedido delivery já foram enviados!")
-            page.update()
-            return
-
-        # --- Insumos ---
-        token = page.client_storage.get("token")
-        insumos = listar_insumos(token)
-        preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
-
-        # --- Processa cada item ---
-        for item in itens_pendentes:
-
-            id_lanche = item.get("id_lanche")
-            id_bebida = item.get("id_bebida")
-            qtd = int(item.get("qtd", 1))
-            valor_final = 0
-
-            observacoes = {"adicionar": [], "remover": []}
-
-            # ===== LANCHES =====
-            if id_lanche:
-                receita_original = carregar_receita_base(id_lanche) or {}
-                ingredientes_item = item.get("ingredientes", {})
-
-                # Ajuste de ingredientes
-                for ing_id, qtd_ajustada in ingredientes_item.items():
-                    qtd_base = receita_original.get(ing_id, 0)
-
-                    if qtd_ajustada > qtd_base:
-                        observacoes["adicionar"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_ajustada - qtd_base,
-                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_ajustada - qtd_base)
-                        })
-
-                    elif qtd_ajustada < qtd_base:
-                        observacoes["remover"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_base - qtd_ajustada
-                        })
-
-                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche")))
-                valor_extra = sum(a["valor"] for a in observacoes["adicionar"])
-                valor_final += (valor_base + valor_extra) * qtd
-
-            # ===== BEBIDAS =====
-            if id_bebida:
-                valor_bebida = float(item.get("valor", 0))
-                valor_final += valor_bebida * qtd
-
-            obs_texto = item.get("observacoes_texto", "Nenhuma")
-
-            detalhamento = (
-                f"Lanche: {item.get('nome_lanche', '---')} | "
-                f"Bebida: {item.get('nome_bebida', '---')} | "
-                f"Obs: {obs_texto}"
-            )
-
-            # ===== CADASTRA PEDIDO =====
-            response = cadastrar_pedido_app(
-                id_lanche=id_lanche,
-                id_bebida=id_bebida,
-                qtd_lanche=qtd,
-                detalhamento=detalhamento,
-                numero_mesa="",  # DELIVERY NÃO TEM MESA
-                observacoes=observacoes,
-                id_pessoa=id_pessoa
-            )
-
-            if "error" in response:
-                snack_error(f"Erro ao cadastrar pedido: {response['error']}")
-                return
-
-            # Marca como enviado
-            item["enviado"] = True
-
-        # Atualiza carrinho
-        page.client_storage.set("carrinho", carrinho)
-        snack_sucesso("Pedido realizados com sucesso! \n"
-                      "Tempo médio de espera: 1h ")
-
-        page.go("/")
-        page.update()
-
     def confirmar_venda_delivery_e_enviar_cozinha(e):
         try:
             pessoa_id = page.client_storage.get("pessoa_id")
@@ -1413,16 +1022,121 @@ def main(page: ft.Page):
             print("❌ ERRO EM confirmar_venda_delivery_e_enviar_cozinha:", err)
             snack_error("Erro ao confirmar venda + enviar cozinha.")
 
+    def enviar_pedidos_delivery(page, e):
+        id_pessoa = page.client_storage.get("pessoa_id")
+        if not id_pessoa:
+            snack_error("Usuário não logado!")
+            page.go("/login")
+            return
+
+        # --- Carrinho delivery ---
+        carrinho = page.client_storage.get("carrinho") or []
+        if isinstance(carrinho, str):
+            try:
+                carrinho = json.loads(carrinho)
+            except:
+                carrinho = []
+
+        if not carrinho:
+            snack_error("Nenhum item no carrinho para enviar!")
+            page.update()
+            return
+
+        # Itens não enviados ainda
+        itens_pendentes = [item for item in carrinho if not item.get("enviado")]
+        if not itens_pendentes:
+            snack_error("Todos os itens desse pedido delivery já foram enviados!")
+            page.update()
+            return
+
+        # --- Insumos ---
+        token = page.client_storage.get("token")
+        insumos = listar_insumos(token)
+        preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
+
+        # --- Processa cada item ---
+        for item in itens_pendentes:
+
+            id_lanche = item.get("id_lanche")
+            id_bebida = item.get("id_bebida")
+            qtd = int(item.get("qtd", 1))
+            valor_final = 0
+
+            observacoes = {"adicionar": [], "remover": []}
+
+            # ===== LANCHES =====
+            if id_lanche:
+                receita_original = carregar_receita_base(id_lanche) or {}
+                ingredientes_item = item.get("ingredientes", {})
+
+                # Ajuste de ingredientes
+                for ing_id, qtd_ajustada in ingredientes_item.items():
+                    qtd_base = receita_original.get(ing_id, 0)
+
+                    if qtd_ajustada > qtd_base:
+                        observacoes["adicionar"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_ajustada - qtd_base,
+                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_ajustada - qtd_base)
+                        })
+
+                    elif qtd_ajustada < qtd_base:
+                        observacoes["remover"].append({
+                            "insumo_id": ing_id,
+                            "qtd": qtd_base - qtd_ajustada
+                        })
+
+                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche")))
+                valor_extra = sum(a["valor"] for a in observacoes["adicionar"])
+                valor_final += (valor_base + valor_extra) * qtd
+
+            # ===== BEBIDAS =====
+            if id_bebida:
+                valor_bebida = float(item.get("valor", 0))
+                valor_final += valor_bebida * qtd
+
+            obs_texto = item.get("observacoes_texto", "Nenhuma")
+
+            detalhamento = (
+                f"Lanche: {item.get('nome_lanche', '---')} | "
+                f"Bebida: {item.get('nome_bebida', '---')} | "
+                f"Obs: {obs_texto}"
+            )
+
+            # ===== CADASTRA PEDIDO =====
+            response = cadastrar_pedido_app(
+                id_lanche=id_lanche,
+                id_bebida=id_bebida,
+                qtd_lanche=qtd,
+                detalhamento=detalhamento,
+                numero_mesa="",  # DELIVERY NÃO TEM MESA
+                observacoes=observacoes,
+                id_pessoa=id_pessoa
+            )
+
+            if "error" in response:
+                snack_error(f"Erro ao cadastrar pedido: {response['error']}")
+                return
+
+            # Marca como enviado
+            item["enviado"] = True
+
+        # Atualiza carrinho
+        page.client_storage.set("carrinho", carrinho)
+        snack_sucesso("Pedido realizados com sucesso! \n"
+                      "Tempo médio de espera: 1h ")
+
+        page.go("/")
+        page.update()
+
     # FUNÇÕES GARCOM
     def carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num):
         lv_carrinho_garcom.controls.clear()
         print("Atualizando carrinho da mesa:", mesa_num)
 
+        # Recupera carrinhos
         carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
         carrinho = carrinhos.get(str(mesa_num), [])
-
-        lanches_mesa = [item for item in carrinho if "nome_lanche" in item]
-        bebidas_mesa = [item for item in carrinho if "nome_bebida" in item]
 
         if not carrinho:
             lv_carrinho_garcom.controls.append(
@@ -1431,59 +1145,41 @@ def main(page: ft.Page):
             page.update()
             return
 
+        # DIVIDE LISTAS
+        lanches_mesa = [item for item in carrinho if "nome_lanche" in item]
+        bebidas_mesa = [item for item in carrinho if "nome_bebida" in item]
+
+        # CÁLCULO DO TOTAL
         total = sum(
             float(item.get("valor_lanche", 0)) + float(item.get("valor", 0))
             for item in carrinho
         )
 
-        # --------------- FUNÇÕES DE REMOÇÃO CORRIGIDAS ------------------
-
-        def remover_item(index):
+        # FUNÇÃO REMOVER (funciona para qualquer item)
+        def remover_item(index_real):
             carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
             carrinho_mesa = carrinhos.get(str(mesa_num), [])
 
             try:
-                item = carrinho_mesa[index]
+                item = carrinho_mesa[index_real]
 
-                # Impede remover itens enviados
                 if item.get("enviado"):
-                    snack_error("Este item já foi enviado para a cozinha e não pode ser removido.")
+                    snack_error("Este item já foi enviado para a cozinha.")
                     return
 
-                carrinho_mesa.pop(index)
+                carrinho_mesa.pop(index_real)
                 carrinhos[str(mesa_num)] = carrinho_mesa
                 page.client_storage.set("carrinhos_por_mesa", carrinhos)
 
-                snack_sucesso("Item removido do carrinho!")
+                snack_sucesso("Item removido!")
                 carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num)
 
             except Exception as e:
                 snack_error(f"Erro ao remover item: {e}")
 
-        def remover_item_b(index):
-            carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
-            carrinho_mesa = carrinhos.get(str(mesa_num), [])
-
-            try:
-                item = carrinho_mesa[index]
-
-                if item.get("enviado"):
-                    snack_error("Esta bebida já foi enviada para a cozinha e não pode ser removida.")
-                    return
-
-                carrinho_mesa.pop(index)
-                carrinhos[str(mesa_num)] = carrinho_mesa
-                page.client_storage.set("carrinhos_por_mesa", carrinhos)
-
-                snack_sucesso("Bebida removida do carrinho!")
-                carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num)
-
-            except Exception as e:
-                snack_error(f"Erro ao remover bebida: {e}")
-
-        # --------------- LISTAR LANCHES ------------------
-
-        for idx, item in enumerate(lanches_mesa):
+        # LISTAR LANCHES
+        for item in lanches_mesa:
+            index_real = carrinho.index(item)
             enviado = item.get("enviado", False)
 
             botoes = []
@@ -1491,7 +1187,7 @@ def main(page: ft.Page):
                 botoes.append(
                     ft.OutlinedButton(
                         "Remover",
-                        on_click=lambda e, index=idx: remover_item(index),
+                        on_click=lambda e, index=index_real: remover_item(index),
                         style=ft.ButtonStyle(
                             color=Colors.RED_600,
                             side=ft.BorderSide(1, Colors.RED_600)
@@ -1510,9 +1206,8 @@ def main(page: ft.Page):
                     )
                 )
 
-            # Aparência do card
             card_border = Colors.GREEN_400 if enviado else Colors.RED
-            status_icon = "✔ Enviado" if enviado else "⏳ Pendente"
+            status_icon = "✔ Enviado" if enviado else "❌ Pendente"
             status_color = Colors.GREEN_300 if enviado else Colors.RED_400
 
             lv_carrinho_garcom.controls.append(
@@ -1521,25 +1216,12 @@ def main(page: ft.Page):
                         content=ft.Row(
                             [
                                 ft.Image(src="imagemdolanche.png", height=80),
-
                                 ft.Column(
                                     [
                                         ft.Text(item["nome_lanche"], color=Colors.ORANGE_900, size=16),
-
-                                        ft.Text(
-                                            f'R$ {item["valor_lanche"]:.2f}',
-                                            color=Colors.YELLOW_900
-                                        ),
-
+                                        ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
                                         ft.Text(f"Mesa {mesa_num}", color=Colors.PURPLE_200),
-
-                                        ft.Text(
-                                            status_icon,
-                                            color=status_color,
-                                            size=15,
-                                            weight=ft.FontWeight.BOLD
-                                        ),
-
+                                        ft.Text(status_icon, color=status_color, size=15, weight=ft.FontWeight.BOLD),
                                         ft.Row(botoes, spacing=10)
                                     ]
                                 )
@@ -1555,13 +1237,9 @@ def main(page: ft.Page):
                 )
             )
 
-        # --------------- LISTAR BEBIDAS ------------------
-
-        for i, item in enumerate(bebidas_mesa):
-
-            # índice global no carrinho completo
-            idx = len(lanches_mesa) + i
-
+        # LISTAR BEBIDAS
+        for item in bebidas_mesa:
+            index_real = carrinho.index(item)
             enviado = item.get("enviado", False)
 
             botoes = []
@@ -1569,7 +1247,7 @@ def main(page: ft.Page):
                 botoes.append(
                     ft.OutlinedButton(
                         "Remover",
-                        on_click=lambda e, index=idx: remover_item_b(index),
+                        on_click=lambda e, index=index_real: remover_item(index),
                         style=ft.ButtonStyle(
                             color=Colors.RED_600,
                             side=ft.BorderSide(1, Colors.RED_600)
@@ -1578,7 +1256,7 @@ def main(page: ft.Page):
                 )
 
             card_border = Colors.GREEN_400 if enviado else Colors.RED
-            status_icon = "✔ Enviado" if enviado else "⏳ Pendente"
+            status_icon = "✔ Enviado" if enviado else "❌ Pendente"
             status_color = Colors.GREEN_300 if enviado else Colors.RED_400
 
             lv_carrinho_garcom.controls.append(
@@ -1587,25 +1265,12 @@ def main(page: ft.Page):
                         content=ft.Row(
                             [
                                 ft.Image(src="istockphoto-459361585-170667a.jpg", height=80),
-
                                 ft.Column(
                                     [
-                                        ft.Text(item["nome_bebida"], color=Colors.ORANGE_900, font_family="Arial",size=18),
-
-                                        ft.Text(
-                                            f'R$ {item["valor"]:.2f}',
-                                            color=Colors.YELLOW_900, font_family="Arial",size=18
-                                        ),
-
+                                        ft.Text(item["nome_bebida"], color=Colors.ORANGE_900, size=16),
+                                        ft.Text(f'R$ {item["valor"]:.2f}', color=Colors.YELLOW_900),
                                         ft.Text(f"Mesa {mesa_num}", color=Colors.PURPLE_200),
-
-                                        ft.Text(
-                                            status_icon,
-                                            color=status_color,
-                                            size=15,
-                                            weight=ft.FontWeight.BOLD
-                                        ),
-
+                                        ft.Text(status_icon, color=status_color, size=15, weight=ft.FontWeight.BOLD),
                                         ft.Row(botoes, spacing=10)
                                     ]
                                 )
@@ -1621,14 +1286,12 @@ def main(page: ft.Page):
                 )
             )
 
-        # --------------- TOTAL + BOTÃO ENVIAR ------------------
-
+        # TOTAL + BOTÃO ENVIAR
         lv_carrinho_garcom.controls.append(
             ft.Container(
                 content=ft.Column(
                     [
                         ft.Text(f"Total: R$ {total:.2f}", color=Colors.ORANGE_700, size=20),
-
                         ft.ElevatedButton(
                             "Enviar para cozinha",
                             on_click=lambda e, mesa=mesa_num: confirmar_pedido_cozinha_mesa(e, mesa),
@@ -1657,6 +1320,7 @@ def main(page: ft.Page):
         numero_mesa = page.client_storage.get("mesa_atual")
         if not numero_mesa:
             snack_error("Nenhuma mesa selecionada!")
+            page.update()
             return
 
         carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
@@ -1664,11 +1328,13 @@ def main(page: ft.Page):
 
         if not carrinho:
             snack_error(f"Nenhum item no carrinho da mesa {numero_mesa}!")
+            page.update()
             return
 
         itens_pendentes = [item for item in carrinho if not item.get("enviado")]
         if not itens_pendentes:
             snack_error("Todos os itens dessa mesa já foram enviados!")
+            page.update()
             return
 
         token = page.client_storage.get("token")
@@ -1740,6 +1406,7 @@ def main(page: ft.Page):
         page.client_storage.set("carrinhos_por_mesa", carrinhos)
 
         snack_sucesso(f"Pedidos da mesa {numero_mesa} enviados!")
+        page.update()
 
         page.go("/mesa")
         page.update()
@@ -1873,67 +1540,54 @@ def main(page: ft.Page):
             page.update()
             return
 
-        # Pega todos os carrinhos de mesas
+        # Carrinhos por mesa
         carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
         carrinho_mesa = carrinhos.get(str(mesa_valor), [])
 
-        # --------------------------
-        #      ADICIONAR LANCHE
-        # --------------------------
         if lanche_id:
             lanche = next((l for l in lanches_disponiveis if l["id_lanche"] == int(lanche_id)), None)
-            if not lanche:
-                snack_error("Lanche selecionado não foi encontrado.")
-                page.update()
-                return
-
-            # Agora pode repetir o item → então NÃO verifica mais duplicação
             carrinho_mesa.append({
                 "id_lanche": lanche["id_lanche"],
                 "nome_lanche": lanche["nome_lanche"],
                 "valor_lanche": lanche["valor_lanche"],
                 "mesa": mesa_valor,
-                "enviado": False,  # importante para controle de remoção depois
+                "enviado": False
             })
 
-        # --------------------------
-        #        ADICIONAR BEBIDA
-        # --------------------------
         if bebida_id:
             bebida = next((b for b in bebidas_disponiveis if b["id_bebida"] == int(bebida_id)), None)
-            if not bebida:
-                snack_error("Bebida selecionada não foi encontrada.")
-                page.update()
-                return
-
             carrinho_mesa.append({
                 "id_bebida": bebida["id_bebida"],
                 "nome_bebida": bebida["nome_bebida"],
                 "valor": bebida["valor"],
                 "mesa": mesa_valor,
-                "enviado": False,  # importante para controle de remoção depois
+                "enviado": False
             })
 
-        # Atualiza o dicionário geral
         carrinhos[str(mesa_valor)] = carrinho_mesa
         page.client_storage.set("carrinhos_por_mesa", carrinhos)
 
-        # Armazena mesa atual
         page.client_storage.set("mesa_atual", mesa_valor)
 
         snack_sucesso(f"Pedido da Mesa {mesa_valor} adicionado com sucesso!")
 
-        # Limpa campos
+        # Limpa valores internos
         numero_mesa.value = ""
-        lanche_dropdown.value = ""
-        bebidas_dropdow.value = ""
+        lanche_dropdown.value = None
+        bebidas_dropdow.value = None
+
+        # Remove foco
 
 
-        # Atualiza lista de mesas abertas
+        # Atualiza mesas abertas
         mesa_dropdown_aberta.options = [
             ft.dropdown.Option(m, f"Mesa {m}") for m in listar_mesas_abertas()
         ]
 
+        # PRIMEIRO volta para rota mesa
+        page.go("/mesa")
+
+        # DEPOIS atualiza
         page.update()
 
     def listar_mesas_abertas():
@@ -1953,54 +1607,6 @@ def main(page: ft.Page):
 
     # ***************************************************************************/*******************************
 
-    # nova função para salvar em vendas e em cozinha
-    # def confirmar_venda_e_cozinha(e):
-    #     """
-    #     Finaliza uma VENDA DELIVERY e envia automaticamente seus itens para a cozinha.
-    #     Agora funciona corretamente.
-    #     """
-    #     try:
-    #         pessoa_id = page.client_storage.get("pessoa_id")
-    #         if not pessoa_id:
-    #             snack_error("Usuário não logado!")
-    #             page.go("/login")
-    #             return
-    #
-    #         # 🔧 Garante que estamos no modo DELIVERY
-    #         page.client_storage.set("mesa_atual", None)
-    #
-    #         # 🛒 Pega carrinho de delivery
-    #         carrinho = page.client_storage.get("carrinho") or []
-    #
-    #         if isinstance(carrinho, str):
-    #             try:
-    #                 carrinho = json.loads(carrinho)
-    #             except:
-    #                 carrinho = []
-    #
-    #         if not carrinho:
-    #             snack_error("Carrinho do delivery está vazio!")
-    #             return
-    #
-    #         # 🔄 Backup do carrinho ANTES de confirmar a venda
-    #         backup = carrinho.copy()
-    #
-    #         print("💰 Confirmando venda DELIVERY...")
-    #         confirmar_venda_delivery()
-    #
-    #         # Recupera carrinho porque confirmar_venda limpa ele
-    #         page.client_storage.set("carrinho", backup)
-    #
-    #         print("🍳 Enviando itens DELIVERY para a cozinha...")
-    #         enviar_pedidos_cozinha_delivery(page)
-    #
-    #         snack_sucesso("Venda delivery registrada e enviada para a cozinha!")
-    #         page.go("/")
-    #         page.update()
-    #
-    #     except Exception as err:
-    #         print("Erro ao finalizar delivery:", err)
-    #         snack_error("Erro ao confirmar venda e enviar à cozinha.")
 
 
 
@@ -2121,9 +1727,9 @@ def main(page: ft.Page):
             )
 
         if page.route == "/mesa":
-            numero_mesa.value = ""
-            lanche_dropdown.value = ""
-            bebidas_dropdow.value = ""
+            # numero_mesa.value = ""
+            # lanche_dropdown.value = ""
+            # bebidas_dropdow.value = ""
             # Containers, ícones e botões
             icone_mesa = ft.Icon(ft.Icons.TABLE_RESTAURANT, color=Colors.ORANGE_800, size=30)
             icone_lanche = ft.Icon(ft.Icons.FASTFOOD, color=Colors.ORANGE_800, size=30)
@@ -2403,10 +2009,17 @@ def main(page: ft.Page):
             )
 
             def salvar_observacoes(e):
-                carrinho = page.client_storage.get("carrinho_garcom") or []
+
+                # --- pega todos carrinhos ---
+                carrinhos = page.client_storage.get("carrinhos_por_mesa") or {}
+                mesa = str(item["mesa"])
+                carrinho = carrinhos.get(mesa, [])
+
+                # --- recalcula quantidades ---
                 valores_atualizados = {ing_id: int(txt.value) for ing_id, txt in ingrediente_controls.items()}
 
                 observacoes = {"adicionar": [], "remover": []}
+
                 for ing_id, qtd_base in receita_original.items():
                     qtd_nova = valores_atualizados.get(ing_id, 0)
                     if qtd_nova > qtd_base:
@@ -2420,6 +2033,7 @@ def main(page: ft.Page):
 
                 novo_valor = atualizar_preco()
 
+                # --- salva no carrinho da mesa correta ---
                 for i, it in enumerate(carrinho):
                     if it.get("id_lanche") == lanche_id:
                         carrinho[i].update({
@@ -2431,17 +2045,13 @@ def main(page: ft.Page):
                         })
                         break
 
-                page.client_storage.set("carrinho_garcom", carrinho)
-
+                #  agora salvando no lugar correto!
+                carrinhos[mesa] = carrinho
+                page.client_storage.set("carrinhos_por_mesa", carrinhos)
 
                 snack_sucesso("Observações salvas com sucesso!")
                 page.update()
-                # page.snack_bar = ft.SnackBar(
-                #     ft.Text("Observações salvas com sucesso!"),
-                #     open=True, bgcolor=Colors.GREEN_700, duration=1500
-                # )
-                # page.update()
-                page.go(f"/carrinho_garcom?mesa={item['mesa']}")
+                page.go(f"/carrinho_garcom?mesa={mesa}")
 
             atualizar_preco()
 
@@ -2523,7 +2133,7 @@ def main(page: ft.Page):
                         ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Text(f"🥤 {nome_bebida}", color=Colors.BLUE_900, size=16),
+                                    ft.Text(f"🍹{nome_bebida}", color=Colors.BLUE_900, size=16),
                                     ft.Text(f"R$ {float(item.get('valor', 0)):.2f}", color=Colors.YELLOW_800, size=16),
                                 ],
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -2536,7 +2146,7 @@ def main(page: ft.Page):
             total = sum(float(item.get("valor_lanche", 0)) + float(item.get("valor", 0)) for item in carrinho_mesa)
 
             total_label = ft.Text(
-                f"💰 Total da Mesa {mesa_num}: R$ {total:.2f}",
+                f"💵 Total da Mesa {mesa_num}: R$ {total:.2f}",
                 color=Colors.ORANGE_700,
                 size=20,
                 weight=ft.FontWeight.BOLD
@@ -2595,8 +2205,6 @@ def main(page: ft.Page):
             )
 
             page.update()
-
-
 
         if page.route == "/presencial_delivery":
             page.views.append(
@@ -2908,7 +2516,6 @@ def main(page: ft.Page):
                     carrinho[lanche_index] = item_copy
                     page.client_storage.set("carrinho", carrinho)
 
-
                     snack_sucesso("Observações salvas com sucesso!")
                     page.update()
                     # page.snack_bar = ft.SnackBar(
@@ -2944,6 +2551,7 @@ def main(page: ft.Page):
                     bgcolor=Colors.ORANGE_50
                 )
             )
+            page.update()
 
         if page.route == "/vendas":
             #  Limpa o histórico de views antigas
@@ -3418,13 +3026,26 @@ def main(page: ft.Page):
         # bgcolor=Colors.DEEP_ORANGE_100
     )
 
+    lanches_ordenados = sorted(
+        [l for l in lanches_disponiveis if l.get("disponivel") == True],
+        key=lambda x: x["nome_lanche"].lower()
+    )
+
     lanche_dropdown = ft.Dropdown(
         label="Selecione o Lanche",
         width=250,
         border_color=Colors.PURPLE,
         color=Colors.BLACK,
         bgcolor=Colors.DEEP_ORANGE_100,
-        options=[ft.dropdown.Option(str(l["id_lanche"]), l["nome_lanche"]) for l in lanches_disponiveis]
+        options=[
+            ft.dropdown.Option(str(l["id_lanche"]), l["nome_lanche"])
+            for l in lanches_ordenados
+        ]
+    )
+
+    bebidas_ordenadas = sorted(
+        bebidas_disponiveis,
+        key=lambda x: x["nome_bebida"].lower()
     )
 
     bebidas_dropdow = ft.Dropdown(
@@ -3433,8 +3054,13 @@ def main(page: ft.Page):
         border_color=Colors.PURPLE,
         color=Colors.BLACK,
         bgcolor=Colors.DEEP_ORANGE_100,
-        options=[ft.dropdown.Option(str(b["id_bebida"]), b["nome_bebida"]) for b in bebidas_disponiveis  ]
+        options=[
+            ft.dropdown.Option(str(b["id_bebida"]), b["nome_bebida"])
+            for b in bebidas_ordenadas
+        ]
     )
+
+
 
     cliente_dropdown = ft.Dropdown(
         label="Selecione o Cliente",
@@ -3444,8 +3070,6 @@ def main(page: ft.Page):
         bgcolor=Colors.DEEP_ORANGE_100,
         options=[ft.dropdown.Option(str(c["id_pessoa"]), c["nome_pessoa"]) for c in clientes_disponiveis]
     )
-
-
 
     # mesa_dropdown_aberta = ft.Dropdown(
     #     label="Mesas Abertas",

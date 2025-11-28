@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://192.168.1.238:5002"
+base_url = "http://10.135.232.47:5002"
 
 
 # LOGIN
@@ -182,7 +182,7 @@ def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_
             print(f"⚠️ numero_mesa inválido: {numero_mesa}, usando 0")
             numero_mesa_val = 0  # fallback seguro
 
-    # 🔧 Monta o payload base
+    # Monta o payload base
     payload = {
         "data_pedido": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "numero_mesa": numero_mesa_val,
@@ -192,25 +192,25 @@ def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_
         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
     }
 
-    # 🔹 Adiciona lanche se existir
+    #  Adiciona lanche se existir
     if id_lanche not in [None, "", 0, "0"]:
         try:
             payload["id_lanche"] = int(id_lanche)
         except Exception:
             print(f"id_lanche inválido: {id_lanche}")
 
-    # 🔹 Adiciona bebida se existir
+    #  Adiciona bebida se existir
     if id_bebida not in [None, "", 0, "0"]:
         try:
             payload["id_bebida"] = int(id_bebida)
         except Exception:
             print(f"id_bebida inválido: {id_bebida}")
 
-    # ⚠️ Se não tiver lanche nem bebida, não envia
+    # Se não tiver lanche nem bebida, não envia
     if "id_lanche" not in payload and "id_bebida" not in payload:
         return {"error": "É necessário informar pelo menos um lanche ou uma bebida"}
 
-    # 🚀 Faz a requisição
+    # Faz a requisição
     try:
         response = requests.post(url, json=payload)
         if response.status_code != 201:

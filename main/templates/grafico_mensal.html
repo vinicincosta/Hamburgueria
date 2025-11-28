@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    /* Caixa do gráfico */
+    #grafico-box {
+        background: #1e1e2f;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.25);
+        margin-bottom: 35px;
+        max-width: 1000px;
+    }
+
+    h2 {
+        color: #ffffff;
+        font-family: Arial;
+        text-shadow: 0 0 8px rgba(255,255,255,0.2);
+    }
+
+    label {
+        color: white;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    button {
+        background-color: #4b70e2;
+        color: white;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-left: 10px;
+        font-weight: bold;
+    }
+
+    button:hover {
+        background-color: #3558c9;
+    }
+</style>
+
+<div id="grafico-box">
+    <h2>📊 Vendas por Funcionário (Mês)</h2>
+
+    <label for="mes">Mês:</label>
+    <input type="month" id="mes">
+    <button onclick="carregarGraficoMes()">Atualizar</button>
+
+    <canvas id="graficoVendasMes" height="140"></canvas>
+</div>
+
+<script>
+let graficoMes = null;
+
+// sombra bonita nas barras
+Chart.register({
+    id: 'sombra',
+    beforeDraw: (chart) => {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0,0,0,0.3)';
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetX = 4;
+        ctx.shadowOffsetY = 4;
+    },
+    afterDraw: (chart) => chart.ctx.restore()
+});
+
+async function carregarGraficoMes() {
+    const mesSelecionado = document.getElementById("mes").value;
+
+    let url = "http://10.135.232.24:5002/vendas_valor_por_funcionario_mes";
+    if (mesSelecionado) {
+        url += `?month=${mesSelecionado}`;
+    }
+
+    const res = await fetch(url);
+    const dados = await res.json();
+
+    const labels = dados.labels;
+    const counts = dados.counts ?? [];
+    const totals = dados.totals ?? [];
+
+    const ctx = document.getElementById("graficoVendasMes").getContext("2d");
+
+    // gradientes bonitos
+    const azulGradiente = ctx.createLinearGradient(0, 0, 0, 300);
+    azulGradiente.addColorStop(0, "rgba(54, 162, 235, 0.9)");
+    azulGradiente.addColorStop(1, "rgba(54, 162, 235, 0.3)");
+
+    const verdeGradiente = ctx.createLinearGradient(0, 0, 0, 300);
+    verdeGradiente.addColorStop(0, "rgba(75, 192, 75, 0.9)");
+    verdeGradiente.addColorStop(1, "rgba(75, 192, 75, 0.3)");
+
+    if (graficoMes) graficoMes.destroy();
+
+    graficoMes = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Quantidade de Vendas",
+                    data: counts,
+                    backgroundColor: azulGradiente,
+                    borderRadius: 10,
+                    yAxisID: "y1",
+                },
+                {
+                    label: "Total Vendido (R$)",
+                    data: totals,
+                    backgroundColor: verdeGradiente,
+                    borderRadius: 10,
+                    yAxisID: "y2",
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: "#ffffff",
+                        font: { size: 14, family: "Arial" }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: "white" },
+                    grid: { color: "rgba(255,255,255,0.05)" }
+                },
+                y1: {
+                    position: "left",
+                    ticks: { color: "white" },
+                    grid: { color: "rgba(255,255,255,0.05)" }
+                },
+                y2: {
+                    position: "right",
+                    ticks: { color: "white" },
+                    grid: { drawOnChartArea: false }
+                }
+            },
+            animation: {
+                duration: 900,
+                easing: "easeOutQuart"
+            }
+        }
+    });
+}
+
+// mês atual ao abrir
+window.onload = () => {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    document.getElementById("mes").value = `${ano}-${mes}`;
+    carregarGraficoMes();
+};
+</script>
+</body>
+</html>
