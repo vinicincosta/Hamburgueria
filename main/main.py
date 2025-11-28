@@ -24,7 +24,7 @@ def login():
         print(email, password, 'EMAILSENHA')
         user = routes_web.post_login(email, password)
         if 'access_token' in user:
-            # print()
+            session['user_id'] = routes_web.get_id_pessoa_by_token(user['access_token'])
             session['token'] = user['access_token']
             session['username'] = user['nome']
             session['papel'] = user['papel']
@@ -393,9 +393,16 @@ def cadastrar_categorias():
 @app.route("/faturamento")
 def faturamento():
     return render_template("faturamento.html")
+@app.route('/vendas_por_usuario')
+def vendas_usuario():
+    return render_template('grafico_usuario.html')
+@app.route('/venda_por_mes')
+def venda_mes():
+    return render_template('grafico_mensal.html')
 
-
-
+@app.route('/venda_garcom')
+def venda():
+    return render_template('graficoestilizado.html')
 #
 
 

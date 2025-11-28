@@ -17,7 +17,7 @@
         </span>
         {% if exibir in ['False', False] %}
             {% for p in pessoas %}
-                {% if p['nome_pessoa'] != session['username'] %}
+                {% if p['nome_pessoa'] != session['user_id'] %}
                     <div class="card">
                         <h1>#{{p['id_pessoa']}}</h1>
                 {% else %}

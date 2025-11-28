@@ -1,7 +1,7 @@
 import requests
 
 # url = "http://10.135.233.139:5002"
-url = "http://192.168.1.238:5002"
+url = "http://10.135.232.24:5002"
 # url ="http://192.168.15.9:5002"
 
 
@@ -114,6 +114,15 @@ def get_insumo_by_id_insumo(id_insumo, token_): # Feito
     else:
         print(response.status_code)
         print(response.json())
+        return {'erro':response.status_code}
+
+def get_id_pessoa_by_token(token_):
+    response = requests.get(f"{url}/teste", headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        # print({'erro':response.json()})
         return {'erro':response.status_code}
 
 ########################
@@ -230,15 +239,8 @@ def post_login(email, password):
 
 # print(get_insumos(post_login('vini@', '123')))
 
-def get_id_pessoa_by_token(token_):
-    response = requests.get(f"{url}/teste", headers={'Authorization': f'Bearer {token_}'})
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(response.status_code)
-        # print({'erro':response.json()})
-        return {'erro':response.status_code}
+
     
 
 
-print(get_pedidos(post_login("d@", "123")['access_token']))
+# print(get_pedidos(post_login("d@", "123")['access_token']))

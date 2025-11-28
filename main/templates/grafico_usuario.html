@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<h2>Vendas por Funcionário (Dia)</h2>
+
+<!-- Campo de data -->
+<label for="data-dia">Selecione o dia:</label>
+<input type="date" id="data-dia" />
+
+<!-- Botão -->
+<button onclick="carregarGraficoDia()">Carregar Gráfico</button>
+
+<!-- Gráfico -->
+<canvas id="graficoVendasDia"></canvas>
+
+<script>
+let graficoDia = null;
+
+async function carregarGraficoDia() {
+    const dataSelecionada = document.getElementById("data-dia").value;
+
+    let url = "http://10.135.232.24:5002/vendas_valor_por_funcionario";
+    if (dataSelecionada) {
+        url += `?date=${dataSelecionada}`;
+    }
+
+    // busca dados da API
+    const res = await fetch(url);
+    const dados = await res.json();
+
+    const labels = dados.labels;
+    const counts = dados.counts || dados.values; // fallback se counts não existir
+    const totals = dados.totals; // total vendido em R$
+
+    const ctx = document.getElementById("graficoVendasDia").getContext("2d");
+
+    // destruir gráfico anterior se existir
+    if (graficoDia) graficoDia.destroy();
+
+    graficoDia = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: "Quantidade de Vendas",
+                    data: counts,
+                    yAxisID: 'y1',
+                    backgroundColor: "rgba(54, 162, 235, 0.5)",
+                },
+                {
+                    label: "Total Vendido (R$)",
+                    data: totals,
+                    yAxisID: 'y2',
+                    backgroundColor: "rgba(75, 192, 75, 0.5)",
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y1: {
+                    type: "linear",
+                    position: "left",
+                    beginAtZero: true,
+                    title: { text: "Qtd de vendas", display: true }
+                },
+                y2: {
+                    type: "linear",
+                    position: "right",
+                    beginAtZero: true,
+                    title: { text: "Total (R$)", display: true }
+                }
+            }
+        }
+    });
+}
+
+// carrega automaticamente ao abrir a página
+window.onload = () => {
+    const hoje = new Date().toISOString().split("T")[0];
+    document.getElementById("data-dia").value = hoje;
+    carregarGraficoDia();
+};
+</script>
+
+</body>
+</html>

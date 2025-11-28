@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Document</title>
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    #grafico-box {
+        background: #1e1e2f;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.25);
+        margin-bottom: 35px;
+        max-width: 1100px;
+    }
+
+    #total-mes {
+        color: #66ff99;
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    h2 { color: #fff; }
+    label { color: #fff; margin-right: 10px; }
+    button {
+        background: #4b70e2;
+        color: #fff;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+</style>
+
+<div id="grafico-box">
+    <h2>📊 Vendas por Funcionário (Mês)</h2>
+    <div id="total-mes"></div>
+
+    <label>Mês:</label>
+    <input type="month" id="mes">
+    <button onclick="carregarGraficoMes()">Atualizar</button>
+
+    <canvas id="graficoVendasMes" height="150"></canvas>
+</div>
+
+<script>
+let graficoMes = null;
+
+// 🔥 CORREÇÃO: carregar imagem uma vez só
+const avatarImg = new Image();
+avatarImg.src = "/static/img/user.png";
+
+// 🔥 Plugin com avatar circular bonito
+const pluginAvatar = {
+    id: "avatarPlugin",
+    afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+
+        meta.data.forEach((bar, index) => {
+            const x = bar.x;
+            const y = bar.y - 40;
+
+            // foto redonda (avatar)
+            const radius = 18;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y - 15, radius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            ctx.drawImage(avatarImg, x - radius, y - radius - 15, radius * 2, radius * 2);
+            ctx.restore();
+
+            // nome do garçom acima
+            ctx.save();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 12px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(chart.data.labels[index], x, y - 45);
+            ctx.restore();
+        });
+    }
+};
+
+Chart.register(pluginAvatar);
+
+async function carregarGraficoMes() {
+    const mesSel = document.getElementById("mes").value;
+    let url = "http://10.135.232.24:5002/vendas_valor_por_funcionario_mes";
+    if (mesSel) url += `?month=${mesSel}`;
+
+    const res = await fetch(url);
+    const dados = await res.json();
+
+    const labels = dados.labels;
+    const totals = dados.totals ?? [];
+
+    const totalMes = totals.reduce((a, b) => a + b, 0);
+    document.getElementById("total-mes").innerHTML =
+        `💰 Total do mês: <strong>R$ ${totalMes.toFixed(2)}</strong>`;
+
+    const ctx = document.getElementById("graficoVendasMes").getContext("2d");
+
+    const grad = ctx.createLinearGradient(0, 0, 0, 300);
+    grad.addColorStop(0, "rgba(75, 192, 75, 1)");
+    grad.addColorStop(1, "rgba(75, 192, 75, 0.3)");
+
+    if (graficoMes) graficoMes.destroy();
+
+    graficoMes = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: "Total vendido (R$)",
+                    data: totals,
+                    backgroundColor: grad,
+                    borderRadius: 14
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { ticks: { color: "#fff" }, grid: { display: false } },
+                y: { ticks: { color: "#fff" }, beginAtZero: true }
+            },
+            plugins: {
+                legend: { labels: { color: "#fff" } },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `R$ ${ctx.raw.toFixed(2)}`
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Carrega mês atual ao abrir
+window.onload = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    document.getElementById("mes").value = `${y}-${m}`;
+    carregarGraficoMes();
+};
+</script>
+</body>
+</html>
