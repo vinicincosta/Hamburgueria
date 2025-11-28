@@ -2643,8 +2643,8 @@ def main(page: ft.Page):
                 obs_texto = item.get("observacoes_texto", "Nenhuma")
 
 
-                removidos = page.client_storage.get("adicionados")
-                adicionados = page.client_storage.get("removidos")
+                adicionados = page.client_storage.get("adicionados")
+                removidos = page.client_storage.get("removidos")
 
                 lista_itens.append(
                     ft.Container(
