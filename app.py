@@ -19,7 +19,7 @@ from flet.core.icons import Icons
 from flet.core.text_style import TextStyle, TextThemeStyle
 from flet.core.theme import TextTheme
 from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
-
+import ast
 from urllib.parse import urlparse, parse_qs
 
 
@@ -330,6 +330,268 @@ def main(page: ft.Page):
                         shadow_color=Colors.YELLOW_900
                     )
                 )
+
+        page.update()
+
+
+    # def lista_pedidos(e):
+    #     lv_pedidos.controls.clear()
+    #
+    #     token = page.client_storage.get('token')
+    #     resultdo_pedidoss = listar_pedidos(token)
+    #
+    #     print(f'Resultado dos pedidos: {resultdo_pedidoss}')
+    #
+    #     for pedido in resultdo_pedidoss:
+    #
+    #         lv_pedidos.controls.append(
+    #             ft.Card(
+    #                 content=ft.Container(
+    #                     content=ft.Row(
+    #                         [
+    #                             ft.Image(src="imagemdolanche.png", height=100),
+    #                             ft.Column(
+    #                                 [
+    #                                     ft.Text(f'{pedido["status"]}',  color=Colors.ORANGE_900, font_family="Arial", size=18)
+    #
+    #                                 ]
+    #                             )
+    #                         ]
+    #                     ),
+    #                     bgcolor=Colors.BLACK,
+    #                     height=180,
+    #                     border_radius=10,
+    #                     border=ft.Border(
+    #                         top=ft.BorderSide(2, color=Colors.WHITE),
+    #                         bottom=ft.BorderSide(2, color=Colors.WHITE)
+    #                 )
+    #             )
+    #         )
+    #         )
+    #     page.update()
+
+
+    token = page.client_storage.get("token")
+
+    lista_lanches = listar_lanche(token) or []
+    lista_bebidas = listar_bebidas(token) or []
+
+    # Criar mapas: id → nome
+    mapa_lanches = {l["id_lanche"]: l["nome_lanche"] for l in lista_lanches}
+    mapa_bebidas = {b["id_bebida"]: b["nome_bebida"] for b in lista_bebidas}
+
+    def lista_pedidos(e=None):
+        lv_pedidos.controls.clear()
+
+        pedidos_venda = page.client_storage.get("pedidos_venda_atual") or []
+
+        if not pedidos_venda:
+            print("Nenhum pedido para acompanhar.")
+            page.update()
+            return
+
+        for item in pedidos_venda:
+
+            venda = item.get("venda", {})
+
+            # DETALHAMENTO
+            detalhamento = venda.get("detalhamento", "Sem descrição")
+
+            # DATA
+            data_bruta = venda.get("data_venda", "")
+            try:
+                dt = datetime.strptime(data_bruta, "%Y-%m-%d %H:%M:%S")
+                data_formatada = dt.strftime("%d/%m/%Y - %H:%M")
+            except:
+                data_formatada = data_bruta
+
+            # STATUS (venda não tem status real ainda)
+            status_texto = "Pedido Aprovado"
+            progresso = 0.33
+
+            # IDs
+            lanche_id = venda.get("lanche_id")
+            bebida_id = venda.get("bebida_id")
+
+            # NOME DO LANCHES / BEBIDAS
+            if lanche_id:
+                nome_produto = mapa_lanches.get(lanche_id, f"Lanche ID {lanche_id}")
+            elif bebida_id:
+                nome_produto = mapa_bebidas.get(bebida_id, f"Bebida ID {bebida_id}")
+            else:
+                nome_produto = "Produto não identificado"
+
+            # CARD
+            lv_pedidos.controls.append(
+                ft.Card(
+                    elevation=6,
+                    content=ft.Container(
+                        padding=15,
+                        bgcolor=Colors.BLACK,
+                        border_radius=12,
+                        content=ft.Row(
+                            spacing=15,
+                            expand=True,
+                            controls=[
+                                ft.Image(
+                                    src="fundo.jpg",
+                                    height=140,
+                                    width=140,
+                                    fit="cover"
+                                ),
+
+                                ft.Column(
+                                    alignment="start",
+                                    spacing=8,
+                                    expand=True,
+                                    controls=[
+
+                                        ft.Text(
+                                            nome_produto,
+                                            size=20,
+                                            weight="bold",
+                                            color=Colors.ORANGE_400,
+                                            no_wrap=False,
+                                        ),
+
+                                        ft.Text(
+                                            detalhamento,
+                                            size=16,
+                                            color=Colors.ORANGE_300,
+                                            no_wrap=False,
+                                            max_lines=3
+                                        ),
+
+                                        ft.Text(
+                                            data_formatada,
+                                            size=14,
+                                            color=Colors.ORANGE_700
+                                        ),
+
+                                        ft.Text(
+                                            status_texto,
+                                            size=16,
+                                            color=Colors.ORANGE_500,
+                                            weight="bold"
+                                        ),
+
+                                        ft.ProgressBar(
+                                            value=progresso,
+                                            color=Colors.ORANGE_700,
+                                            bgcolor=Colors.WHITE24,
+                                            bar_height=10,
+                                            width=250
+                                        )
+                                    ]
+                                )
+                            ]
+                        )
+                    )
+                )
+            )
+        page.update()
+
+    def historico_pedidos(e):
+        token = page.client_storage.get("token")
+        if not token:
+            snack_error("Usuário não logado!")
+            page.go("/login")
+            return
+
+        pessoa_id = page.client_storage.get("pessoa_id")
+
+        pedidos = listar_pedidos(token)
+
+        # FILTRA APENAS OS PEDIDOS DO USUÁRIO LOGADO
+        pedidos = [p for p in pedidos if p.get("pessoa_id") == pessoa_id]
+
+        # Ordenar por data DESC
+        pedidos.sort(key=lambda x: x["data_pedido"], reverse=True)
+
+        lv_pedidos_geral.controls.clear()
+
+        for pedido in pedidos:
+
+            status = pedido.get("status", 0)
+            status_text = pedido.get("status_texto", "Desconhecido")
+
+            # Cor baseada no status
+            if status == 0:
+                card_color = Colors.GREEN_300
+            elif status == 1:
+                card_color = Colors.ORANGE_300
+            else:
+                card_color = Colors.BLUE_300
+
+            # Formatar data
+            data_formatada = pedido["data_pedido"]
+            try:
+                dt = datetime.strptime(data_formatada, "%Y-%m-%d %H:%M:%S")
+                data_formatada = dt.strftime("%d/%m/%Y - %H:%M")
+            except:
+                pass
+
+            # Card grande e estilizado
+            card = ft.Container(
+                padding=15,
+                bgcolor=Colors.BLACK,  # 🔥 card preto
+                border_radius=20,
+                shadow=ft.BoxShadow(
+                    blur_radius=12,
+                    spread_radius=1,
+                    color=Colors.BLACK54,
+                    offset=ft.Offset(0, 4)
+                ),
+                margin=10,
+                width=350,
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                ft.Icon(ft.Icons.RECEIPT_LONG, size=32, color=Colors.ORANGE_300),
+                                ft.Text(
+                                    f"Pedido #{pedido['id_pedido']}",
+                                    size=22,
+                                    weight="bold",
+                                    color=Colors.ORANGE_300,
+                                )
+                            ]
+                        ),
+
+                        ft.Text(
+                            data_formatada,
+                            size=16,
+                            color=Colors.ORANGE_200
+                        ),
+
+                        ft.Text(
+                            pedido["detalhamento"],
+                            size=17,
+                            color=Colors.WHITE,
+                            weight="bold",
+                            max_lines=3
+                        ),
+
+                        ft.Text(
+                            f"Status: {status_text}",
+                            size=18,
+                            color=Colors.ORANGE_400,
+                            weight="bold"
+                        ),
+
+                        ft.ProgressBar(
+                            value=status / 2,
+                            width=300,
+                            bgcolor=Colors.WHITE24,
+                            bar_height=10,
+                            color=Colors.ORANGE_700,
+                        ),
+                    ],
+                    spacing=8,
+                )
+            )
+
+            lv_pedidos_geral.controls.append(card)
 
         page.update()
 
@@ -722,7 +984,6 @@ def main(page: ft.Page):
 
         page.update()
 
-
     def confirmar_pedido_cozinha(e):
         numero_mesa = page.client_storage.get("mesa_atual")
 
@@ -731,169 +992,7 @@ def main(page: ft.Page):
         else:
             enviar_pedidos_cozinha_garcom(page, e)
 
-    def confirmar_venda(e):
-        pessoa_id = page.client_storage.get("pessoa_id")
-        if not pessoa_id:
-            snack_error("Usuário não logado!")
-            page.go("/login")
-            return False
 
-        endereco_valor = input_endereco.value.strip()
-        if not endereco_valor:
-            snack_error("Por favor, informe o endereço!")
-            page.update()
-            return False
-
-        forma_pagamento_valor = getattr(input_forma_pagamento, "value", None)
-        if not forma_pagamento_valor:
-            snack_error("Selecione uma forma de pagamento!")
-            page.update()
-            return False
-
-        # --- pega o carrinho de delivery ---
-        carrinho = page.client_storage.get("carrinho") or []
-        if isinstance(carrinho, str):
-            try:
-                carrinho = json.loads(carrinho)
-            except:
-                carrinho = []
-
-        # --- normaliza ---
-        carrinho_normalizado = []
-        for it in carrinho:
-            item = dict(it)
-            item["id_lanche"] = item.get("id_lanche") if item.get("id_lanche") not in [None, ""] else None
-            item["id_bebida"] = item.get("id_bebida") if item.get("id_bebida") not in [None, ""] else None
-
-            try:
-                if item["id_lanche"] not in [None, ""]:
-                    item["id_lanche"] = int(item["id_lanche"])
-                if item["id_bebida"] not in [None, ""]:
-                    item["id_bebida"] = int(item["id_bebida"])
-            except:
-                pass
-
-            if "tipo" not in item or not item["tipo"]:
-                if item["id_lanche"]:
-                    item["tipo"] = "lanche"
-                elif item["id_bebida"]:
-                    item["tipo"] = "bebida"
-                else:
-                    item["tipo"] = None
-
-            if item["id_lanche"] or item["id_bebida"]:
-                carrinho_normalizado.append(item)
-            else:
-                print("Ignorado item inválido no carrinho:", it)
-
-        if not carrinho_normalizado:
-            snack_error("Nenhum item válido no carrinho!")
-            page.update()
-            return False
-
-        # --- carrega dados da API ---
-        token = page.client_storage.get("token")
-        insumos = listar_insumos(token)
-        preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
-
-        # --- valida se lanche/bebida ainda existem ---
-        lanches_validos = {l["id_lanche"]: l["nome_lanche"] for l in listar_lanche(token)}
-        bebidas_validas = {b["id_bebida"]: b["nome_bebida"] for b in listar_bebidas(token)}
-
-        carrinho_filtrado = []
-        for item in carrinho_normalizado:
-            if item.get("id_lanche") and item["id_lanche"] not in lanches_validos:
-                print(f"Removendo lanche inexistente: {item.get('nome_lanche')}")
-                continue
-            if item.get("id_bebida") and item["id_bebida"] not in bebidas_validas:
-                print(f"Removendo bebida inexistente: {item.get('nome_bebida')}")
-                continue
-            carrinho_filtrado.append(item)
-
-        carrinho_normalizado = carrinho_filtrado
-
-        if not carrinho_normalizado:
-            snack_error("Todos os itens do carrinho foram removidos — produtos inexistentes.")
-            page.client_storage.set("carrinho", [])
-            page.update()
-            return False
-
-        # --- processa os itens válidos ---
-        for item in carrinho_normalizado:
-            tipo = item.get("tipo")
-            id_lanche = item.get("id_lanche")
-            id_bebida = item.get("id_bebida")
-            qtd = int(item.get("qtd", 1))
-
-            if tipo == "lanche" or id_lanche is not None:
-                ingredientes = item.get("ingredientes", {}) or {}
-                receita_original = carregar_receita_base(id_lanche) or {}
-                observacoes = {"adicionar": [], "remover": []}
-
-                for ing_id, qtd_atual in ingredientes.items():
-                    qtd_base = receita_original.get(ing_id, 0)
-                    if qtd_atual > qtd_base:
-                        observacoes["adicionar"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_atual - qtd_base,
-                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_atual - qtd_base)
-                        })
-                    elif qtd_atual < qtd_base:
-                        observacoes["remover"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_base - qtd_atual
-                        })
-
-                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-                valor_extra = sum(obs.get("valor", 0) for obs in observacoes.get("adicionar", []))
-                valor_final = (valor_base + valor_extra) * qtd
-
-                detalhamento = f"Lanche: {item.get('nome_lanche', 'Sem nome')} | Obs: {item.get('observacoes_texto', 'Nenhuma')}"
-
-                response = cadastrar_venda_app(
-                    lanche_id=id_lanche,
-                    pessoa_id=pessoa_id,
-                    bebida_id=None,
-                    qtd_lanche=qtd,
-                    forma_pagamento=forma_pagamento_valor,
-                    endereco=endereco_valor,
-                    detalhamento=detalhamento,
-                    observacoes=observacoes,
-                    valor_venda=valor_final
-                )
-
-            elif tipo == "bebida" or id_bebida is not None:
-                valor_final = float(item.get("valor", 0)) * qtd
-                detalhamento = f"Bebida: {item.get('nome_bebida', 'Sem nome')}"
-
-                response = cadastrar_venda_app(
-                    lanche_id=None,
-                    pessoa_id=pessoa_id,
-                    bebida_id=id_bebida,
-                    qtd_lanche=qtd,
-                    forma_pagamento=forma_pagamento_valor,
-                    endereco=endereco_valor,
-                    detalhamento=detalhamento,
-                    observacoes={},
-                    valor_venda=valor_final
-                )
-            else:
-                snack_error(f"Item inválido no carrinho: {item}")
-                page.update()
-                return False
-
-            if "error" in response:
-                snack_error(
-                    f"Erro ao cadastrar {item.get('nome_lanche', item.get('nome_bebida', 'item'))}: {response['error']}"
-                )
-                page.update()
-                return False
-
-        # --- limpa campos ---
-        input_forma_pagamento.value = ""
-        input_endereco.value = ""
-
-        return True
 
     def confirmar_venda_delivery_e_enviar_cozinha(e):
         try:
@@ -930,6 +1029,9 @@ def main(page: ft.Page):
             token = page.client_storage.get("token")
             insumos = listar_insumos(token)
             preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
+
+            # 🔥 LISTA PARA SALVAR TODOS OS PEDIDOS DESSA VENDA
+            pedidos_da_venda = []
 
             # --- REGISTRA VENDA ---
             for item in carrinho:
@@ -1004,18 +1106,29 @@ def main(page: ft.Page):
                     snack_error(f"Erro ao registrar venda: {resp['error']}")
                     return
 
+                #  AQUI ADICIONA CADA PEDIDO RETORNADO PELA API
+                if "pedidos" in resp:
+                    pedidos_da_venda.extend(resp["pedidos"])
+                else:
+                    pedidos_da_venda.append(resp)
+
             print("Venda registrada com sucesso!")
+
+            # SALVA SOMENTE OS PEDIDOS DESSA VENDA
+            page.client_storage.set("pedidos_venda_atual", pedidos_da_venda)
 
             #  AGORA SIM — ENVIA PARA COZINHA
             enviar_pedidos_delivery(page, e)
 
-            # SOMENTE AGORA LIMPA O CARRINHO
+            # LIMPA O CARRINHO
             page.client_storage.set("carrinho", [])
             input_endereco.value = ""
             input_forma_pagamento.value = ""
 
             snack_sucesso("Venda realizada e pedido enviado à cozinha!")
-            page.go("/")
+
+            #  LEVA PARA A ROTA QUE MOSTRA SOMENTE ESSES PEDIDOS
+            page.go("/acompanhar_pedido")
             page.update()
 
         except Exception as err:
@@ -1606,9 +1719,6 @@ def main(page: ft.Page):
         return mesas_abertas
 
     # ***************************************************************************/*******************************
-
-
-
 
 
     # 🔔 Modal de Confirmação (Pedido Presencial)
@@ -2251,6 +2361,15 @@ def main(page: ft.Page):
 
                                                     ),
                                                 ),
+                                                ft.ElevatedButton(
+                                                    "Meus Pedidos",
+                                                    on_click=lambda _: page.go("/historico_pedido"),
+                                                    style=ft.ButtonStyle(
+                                                        shape={"": ft.RoundedRectangleBorder(radius=15)},
+                                                        padding=20,
+                                                        bgcolor=Colors.ORANGE_600,
+                                                        color=Colors.BLACK,
+                                                ))
                                             ],
                                             alignment=ft.MainAxisAlignment.CENTER,
                                             horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -2549,7 +2668,6 @@ def main(page: ft.Page):
                     page.update()
                     # page.snack_bar = ft.SnackBar(
                     #     ft.Text(),
-                    #     open=True, bgcolor=Colors.GREEN_700, duration=1500
                     # )
                     page.update()
                 page.go("/carrinho")
@@ -2641,7 +2759,6 @@ def main(page: ft.Page):
             for item in lanches:
                 total += item.get("valor_lanche", 0)
                 obs_texto = item.get("observacoes_texto", "Nenhuma")
-
 
                 adicionados = page.client_storage.get("adicionados")
                 removidos = page.client_storage.get("removidos")
@@ -2740,6 +2857,55 @@ def main(page: ft.Page):
                 )
             )
 
+        if page.route == "/acompanhar_pedido":
+            lista_pedidos(e)
+            page.views.append(
+                View(
+                    "/acompanhar_pedido",
+                    [
+                        AppBar(
+                            title=ft.Image(src="imgdois.png", width=90),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            color=Colors.PURPLE,
+                            title_spacing=5,
+                            leading=logo,
+                            actions=[btn_logout_acompanhar_pedido]
+                        ),
+
+                        ft.Text("Acompanhar Pedido", size=22, color=Colors.BLACK),
+                        lv_pedidos
+                    ],
+                    bgcolor=Colors.ORANGE_100,
+                )
+            )
+            page.update()
+
+        if page.route == "/historico_pedido":
+            historico_pedidos(None)  # ← Carrega ANTES de montar a view
+
+            page.views.append(
+                View(
+                    "/historico_pedido",
+                    [
+                        AppBar(
+                            title=ft.Image(src="imgdois.png", width=90),
+                            center_title=True,
+                            bgcolor=Colors.BLACK,
+                            color=Colors.PURPLE,
+                            title_spacing=5,
+                            leading=logo,
+                            actions=[btn_logout_historico_pedido]
+                        ),
+                        ft.Text("Histórico de Pedidos", size=22, color=Colors.BLACK),
+                        lv_pedidos_geral  # ← Agora já está preenchido
+                    ],
+                    bgcolor=Colors.ORANGE_100,
+                )
+            )
+
+            page.update()
+
         page.update()
 
 
@@ -2749,6 +2915,9 @@ def main(page: ft.Page):
 
     lv_lanches = ft.ListView(expand=True)
     lv_carrinho = ft.ListView(expand=True)
+    lv_pedidos = ft.ListView(expand=True)
+
+    lv_pedidos_geral = ft.ListView(expand=True)
 
     lv_bebidas = ft.ListView(expand=True)
     lv_porcoes = ft.ListView(expand=True)
@@ -2920,6 +3089,19 @@ def main(page: ft.Page):
         scale=1.5,
         icon_color=Colors.RED_700,
         on_click=lambda _: page.go("/cardapio_delivery"),
+    )
+
+    btn_logout_acompanhar_pedido = ft.TextButton(
+        icon=Icons.LOGOUT,
+        scale=1.5,
+        icon_color=Colors.RED_700,
+        on_click=lambda _: page.go("/presencial_delivery"),
+    )
+    btn_logout_historico_pedido = ft.TextButton(
+        icon=Icons.LOGOUT,
+        scale=1.5,
+        icon_color=Colors.RED_700,
+        on_click=lambda _: page.go("/presencial_delivery"),
     )
 
     btn_logout_carrinho_garcom = ft.TextButton(
