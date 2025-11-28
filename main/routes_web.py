@@ -304,14 +304,16 @@ def put_editar_categoria(token_, id_categoria,nome_categoria):
         print(response.json())
         return {'erro':response.status_code}
 
-def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha_hash, email):
+def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha_hash, email, status):
     response = requests.put(f"{url}/pessoas/{id_pessoa}", json={
         "nome_pessoa":nome_pessoa,
         "cpf":cpf,
         "salario":salario,
         "papel":papel,
         "senha_hash":senha_hash,
-        "email":email
+        "email":email,
+        "status_pessoa":status,
+
     }, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
         return response.json()

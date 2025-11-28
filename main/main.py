@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import routes_web
 
 app = Flask(__name__)
@@ -157,7 +157,7 @@ def lanches():
 
 @app.route('/insumos', methods=['GET'])
 #@app.route('/insumos/<id_insumo>', methods=['GET'])
-def insumos(id_insumo=None):
+def insumos():
     try:
         retorno = verificar_token()
         if retorno:
@@ -415,13 +415,15 @@ def editar_pessoa(id_pessoa):
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
         pessoa = routes_web.get_pessoa_by_id(session['access_token'], id_pessoa)
-
+        pessoa = pessoa['pessoa']
         if request.method == 'POST':
             papel = request.form.get('papel')
             status = request.form.get('status')
+            salario = int(request.form.get('salario'))
+            routes_web.put_editar_pessoa(session['access_token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], salario, papel, pessoa['senha_hash'], pessoa['email'], status)
         else:
             session['funcao_rota_anterior'] = 'editar_pessoa'
-            return render_template('editar_pessoas.html')
+            return render_template('editar_pessoas.html', pessoa=pessoa)
 
     except Exception as erro:
         print(erro)
