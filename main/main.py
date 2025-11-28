@@ -405,6 +405,28 @@ def venda():
     return render_template('graficoestilizado.html')
 #
 
+@app.route('/pessoas/editar<id_pessoa>', methods=['GET', 'POST'])
+def editar_pessoa(id_pessoa):
+    try:
+        retorno = verificar_token()
+        if retorno:
+            return retorno
+        if session['papel'] != "admin":
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+            return redirect(url_for(session['funcao_rota_anterior']))
+        pessoa = routes_web.get_pessoa_by_id(session['access_token'], id_pessoa)
+
+        if request.method == 'POST':
+            papel = request.form.get('papel')
+            status = request.form.get('status')
+        else:
+            session['funcao_rota_anterior'] = 'editar_pessoa'
+            return render_template('editar_pessoas.html')
+
+    except Exception as erro:
+        print(erro)
+        flash('Parece que algo deu errado', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
 
 
 if __name__ == '__main__':

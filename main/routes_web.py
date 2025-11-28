@@ -106,6 +106,15 @@ def get_pessoas(token_): # Feito
         print(response.json())
         return {'erro':response.status_code}
 
+def get_pessoa_by_id(token_, id_pessoa):
+    response = requests.get(f"{url}/pessoas/pessoa{id_pessoa}", headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro': response.status_code}
+
 def get_insumo_by_id_insumo(id_insumo, token_): # Feito
     base_url = f"{url}/get_insumo_id/{id_insumo}"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
@@ -238,6 +247,79 @@ def post_login(email, password):
 ########################################
 ########################################
 # PUT
+
+def put_fechar_mesa(token_, numero_mesa):
+    response = requests.put(f"{url}/pedidos/mesa", json={"numero_mesa": numero_mesa},
+                            headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def put_editar_status_pedidos(token_, id_pedido, status_pedido):
+    response = requests.put(f"{url}/pedidos/{id_pedido}", json={"status_pedido": status_pedido},
+                            headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def put_editar_lanche(token_, id_lanche, nome_lanche, descricao_lanche, valor_lanche):
+    response = requests.put(f"{url}/lanches/{id_lanche}", json={
+        "nome_lanche":nome_lanche,
+        "descricao_lanche":descricao_lanche,
+        "valor_lanche":valor_lanche
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def put_editar_insumo(token_, id_insumo, nome_insumo, categoria_id):
+    response = requests.put(f"{url}/insumos/{id_insumo}", json={
+        "nome_insumo":nome_insumo,
+        "categoria_id":categoria_id,
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def put_editar_categoria(token_, id_categoria,nome_categoria):
+    response = requests.put(f"{url}/categorias/{id_categoria}", json={
+        "nome_categoria":nome_categoria
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha_hash, email):
+    response = requests.put(f"{url}/pessoas/{id_pessoa}", json={
+        "nome_pessoa":nome_pessoa,
+        "cpf":cpf,
+        "salario":salario,
+        "papel":papel,
+        "senha_hash":senha_hash,
+        "email":email
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
 
 
 # def post_cadastrar_pedido(token_, nome_pedido, categoria_id):
