@@ -2502,9 +2502,38 @@ def main(page: ft.Page):
 
                     preco_total = atualizar_preco()
 
-                    print("ANTES DE SALVAR:", valores_atualizados)
+                    print("ANTES DE SALVAR:", ingredientes_salvos)
                     print("RECEITA ORIGINAL:", receita_original)
-                    print("INGREDIENTES SALVOS:", ingredientes_salvos)
+                    print("INGREDIENTES SALVOS:", valores_atualizados)
+
+                    # diferença entre o que ficou salvo e a receita original
+                    diferenca = {
+                        k: valores_atualizados.get(k, 0) - receita_original.get(k, 0)
+                        for k in valores_atualizados
+                    }
+
+                    adicionados = []
+                    removidos = []
+
+                    for ing_id, qtd_atual in valores_atualizados.items():
+                        qtd_base = receita_original.get(ing_id, 0)
+                        nome = ingredientes_disponiveis.get(ing_id, f"ID {ing_id}")
+
+                        diff = qtd_atual - qtd_base
+
+                        if diff > 0:
+                            # aumentou = ingrediente adicionado
+                            adicionados.append(f"{nome} (+{diff * 100}g)")
+
+                        elif diff < 0:
+                            # diminuiu = ingrediente removido
+                            removidos.append(f"{nome} (-{abs(diff) * 100}g)")
+
+                    print("REMOVIDOS:", removidos)
+                    print("ADICIONADOS:", adicionados)
+
+                    page.client_storage.set("adicionados", adicionados)
+                    page.client_storage.set("removidos", removidos)
 
                     item_copy.update({
                         "observacoes_texto": obs_input.value or "Nenhuma",
@@ -2611,19 +2640,11 @@ def main(page: ft.Page):
             # --- Lanches ---
             for item in lanches:
                 total += item.get("valor_lanche", 0)
-                receita_base = carregar_receita_base(item.get("id_lanche"))
-                ingredientes_atual = item.get("ingredientes", {})
                 obs_texto = item.get("observacoes_texto", "Nenhuma")
 
-                adicionados, removidos = [], []
-                for ing_id, qtd_atual in ingredientes_atual.items():
-                    qtd_base = receita_base.get(ing_id, 0)
-                    if qtd_atual > qtd_base:
-                        adicionados.append(
-                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (+{(qtd_atual - qtd_base) * 100}g)")
-                    elif qtd_atual < qtd_base:
-                        removidos.append(
-                            f"{ingredientes_disponiveis.get(ing_id, str(ing_id))} (-{(qtd_base - qtd_atual) * 100}g)")
+
+                removidos = page.client_storage.get("adicionados")
+                adicionados = page.client_storage.get("removidos")
 
                 lista_itens.append(
                     ft.Container(
