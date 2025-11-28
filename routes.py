@@ -105,12 +105,25 @@ def listar_pedidos(token):
     response = requests.get(url, headers={'Authorization': f'Bearer {token}'})
 
     if response.status_code == 200:
-        dados_get_pedidos_ = response.json()
-        print(dados_get_pedidos_)
-        return dados_get_pedidos_
+        dados = response.json()
+        pedidos = dados["pedidos"]
+
+        STATUS_MAP = {
+            0: "Aprovado",
+            1: "Sendo preparado",
+            2: "Entregue"
+        }
+
+        for p in pedidos:
+            p["status_texto"] = STATUS_MAP.get(p["status"], "Desconhecido")
+
+        return pedidos
+
     else:
-        print(f'Erro: {response.status_code}')
+        print(f"Erro: {response.status_code}")
         return response.json()
+
+
 
 
 def listar_bebidas(token):
