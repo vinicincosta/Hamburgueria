@@ -65,6 +65,8 @@ def get_categorias(token_): # Feito
         print(response.json())
         return {'erro':response.status_code}
 
+
+
 def get_entradas(token_): # Feito
     base_url = f"{url}/entradas"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
@@ -114,7 +116,18 @@ def get_pessoa_by_id(token_, id_pessoa):
         print(response.json())
         return {'erro': response.status_code}
 
-def get_insumo_by_id_insumo(id_insumo, token_): # Feito
+def get_categoria_by_id_categoria(token_, id_categoria): # Feito
+    base_url = f"{url}/categorias/categoria{id_categoria}"
+    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        print(response.json())
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def get_insumo_by_id_insumo(token_, id_insumo): # Feito
     base_url = f"{url}/get_insumo_id/{id_insumo}"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -292,7 +305,7 @@ def put_editar_insumo(token_, id_insumo, nome_insumo, categoria_id):
         print(response.json())
         return {'erro':response.status_code}
 
-def put_editar_categoria(token_, id_categoria,nome_categoria):
+def put_editar_categoria(token_, id_categoria, nome_categoria):
     response = requests.put(f"{url}/categorias/{id_categoria}", json={
         "nome_categoria":nome_categoria
     }, headers={'Authorization': f'Bearer {token_}'})
@@ -328,8 +341,4 @@ def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha
 
 # print(get_insumos(post_login('vini@', '123')))
 
-
-
-
-
-print(get_categorias(post_login("d@", "123")['access_token']))
+# print(get_categorias(post_login("d@", "123")['access_token']))

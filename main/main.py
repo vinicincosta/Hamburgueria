@@ -444,7 +444,7 @@ def editar_categoria(id_categoria):
         if session['papel'] != "admin":
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
-        categoria = routes_web.get_categoria(session['access_token'], id_categoria)
+        categoria = routes_web.get_categoria_by_id_categoria(session['access_token'], id_categoria)
         categoria = categoria['categoria']
         if request.method == 'POST':
             nome = request.form.get('nome_categoria')
@@ -468,15 +468,16 @@ def editar_insumo(id_insumo):
         if session['papel'] != "admin":
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
-        insumo = routes_web.get_categorias(session['access_token'], id_categoria)
+        insumo = routes_web.get_insumo_by_id_insumo(session['access_token'], id_insumo)
         categoria = categoria['categoria']
         if request.method == 'POST':
-            nome = request.form.get('nome_categoria')
+            nome = request.form.get('nome_insumo')
+            categoria_id = request.form.get('categoria_id')
 
-            routes_web.put_editar_categoria(session['access_token'], id_categoria, nome)
+            routes_web.put_editar_insumo(session['access_token'], id_insumo, nome, categoria_id)
         else:
             session['funcao_rota_anterior'] = 'editar_pessoa'
-            return render_template('editar_pessoas.html', categoria=categoria)
+            return render_template('editar_pessoas.html', insumo=insumo)
 
     except Exception as erro:
         print(erro)
