@@ -428,6 +428,53 @@ def editar_pessoa(id_pessoa):
         flash('Parece que algo deu errado', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
+@app.route('/categorias/editar<id_categoria>', methods=['GET', 'POST'])
+def editar_categoria(id_categoria):
+    try:
+        retorno = verificar_token()
+        if retorno:
+            return retorno
+        if session['papel'] != "admin":
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+            return redirect(url_for(session['funcao_rota_anterior']))
+        categoria = routes_web.get_categoria(session['access_token'], id_categoria)
+        categoria = categoria['categoria']
+        if request.method == 'POST':
+            nome = request.form.get('nome_categoria')
+
+            routes_web.put_editar_categoria(session['access_token'], id_categoria, nome)
+        else:
+            session['funcao_rota_anterior'] = 'editar_pessoa'
+            return render_template('editar_pessoas.html', categoria=categoria)
+
+    except Exception as erro:
+        print(erro)
+        flash('Parece que algo deu errado', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+@app.route('/insumos/editar<id_insumo>', methods=['GET', 'POST'])
+def editar_insumo(id_insumo):
+    try:
+        retorno = verificar_token()
+        if retorno:
+            return retorno
+        if session['papel'] != "admin":
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+            return redirect(url_for(session['funcao_rota_anterior']))
+        insumo = routes_web.get_categorias(session['access_token'], id_categoria)
+        categoria = categoria['categoria']
+        if request.method == 'POST':
+            nome = request.form.get('nome_categoria')
+
+            routes_web.put_editar_categoria(session['access_token'], id_categoria, nome)
+        else:
+            session['funcao_rota_anterior'] = 'editar_pessoa'
+            return render_template('editar_pessoas.html', categoria=categoria)
+
+    except Exception as erro:
+        print(erro)
+        flash('Parece que algo deu errado', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
 
 if __name__ == '__main__':
     app.run(debug=True)

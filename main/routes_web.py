@@ -60,6 +60,7 @@ def get_categorias(token_): # Feito
     base_url = f"{url}/categorias"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
+        print(response.json())
         return response.json()
     else:
         print(response.status_code)
@@ -312,7 +313,7 @@ def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha
         "papel":papel,
         "senha_hash":senha_hash,
         "email":email,
-        "status_pessoa":status,
+        "status_pessoa":status
 
     }, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
@@ -330,7 +331,7 @@ def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha
 # print(get_insumos(post_login('vini@', '123')))
 
 
-    
 
 
-# print(get_pedidos(post_login("d@", "123")['access_token']))
+
+print(get_categorias(post_login("d@", "123")['access_token']))
