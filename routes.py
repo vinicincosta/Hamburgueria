@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.232.30:5002"
+base_url = "http://192.168.0.165:5002"
 
 
 # LOGIN
@@ -121,7 +121,7 @@ def listar_pedidos(token):
 
     else:
         print(f"Erro: {response.status_code}")
-        return response.json()
+        return []
 
 
 
@@ -152,34 +152,6 @@ def listar_pessoas():
         return response.json()
 
 
-# def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
-#     url = f"{base_url}/pedidos"
-#
-#     payload = {
-#         "data_pedido": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#         "numero_mesa": numero_mesa,
-#         "id_pessoa": id_pessoa,
-#         "qtd_lanche": qtd_lanche,
-#         "detalhamento": detalhamento,
-#         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
-#     }
-#
-#     if id_lanche is not None:
-#         payload["id_lanche"] = int(id_lanche)
-#     if id_bebida is not None:
-#         payload["id_bebida"] = int(id_bebida)
-#
-#     print("DEBUG payload enviar pedido:", json.dumps(payload, indent=2, ensure_ascii=False))  # 👈 ADICIONE ISSO
-#
-#     try:
-#         response = requests.post(url, json=payload)
-#         if response.status_code != 201:
-#             print("DEBUG cadastrar_pedido_app:", response.status_code, response.text)
-#             return {"error": response.text}
-#         return response.json()
-#     except Exception as e:
-#         print("ERRO cadastrar_pedido_app:", str(e))
-#         return {"error": str(e)}
 
 
 def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):

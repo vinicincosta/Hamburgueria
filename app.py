@@ -66,11 +66,12 @@ def main(page: ft.Page):
             print(f"Papel do usuário: {papel}, Nome: {nome}")
             page.client_storage.set('token', token)
             page.client_storage.set('papel', papel)
+            page.client_storage.set('nome_pessoa', nome)
 
             #  Salva o ID da pessoa logada na sessão
             for pessoa in resultado_pessoas:
                 if pessoa['email'] == input_email.value:
-                    page.session.set("pessoa_id", pessoa["id_pessoa"])
+                    page.client_storage.set("pessoa_id", pessoa["id_pessoa"])
                     print("pessoa_id salvo na sessão:", pessoa["id_pessoa"])
                     break
 
@@ -78,6 +79,8 @@ def main(page: ft.Page):
             input_senha.value = ''
 
             if papel == "cliente":
+                print("DEBUG CLIENT STORAGE:", page.client_storage.get("pessoa_id"))
+
                 page.go("/presencial_delivery")
             elif papel == "garcom":
                 page.go("/mesa")
@@ -170,60 +173,6 @@ def main(page: ft.Page):
             update_bebida(id_bebida)
 
     # FUNÇÕES CARDÁPIO
-    # def cardapio_porcoes(e):
-    #     lv_porcoes.controls.clear()
-    #
-    #     # Primeiro atualiza o estoque de todos os insumos
-    #     atualizar_lanches_estoque()
-    #
-    #     token = page.client_storage.get('token')
-    #     resultado_lanches = listar_lanche(token)
-    #
-    #     print(f'Resultado dos lanches: {resultado_lanches}')
-    #
-    #     for lanche in resultado_lanches:
-    #         # Mostra só os ativos
-    #         if lanche["disponivel"] == True:
-    #             lv_porcoes.controls.append(
-    #                 ft.Card(
-    #                     content=ft.Container(
-    #                         content=ft.Row(
-    #                             [
-    #                                 ft.Image(src="imagemdolanche.png", height=100),
-    #                                 ft.Column(
-    #                                     [
-    #                                         ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900),
-    #                                         ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
-    #                                         ft.Text(f'{lanche["descricao_lanche"]}',
-    #                                                 color=Colors.YELLOW_800, width=200),
-    #                                         ft.ElevatedButton(
-    #                                             "Finalizar Pedido",
-    #                                             on_click=lambda e: page.open(dlg_modal),
-    #                                             style=ft.ButtonStyle(
-    #                                                 bgcolor=Colors.ORANGE_700,
-    #                                                 color=Colors.BLACK,
-    #                                                 padding=15,
-    #                                                 shape={"": ft.RoundedRectangleBorder(radius=10)}
-    #                                             )
-    #                                         )
-    #                                     ]
-    #                                 ),
-    #                             ]
-    #                         ),
-    #                         bgcolor=Colors.BLACK,
-    #                         height=180,
-    #                         border_radius=10,
-    #                         border=ft.Border(
-    #                             top=ft.BorderSide(2, color=Colors.WHITE),
-    #                             bottom=ft.BorderSide(2, color=Colors.WHITE)
-    #                         ),
-    #                     ),
-    #                     shadow_color=Colors.YELLOW_900
-    #                 )
-    #             )
-    #
-    #     page.update()
-
     def cardapio_bebidas(e):
         lv_bebidas.controls.clear()
 
@@ -332,44 +281,6 @@ def main(page: ft.Page):
                 )
 
         page.update()
-
-
-    # def lista_pedidos(e):
-    #     lv_pedidos.controls.clear()
-    #
-    #     token = page.client_storage.get('token')
-    #     resultdo_pedidoss = listar_pedidos(token)
-    #
-    #     print(f'Resultado dos pedidos: {resultdo_pedidoss}')
-    #
-    #     for pedido in resultdo_pedidoss:
-    #
-    #         lv_pedidos.controls.append(
-    #             ft.Card(
-    #                 content=ft.Container(
-    #                     content=ft.Row(
-    #                         [
-    #                             ft.Image(src="imagemdolanche.png", height=100),
-    #                             ft.Column(
-    #                                 [
-    #                                     ft.Text(f'{pedido["status"]}',  color=Colors.ORANGE_900, font_family="Arial", size=18)
-    #
-    #                                 ]
-    #                             )
-    #                         ]
-    #                     ),
-    #                     bgcolor=Colors.BLACK,
-    #                     height=180,
-    #                     border_radius=10,
-    #                     border=ft.Border(
-    #                         top=ft.BorderSide(2, color=Colors.WHITE),
-    #                         bottom=ft.BorderSide(2, color=Colors.WHITE)
-    #                 )
-    #             )
-    #         )
-    #         )
-    #     page.update()
-
 
     token = page.client_storage.get("token")
 
@@ -503,7 +414,12 @@ def main(page: ft.Page):
         pedidos = listar_pedidos(token)
 
         # FILTRA APENAS OS PEDIDOS DO USUÁRIO LOGADO
-        pedidos = [p for p in pedidos if p.get("pessoa_id") == pessoa_id]
+        pedidos = [p for p in pedidos if p.get("id_pessoa") == pessoa_id]
+
+        pedidos = [
+            p for p in pedidos
+            if isinstance(p, dict) and p.get("id_pessoa") == pessoa_id
+        ]
 
         # Ordenar por data DESC
         pedidos.sort(key=lambda x: x["data_pedido"], reverse=True)
@@ -534,7 +450,7 @@ def main(page: ft.Page):
             # Card grande e estilizado
             card = ft.Container(
                 padding=15,
-                bgcolor=Colors.BLACK,  # 🔥 card preto
+                bgcolor=card_color,
                 border_radius=20,
                 shadow=ft.BoxShadow(
                     blur_radius=12,
@@ -548,26 +464,33 @@ def main(page: ft.Page):
                     [
                         ft.Row(
                             [
-                                ft.Icon(ft.Icons.RECEIPT_LONG, size=32, color=Colors.ORANGE_300),
+                                ft.Icon(ft.Icons.RECEIPT_LONG, size=32, color=Colors.BLACK),
                                 ft.Text(
                                     f"Pedido #{pedido['id_pedido']}",
                                     size=22,
                                     weight="bold",
-                                    color=Colors.ORANGE_300,
+                                    color=Colors.BLACK,
                                 )
                             ]
                         ),
 
                         ft.Text(
+
+                            size=17,
+                            weight="bold",
+                            color=Colors.BLACK,
+                        ),
+
+                        ft.Text(
                             data_formatada,
                             size=16,
-                            color=Colors.ORANGE_200
+                            color=Colors.BLACK,
                         ),
 
                         ft.Text(
                             pedido["detalhamento"],
                             size=17,
-                            color=Colors.WHITE,
+                            color=Colors.BLACK,
                             weight="bold",
                             max_lines=3
                         ),
@@ -575,7 +498,7 @@ def main(page: ft.Page):
                         ft.Text(
                             f"Status: {status_text}",
                             size=18,
-                            color=Colors.ORANGE_400,
+                            color=Colors.BLACK,
                             weight="bold"
                         ),
 
@@ -584,7 +507,7 @@ def main(page: ft.Page):
                             width=300,
                             bgcolor=Colors.WHITE24,
                             bar_height=10,
-                            color=Colors.ORANGE_700,
+                            color=Colors.BLACK,
                         ),
                     ],
                     spacing=8,
@@ -2317,20 +2240,29 @@ def main(page: ft.Page):
             page.update()
 
         if page.route == "/presencial_delivery":
+            nome = page.client_storage.get("nome_pessoa")
             page.views.append(
                 ft.View(
                     "/presencial_delivery",
                     appbar=ft.AppBar(
                         bgcolor=Colors.BLACK,
                         actions=[btn_logout],
+
                     ),
+
+
                     controls=[
+                        ft.Text(f"Olá {nome}, o que você deseja hoje?", size=20, color=Colors.ORANGE_700,
+                                weight=ft.FontWeight.BOLD, text_align=ft.alignment.center),
+
                         ft.Container(
                             expand=True,
                             image=ft.DecorationImage(
                                 src="fundo.jpg",
                                 fit=ft.ImageFit.COVER
                             ),
+
+
                             content=ft.Column(
                                 [
                                     ft.Container(
@@ -2338,6 +2270,9 @@ def main(page: ft.Page):
                                         alignment=ft.alignment.center,
                                         content=ft.Column(
                                             [
+
+
+
                                                 ft.ElevatedButton(
                                                     "Presencial",
                                                     on_click=lambda _: page.go("/cardapio_presencial"),
