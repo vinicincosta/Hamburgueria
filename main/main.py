@@ -392,11 +392,22 @@ def cadastrar_entradas():
     if request.method == 'POST':
         qtd_entrada = request.form['qtd_entradas']
         insumo_id = request.form['insumo_id']
-        data_entrada = request.form['data_entrada']
+        bebida_id = request.form['bebida_id']
+        data_entrada = datetime.datetime.now()
         nota_fiscal = request.form['nota_fiscal']
         valor_entrada = request.form['valor_entrada']
 
-        salvar_entrada = routes_web.post_entradas(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
+        if not nota_fiscal or not valor_entrada or not qtd_entrada:
+            flash('Preencha todos os campos', 'error')
+            return redirect(url_for('cadastrar_entradas'))
+        if not bebida_id and not insumo_id:
+            flash('Preencha todos os campos', 'error')
+            return redirect(url_for('cadastrar_entradas'))
+        if insumo_id:
+            salvar_entrada = routes_web.post_entradas_insumos(session['token'], qtd_entrada, insumo_id, data_entrada, nota_fiscal, valor_entrada)
+        else:
+            salvar_entrada = routes_web.post_entradas_bebidas(session['token'], qtd_entrada, bebida_id, data_entrada, nota_fiscal, valor_entrada)
+
         if 'success' in salvar_entrada:
             flash('Entrada adicionada com sucesso', 'success')
             return redirect(url_for('entradas'))

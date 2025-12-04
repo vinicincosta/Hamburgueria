@@ -8,7 +8,12 @@ function closeNav() {
   document.getElementById("nav").style.width = "0";
 }
 function apareceInsumo() {
-  document.getElementById("insumoLabel").style.display = "0";
+  document.getElementById("insumoLabel").style.display = "relative";
+  document.getElementById("bebidaLabel").style.display = "none";
+}
+function apareceBebida(){
+  document.getElementById("insumoLabel").style.display = "none";
+  document.getElementById("bebidaLabel").style.display = "relative";
 }
 // function testeCheckbox(){
 //   renderTabela(checkboxTabela.checked);

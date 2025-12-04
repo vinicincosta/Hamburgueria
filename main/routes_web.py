@@ -206,9 +206,24 @@ def post_insumos(token_, nome_insumo, custo, categoria_id):
         print(response.json())
         return {'erro':response.status_code}
 
-def post_entradas(token_, insumo_id, qtd_entrada, data_entrada, nota_fiscal, valor_entrada):
+def post_entradas_insumos(token_, insumo_id, qtd_entrada, data_entrada, nota_fiscal, valor_entrada):
     response = requests.post(f"{url}/entradas", json={
         "insumo_id":insumo_id,
+        "qtd_entrada":qtd_entrada,
+        "data_entrada":data_entrada,
+        "nota_fiscal":nota_fiscal,
+        "valor_entrada":valor_entrada
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+def post_entradas_bebidas(token_, bebida_id, qtd_entrada, data_entrada, nota_fiscal, valor_entrada):
+    response = requests.post(f"{url}/entradas", json={
+        "bebida_id":bebida_id,
         "qtd_entrada":qtd_entrada,
         "data_entrada":data_entrada,
         "nota_fiscal":nota_fiscal,

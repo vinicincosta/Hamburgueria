@@ -10,11 +10,11 @@
         <label>
 
             <label for="insumo">Insumo</label>
-            <input onclick="" id="insumo" name="insumo_bebida" class="inputt" value="insumo" type="radio" placeholder="" required>
+            <input onclick="apareceInsumo()" id="insumo" name="insumo_bebida" class="inputt" value="insumo" type="radio" placeholder="" required>
             <label for="bebida">Bebida</label>
-            <input id="bebida" name="insumo_bebida" class="inputt" value="bebida" type="radio" placeholder="" required>
+            <input onclick="apareceBebida()" id="bebida" name="insumo_bebida" class="inputt" value="bebida" type="radio" placeholder="" required>
         </label>
-        <label>
+        <label style="display: none" id="insumoLabel">
             <select name="categoria_id" class="inputt">
                 {% for i in insumos %}
                     <option value="{{i['id_insumo']}}">{{i['nome_insumo']}}</option>
@@ -22,7 +22,7 @@
             </select>
             <span>Insumo (ID):</span>
         </label>
-        <label>
+        <label style="display: none" id="bebidaLabel" class="inputt">
             <select name="categoria_id" class="inputt">
                 {% for b in bebidas %}
                     <option value="{{b['id_bebida']}}">{{b['nome_bebida']}}</option>
@@ -32,12 +32,15 @@
         </label>
 
         <label>
-            <input name="custo_insumo" class="inputt" type="number" placeholder="" required>
-            <span>Custo:</span>
+            <input name="valor_entrada" class="inputt" type="number" placeholder="" required>
+            <span>Valor:</span>
+        </label>
+        <label>
+            <input name="nota_fiscal" class="inputt" type="text" placeholder="" required>
+            <span>NF:</span>
         </label>
         <button class="submit">Salvar</button>
         <a href="{{url_for('insumos')}}">Cancelar</a>
-
     </form>
 </div>
 {% endblock %}
