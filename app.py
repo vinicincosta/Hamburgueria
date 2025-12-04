@@ -2586,15 +2586,17 @@ def main(page: ft.Page):
                     print("REMOVIDOS:", removidos)
                     print("ADICIONADOS:", adicionados)
 
-                    page.client_storage.set("adicionados", adicionados)
-                    page.client_storage.set("removidos", removidos)
+                    item_copy["adicionados"] = adicionados
+                    item_copy["removidos"] = removidos
 
                     item_copy.update({
                         "observacoes_texto": obs_input.value or "Nenhuma",
                         "ingredientes": valores_atualizados,
                         "valor_lanche": preco_total,
                         "valor_venda": preco_total,
-                        "observacoes": observacoes
+                        "observacoes": observacoes,
+                        "adicionados": adicionados,
+                        "removidos": removidos
                     })
                     carrinho[lanche_index] = item_copy
                     page.client_storage.set("carrinho", carrinho)
@@ -2695,8 +2697,8 @@ def main(page: ft.Page):
                 total += item.get("valor_lanche", 0)
                 obs_texto = item.get("observacoes_texto", "Nenhuma")
 
-                adicionados = page.client_storage.get("adicionados")
-                removidos = page.client_storage.get("removidos")
+                adicionados = item.get("adicionados")
+                removidos = item.get("removidos")
 
                 lista_itens.append(
                     ft.Container(
