@@ -1,0 +1,60 @@
+{% extends 'inicio.html' %}
+
+{% block content %}
+    <main>
+        <span class="" style="display: block">
+            <form method="get" action="{{url_for('pessoas')}}">
+                <input type="hidden" name="exibir" value="{{exibir}}">
+                <input type="hidden" name="form" value="pessoas">
+                {% if exibir in ['True', True] %}
+                    <label for="tabela" style="color: white">Tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela" checked>
+                {% else %}
+                    <label for="tabela2" style="color: white">Tabela</label>
+                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="tabela2">
+                {% endif %}
+            </form>
+        </span>
+        {% if exibir in ['False', False] %}
+            {% for p in pessoas %}
+                {% if p['nome_pessoa'] != session['user_id'] %}
+                    <div class="card">
+                        <h1>#{{p['id_pessoa']}}</h1>
+                {% else %}
+                    <div class="card-user">
+                        <h1>#{{p['id_pessoa']}}</h1>
+                        <p>(VOCÊ)</p>
+                {% endif %}
+
+                        <h2>{{p['nome_pessoa']}}</h2>
+                        <p>{{p['papel']}}</p>
+                        <p>{{p['email']}}</p>
+                        <p>{{p['salario']}} R$</p>
+                    </div>
+            {% endfor %}
+        {% else %}
+            <table class="tabela">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>NOME</th>
+                        <th>PAPEL</th>
+                        <th>EMAIL</th>
+                        <th>SALÁRIO</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pessoas %}
+                        <tr>
+                            <th>#{{p['id_pessoa']}}</th>
+                            <th>{{p['nome_pessoa']}}</th>
+                            <th>{{p['papel']}}</th>
+                            <th>{{p['email']}}</th>
+                            <th>{{p['salario']}} R$</th>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </main>
+{% endblock %}

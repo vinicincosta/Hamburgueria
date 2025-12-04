@@ -388,7 +388,9 @@ def cadastrar_categorias():
     else:
         session['funcao_rota_anterior'] = 'cadastrar_categorias'
         return render_template('cadastrar_categorias.html')
-
+@app.route('/vendas_por_funcionarios')
+def get_vendas_por_funcionarios():
+    return render_template('vendas_funcionarios.html')
 @app.route("/formulario_teste")
 def formulario_teste():
     return render_template("formulario_teste.html")

@@ -8,88 +8,125 @@
 <body>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<h2>Vendas por Funcionário (Dia)</h2>
-
-<!-- Campo de data -->
-<label for="data-dia">Selecione o dia:</label>
-<input type="date" id="data-dia" />
-
-<!-- Botão -->
-<button onclick="carregarGraficoDia()">Carregar Gráfico</button>
-
-<!-- Gráfico -->
-<canvas id="graficoVendasDia"></canvas>
+<canvas id="graficoVendasDia" height="150"></canvas>
 
 <script>
 let graficoDia = null;
 
-async function carregarGraficoDia() {
-    const dataSelecionada = document.getElementById("data-dia").value;
+const avatarImgDia = new Image();
+avatarImgDia.src = "/static/img/user.png";
 
-    let url = "http://10.135.232.24:5002/vendas_valor_por_funcionario";
-    if (dataSelecionada) {
-        url += `?date=${dataSelecionada}`;
+// Plugin: avatar + nome (SEM FUNDO)
+const pluginAvatarDia = {
+    id: "avatarDia",
+    afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+
+        meta.data.forEach((bar, index) => {
+            const x = bar.x;
+            const y = bar.y - 35;
+            const radius = 17;
+
+            // avatar redondo
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(x, y - 10, radius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(avatarImgDia, x - radius, y - radius - 10, radius * 2, radius * 2);
+            ctx.restore();
+
+            // nome do garçom
+            ctx.save();
+            ctx.fillStyle = "#333";
+            ctx.font = "bold 12px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(chart.data.labels[index], x, y - 30);
+            ctx.restore();
+        });
     }
+};
 
-    // busca dados da API
+Chart.register(pluginAvatarDia);
+
+async function carregarGraficoDia() {
+    const dataEscolhida = document.getElementById("data-dia")?.value;
+    let url = "http://192.168.1.238:5002/vendas_valor_por_funcionario";
+    if (dataEscolhida) url += `?date=${dataEscolhida}`;
+
     const res = await fetch(url);
     const dados = await res.json();
 
     const labels = dados.labels;
-    const counts = dados.counts || dados.values; // fallback se counts não existir
-    const totals = dados.totals; // total vendido em R$
+    const totals = dados.totals ?? [];
 
     const ctx = document.getElementById("graficoVendasDia").getContext("2d");
 
-    // destruir gráfico anterior se existir
+    // gradiente suave
+    const grad = ctx.createLinearGradient(0, 0, 0, 300);
+    grad.addColorStop(0, "rgba(54, 162, 235, 1)");
+    grad.addColorStop(1, "rgba(54, 162, 235, 0.4)");
+
     if (graficoDia) graficoDia.destroy();
 
     graficoDia = new Chart(ctx, {
         type: "bar",
         data: {
-            labels: labels,
+            labels,
             datasets: [
                 {
-                    label: "Quantidade de Vendas",
-                    data: counts,
-                    yAxisID: 'y1',
-                    backgroundColor: "rgba(54, 162, 235, 0.5)",
-                },
-                {
-                    label: "Total Vendido (R$)",
+                    label: "",
                     data: totals,
-                    yAxisID: 'y2',
-                    backgroundColor: "rgba(75, 192, 75, 0.5)",
+                    backgroundColor: grad,
+                    borderRadius: 14,
+                    borderSkipped: false,
                 }
             ]
         },
         options: {
             responsive: true,
-            scales: {
-                y1: {
-                    type: "linear",
-                    position: "left",
-                    beginAtZero: true,
-                    title: { text: "Qtd de vendas", display: true }
-                },
-                y2: {
-                    type: "linear",
-                    position: "right",
-                    beginAtZero: true,
-                    title: { text: "Total (R$)", display: true }
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => `R$ ${ctx.raw.toFixed(2)}`
+                    }
                 }
+            },
+
+            // ⭐ LIMPEZA TOTAL DO GRÁFICO ⭐
+            scales: {
+                x: {
+                    ticks: { color: "#000", font: { size: 12 } },
+                    grid: { display: false },   // ❌ remove linhas verticais
+                    border: { display: false }  // ❌ remove borda eixo X
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { display: false },  // ❌ remove números
+                    grid: { display: false },   // ❌ remove linhas horizontais
+                    border: { display: false }  // ❌ remove borda eixo Y
+                }
+            },
+
+            layout: {
+                padding: { top: 50 }
             }
         }
     });
 }
 
-// carrega automaticamente ao abrir a página
+// Carrega o dia atual automaticamente
 window.onload = () => {
     const hoje = new Date().toISOString().split("T")[0];
-    document.getElementById("data-dia").value = hoje;
+
+    if (document.getElementById("data-dia")) {
+        document.getElementById("data-dia").value = hoje;
+    }
+
     carregarGraficoDia();
 };
 </script>
-
 </body>
 </html>

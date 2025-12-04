@@ -1,0 +1,43 @@
+{% extends 'inicio.html' %}
+
+{% block content %}
+<div class="main_vendas" >
+{% for vendas in vendas %}
+<!-- From Uiverse.io by joe-watson-sbf -->
+<div class="flip-card">
+    <div class="flip-card-inner">
+        <div class="flip-card-front">
+<!--            <p class="titulo_card_venda">data da venda: </p>-->
+<!--            <p>teste</p>-->
+
+<!--            <p>Hover Me</p>-->
+            <div class="titulo_card_venda"><p class="titulo_venda" >Data venda:</p><p>{{ vendas['data_venda'] }}</p></div>
+            <div><p>valor_venda: {{ vendas['valor_venda'] }}</p></div>
+        </div>
+        <div class="flip-card-back">
+            <p class="titulo_venda"> venda: {{vendas['lanche']}}</p>
+            <p>vendedor: {{vendas['pessoa']}}</p>
+
+        </div>
+    </div>
+</div>
+<p>id da venda: {{ vendas['id_venda'] }}</p>
+<p>data da venda: {{ vendas['data_venda'] }}</p>
+
+<p>status_venda: {{ vendas['status_venda'] }}</p>
+<p>detalhamento: {{ vendas['detalhamento'] }}</p>
+<p>lanche_id: {{ vendas['lanche'] }}</p>
+{% if not vendas['bebida'] %}
+<p>sem bebida</p>
+{% else %}
+<p>{{vendas['bebida']}}</p>
+{% endif %}
+<p>pessoa_id: {{ vendas['pessoa_id'] }}</p>
+<p>forma_pagamento: {{ vendas['forma_pagamento'] }}</p>
+<p>endereco: {{ vendas['endereco'] }}</p> <br>
+
+
+
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'inicio.html' %}
+
+{% block content %}
+<style>
+#cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 22px;
+    margin-top: 20px;
+}
+
+.card-func {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: .25s;
+}
+
+.card-func:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 28px rgba(0,0,0,0.25);
+}
+
+.card-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.card-avatar img {
+    width: 100%;
+    height: 100%;
+}
+
+.card-name {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.card-total {
+    font-size: 20px;
+    margin-top: 8px;
+    font-weight: bold;
+    color: #27ae60;
+}
+
+.canvas-box {
+    width: 100%;
+    height: 60px;
+    margin-top: 12px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 60px !important;
+}
+</style>
+
+<h2>📅 Vendas por Funcionário (dia)</h2>
+
+<label>Escolha o dia:</label>
+<input type="date" id="data-dia">
+<button onclick="carregarCards()">Buscar</button>
+
+<div id="cards-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+async function carregarCards() {
+    const dia = document.getElementById("data-dia").value;
+
+    let url = "http://192.168.1.238:5002/vendas_valor_por_funcionario";
+    if (dia) url += `?date=${dia}`;
+
+    const dados = await fetch(url).then(r => r.json());
+    const { labels = [], totals = [], ids = [] } = dados;
+
+    const container = document.getElementById("cards-container");
+    container.innerHTML = "";
+
+    for (let i = 0; i < labels.length; i++) {
+        container.innerHTML += `
+            <div class="card-func">
+                <div class="card-avatar">
+                    <img src="/static/img/user.png">
+                </div>
+
+                <div class="card-name">${labels[i]}</div>
+                <div class="card-total">R$ ${totals[i].toFixed(2)}</div>
+
+                <div class="canvas-box">
+                    <canvas id="spark-${i}"></canvas>
+                </div>
+            </div>
+        `;
+    }
+
+    // Criar mini-gráfico por funcionário
+    for (let i = 0; i < labels.length; i++) {
+        gerarSparkline(i, ids[i]);
+    }
+}
+
+async function gerarSparkline(index, idFuncionario) {
+    if (!idFuncionario) return;
+
+    const url = `http://192.168.1.238:5002/vendas_ultimos7?id=${idFuncionario}`;
+    const dados = await fetch(url).then(r => r.json());
+
+    const canvas = document.getElementById(`spark-${index}`);
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+
+    new Chart(ctx, {
+        type: "line",
+        data: {
+            labels: dados.dias,
+            datasets: [{
+                data: dados.totais,
+                borderWidth: 2,
+                tension: 0.4,
+                pointRadius: 0,
+                borderColor: "#4b70e2"
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { x: { display: false }, y: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+window.onload = () => {
+    const hoje = new Date().toISOString().split("T")[0];
+    document.getElementById("data-dia").value = hoje;
+    carregarCards();
+};
+</script>
+
+{% endblock %}
