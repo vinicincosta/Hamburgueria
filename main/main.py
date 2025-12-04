@@ -251,6 +251,40 @@ def pedidos():
     session['funcao_rota_anterior'] = 'pedidos'
     return render_template('pedidos.html', pedidos=var_pedidos['pedidos'], exibir_tabela=exibir_tabela, exibir_concluidos=exibir_concluidos)
 
+@app.route('/bebidas', methods=['GET', 'POST'])
+def bebidas():
+    retorno = verificar_token()
+    if retorno:
+        return retorno
+    if session['papel'] == "cliente":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    var_bebidas = routes_web.get_pedidos(session['token'])
+    if 'bebidas' not in var_bebidas:
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    
+    exibir_tabela = request.args.get('exibir_tabela', False)
+    form = request.args.get('form', None)
+    exibir_concluidos = request.args.get('exibir_concluidos', False)
+
+    if form is not None:
+        if form == 'exibir_tabela':
+            if exibir_tabela in ['False', False]:
+                exibir_tabela = True
+            else:
+                exibir_tabela = False
+        else:
+            if exibir_concluidos in ['False', False]:
+                exibir_concluidos = True
+            else:
+                exibir_concluidos = False
+
+    session['funcao_rota_anterior'] = 'bebidas'
+    return render_template('bebidas.html', bebidas=var_bebidas['bebidas'], exibir_tabela=exibir_tabela, exibir_concluidos=exibir_concluidos)
+
+
 @app.route('/vendas', methods=['GET'])
 def vendas():
     retorno = verificar_token()
@@ -526,10 +560,15 @@ def cadastrar_categorias():
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
         nome_categoria = request.form['nome_categoria']
+        if not nome_categoria:
+            flash('Preencha todos os campos!', 'error')
+            return redirect(url_for('cadastrar_categorias'))
+    
         salvar_categoria = routes_web.post_categorias(session['token'], nome_categoria)
         if 'success' in salvar_categoria:
             flash('Categoria adicionada com sucesso', 'success')
             return redirect(url_for('categorias'))
+        flash('Parece que algo ocorreu errado!', 'error')
         return redirect(url_for('cadastrar_categorias'))
     else:
         session['funcao_rota_anterior'] = 'cadastrar_categorias'
@@ -541,6 +580,31 @@ def get_vendas_por_funcionarios():
 def formulario_teste():
     return render_template("formulario_teste.html")
 
+@app.route('/bebidas/cadastrar', methods=['GET', 'POST'])
+def cadastrar_bebidas():
+    retorno = verificar_token()
+    if retorno:
+        return retorno
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+    if request.method == 'POST':
+        nome_bebida = request.form['nome_bebida']
+        valor = request.form.get['valor']
+        categoria_id = request.form.get['categoria_id']
+        if not nome_bebida or not valor or not categoria_id:
+            flash('Preencha todos os campos!', 'error')
+            return redirect(url_for('cadastrar_bebidas'))
+
+        salvar_bebida = routes_web.post_bebidas(session['token'], nome_bebida, valor, categoria_id)
+        if 'success' in salvar_bebida:
+            flash('Bebida adicionada com sucesso', 'success')
+            return redirect(url_for('bebidas'))
+        flash('Parece que algo ocorreu errado', 'error')
+        return redirect(url_for('cadastrar_bebidas'))
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_categorias'
+        return render_template('cadastrar_categorias.html')
 
 #
 @app.route("/faturamento")

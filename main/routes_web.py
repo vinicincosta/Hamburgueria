@@ -162,6 +162,20 @@ def get_id_pessoa_by_token(token_):
 
 # POST
 
+def post_bebidas(token_, nome_bebida, valor, categoria_id):
+    response = requests.post(f"{url}/bebidas", json={
+        "nome_bebida":nome_bebida,
+        "valor":valor,
+        "categoria_id":categoria_id
+    }, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 201:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro':response.status_code}
+
+
 def post_cadastro_pessoas(token_, nome, cpf, email, senha, salario, papel):
     response = requests.post(f"{url}/cadastro_pessoas_login", json={
         "email":email,
