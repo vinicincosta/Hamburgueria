@@ -37,8 +37,12 @@
                 <span>Salário</span>
             </label>
                 {%if session['user_id'] != pessoa['id_pessoa'] %}
-                <label for="">
-
+                <label>
+                    <label for="inativo">Inativo</label>
+                    <input id="inativo" type="radio" name="status" value="Inativo">
+                    <label for="ativo">ativo</label>
+                    <input id="ativo" type="radio" name="status" value="Ativo">
+                <span>Status</span>
                 </label>
                 {%endif%}
             {% endif %}

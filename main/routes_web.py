@@ -160,7 +160,7 @@ def post_cadastro_pessoas(token_, nome, cpf, email, senha, salario, papel):
         "cpf":cpf,
         "salario":salario,
         "papel":papel
-    })#, headers={'Authorization': f'Bearer {token_}'})
+    }, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 201:
         return response.json()
     else:
