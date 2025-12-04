@@ -55,7 +55,94 @@
 
 
         <!-- <a href="#{{url_for('logout')}}">○</a> -->
-        <div id="img-user"></div>
+        <a style="margin-top: 15px"  href="{{ url_for('editar_pessoa', id_pessoa = session['user_id']) }}">
+                    <svg width="40" height="40" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg">
+          <style>
+            .circle {
+              stroke: #4da3ff;
+              fill: none;
+              stroke-width: 6;
+              animation: pulse 2.2s ease-in-out infinite;
+              transform-origin: 65px 65px;
+            }
+
+            .glow {
+              stroke: #4da3ff;
+              fill: none;
+              stroke-width: 10;
+              opacity: 0.15;
+              transform-origin: 65px 65px;
+              animation: breathe 3s ease-in-out infinite;
+            }
+
+            .head {
+              fill: #4da3ff;
+              animation: headFloat 3s ease-in-out infinite;
+            }
+
+            .body {
+              fill: #4da3ff;
+              animation: bodyFloat 3s ease-in-out infinite;
+              animation-delay: .15s;
+            }
+
+            .shine {
+              stroke: white;
+              stroke-width: 3;
+              stroke-linecap: round;
+              opacity: 0.0;
+              animation: shineMove 2.5s linear infinite;
+            }
+
+            @keyframes pulse {
+              0% { transform: scale(1); }
+              50% { transform: scale(1.04); }
+              100% { transform: scale(1); }
+            }
+
+            @keyframes breathe {
+              0% { transform: scale(1); opacity: .15; }
+              50% { transform: scale(1.12); opacity: .25; }
+              100% { transform: scale(1); opacity: .15; }
+            }
+
+            @keyframes headFloat {
+              0% { transform: translateY(0); }
+              50% { transform: translateY(-4px); }
+              100% { transform: translateY(0); }
+            }
+
+            @keyframes bodyFloat {
+              0% { transform: translateY(0); }
+              50% { transform: translateY(3px); }
+              100% { transform: translateY(0); }
+            }
+
+            @keyframes shineMove {
+              0% { transform: translate(-40px, -40px) rotate(45deg); opacity: 0; }
+              40% { opacity: 0.5; }
+              60% { opacity: 0.2; }
+              100% { transform: translate(140px, 140px) rotate(45deg); opacity: 0; }
+            }
+          </style>
+
+          <!-- brilho circular -->
+          <circle cx="65" cy="65" r="52" class="glow"/>
+
+          <!-- círculo principal -->
+          <circle cx="65" cy="65" r="45" class="circle"/>
+
+          <!-- cabeça -->
+          <circle cx="65" cy="50" r="15" class="head"/>
+
+          <!-- corpo -->
+          <path d="M40 92 q25 -28 50 0 q-25 12 -50 0" class="body"/>
+
+          <!-- shine animado -->
+          <line x1="20" y1="20" x2="60" y2="60" class="shine"/>
+        </svg>
+
+        </a>
 
 
     </header>
@@ -95,7 +182,7 @@
 <script>
     async function carregarDados() {
         try {
-            const resposta = await fetch("http://192.168.1.238:5002/dados_grafico");
+            const resposta = await fetch("http://10.135.232.24:5002/dados_grafico");
             const dados = await resposta.json();
 
             const ctx = document.getElementById("graficoVendas").getContext("2d");

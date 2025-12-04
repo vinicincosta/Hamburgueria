@@ -37,7 +37,7 @@ header {
     flex-wrap: wrap;        /* 👉 quebra para baixo */
     gap: 20px;
 
-    background-color: rgba(11, 12, 13, 0.25);
+    background-color: rgba(11, 12, 13, 0);
     color: white;
     padding-top: 10vh;
     /*padding: 20px;*/
@@ -48,6 +48,8 @@ header {
   height: 254px;
   perspective: 1000px;
   font-family: sans-serif;
+  text-shadow: 2px 2px 2px black;
+    color: gold;
 }
 
 .titulo_venda {
@@ -87,15 +89,16 @@ header {
 .flip-card-front {
   background: linear-gradient(120deg, rgba(255, 183, 0, 0.19) 30%, rgba(255, 206, 0, 0.09) 88%,
   #e17900 40%, rgb(255, 206, 0) 78%);
-  color: black;
+  /*color: black;*/
 
 }
 
 .flip-card-back {
   background: linear-gradient(120deg, rgba(255, 183, 0, 0.12) 30%, #b69600 88%,
   rgba(225, 121, 0, 0.06) 40%, rgba(255, 206, 0, 0.27) 78%);
-  color: black;
-  transform: rotateY(180deg);
+  /*color: black;*/
+  transform: rotateY(190deg);
+
 }
 #menu-button {
     width: 50px;
@@ -107,6 +110,7 @@ header {
     justify-content: center;
     cursor: pointer;
     margin: 10px;
+    color: #005270;
 }
 
 main {
@@ -330,6 +334,7 @@ main {
     /*left: 20px;*/
     cursor: pointer;
     z-index: 99;
+
 
 }
 
@@ -710,3 +715,5 @@ main {
         font-size: 18px;
     }
 }
+
+/*pagina do cardapio*/

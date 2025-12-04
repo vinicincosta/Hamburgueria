@@ -21,7 +21,11 @@
             </div>
 
             <div class="flip-card-back">
+                {% if vendas['lanche'] %}
                 <p style="font-size: 15px" class="titulo_venda">item vendido: {{ vendas['lanche'] }}</p>
+                {% else %}
+                <p style="font-size: 15px" class="titulo_venda">item vendido: {{ vendas['bebida'] }}</p>
+                {% endif %}
                 <p>vendedor: {{ vendas['pessoa'] }}</p>
 
                 {% if vendas['status_venda'] %}

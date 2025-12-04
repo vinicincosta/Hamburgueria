@@ -558,7 +558,7 @@ def venda():
     return render_template('graficoestilizado.html')
 #
 
-@app.route('/pessoas/editar<id_pessoa>', methods=['GET', 'POST'])
+@app.route('/pessoas/editar/<id_pessoa>', methods=['GET', 'POST'])
 def editar_pessoa(id_pessoa):
     try:
         retorno = verificar_token()
@@ -587,7 +587,7 @@ def editar_pessoa(id_pessoa):
                 senha = request.form.get('senha')
                 routes_web.put_editar_pessoa(session['token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], pessoa['salario'], pessoa['papel'], generate_password_hash(senha), email, pessoa['status'])
         else:
-            session['funcao_rota_anterior'] = 'editar_pessoa'
+            session['funcao_rota_anterior'] = 'pessoas'
             return render_template('editar_pessoa.html', pessoa=pessoa)
 
     except Exception as erro:
@@ -611,7 +611,7 @@ def editar_categoria(id_categoria):
 
             routes_web.put_editar_categoria(session['token'], id_categoria, nome)
         else:
-            session['funcao_rota_anterior'] = 'editar_pessoa'
+            session['funcao_rota_anterior'] = 'categorias'
             return render_template('editar_categoria.html', categoria=categoria)
 
     except Exception as erro:

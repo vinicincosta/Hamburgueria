@@ -2,8 +2,9 @@
 {% block content %}
 <!--<div></div>-->
 <!-- From Uiverse.io by ammarsaa -->
+
 <div class="div_pai_cadastrar_pessoa">
-    <form class="form" method="post" action="{{ url_for('editar_pessoa') }}">
+    <form class="form" method="post" action="{{ url_for('editar_pessoa',id_pessoa=pessoa['id_pessoa']) }}">
         <p class="title">Register </p>
         <p class="message">Editar Funcionario </p>
         <div class="flex">
