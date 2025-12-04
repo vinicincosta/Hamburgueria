@@ -34,15 +34,15 @@
             <div class="content-nav">
                 {% if session['papel'] == 'admin' %}
                     <a href="{{ url_for('pessoas') }}">FUNCIONÁRIOS</a>
-                    <a href="{{ url_for('cadastrar_pessoas') }}">Cadastrar funcionarios</a>
+                    <a href="{{ url_for('cadastrar_pessoas') }}">CADASTRAR FUNCIONÁRIOS</a>
                     <a href="{{url_for('entradas')}}">ENTRADAS</a>
                     <a href="{{url_for('vendas')}}">VENDAS</a>
-                    <a href="{{url_for('formulario_teste')}}">TESTE DE FORMULÁRIO</a>
+                    <a href="{{url_for('cadastrar_lanche_insumos')}}">CADASTRAR RECEITA</a>
+                    <a href="{{url_for('lanche_insumos')}}">RECEITA</a>
                 {% endif %}
                 <a href="{{url_for('pedidos')}}">PEDIDOS</a>
                 <a href="{{url_for('lanches')}}">CARDÁPIO</a>
                 <a href="{{url_for('insumos')}}">INSUMOS</a>
-
             </div>
         </div>
     </nav>
