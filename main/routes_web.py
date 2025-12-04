@@ -1,6 +1,7 @@
 import requests
 
-url = "http://10.135.232.30:5002"
+# url = "http://10.135.232.30:5002"
+url = "http://10.135.232.23:5002"
 
 
 def get_lanches(token_): # Feito

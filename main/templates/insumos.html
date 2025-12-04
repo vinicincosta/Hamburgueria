@@ -2,8 +2,7 @@
 
 {% block content %}
     <main>
-        <h1>tab{{exibir_tabela}}</h1>
-        <h1>tdds{{exibir_todos}}</h1>
+
         <span style="display: block">
             <form method="get" action="{{url_for('insumos')}}">
                 <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
@@ -78,14 +77,20 @@
                             </tr>
                         {% elif exibir_todos in ['True', True] and i['qtd_insumo'] == 0 %}
                             <tr class="tr-desativado">
-                        {% elif exibir_todos in ['True', True] and i['qtd_insumo'] != 0 %}
-                            <tr>
-                        {% endif %}
                                 <th>{{i['id_insumo']}}</th>
                                 <th>{{i['nome_insumo']}}</th>
                                 <th>{{i['qtd_insumo']}}</th>
                                 <th>{{i['custo']}}</th>
                             </tr>
+                        {% elif exibir_todos in ['True', True] and i['qtd_insumo'] != 0 %}
+                            <tr>
+                                <th>{{i['id_insumo']}}</th>
+                                <th>{{i['nome_insumo']}}</th>
+                                <th>{{i['qtd_insumo']}}</th>
+                                <th>{{i['custo']}}</th>
+                            </tr>
+                        {% endif %}
+
                         
                     {% endfor %}
                 </tbody>

@@ -1,0 +1,52 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('editar_pessoa') }}">
+        <p class="title">Register </p>
+        <p class="message">Editar Funcionario </p>
+        <div class="flex">
+            <label>
+                <span>Nome: {{pessoa['nome_pessoa']}}</span>
+            </label>
+
+            <label>
+                <span>CPF: {{pessoa['cpf']}}</span>
+            </label>
+            {% if session['user_id'] == pessoa['id_pessoa'] %}
+            <label>
+                <input name="email" class="inputt" value="{{pessoa['email']}}" type="email" placeholder="" required>
+                <span>Email</span>
+            </label>
+
+            <label>
+                <input name="senha" class="inputt" type="password" placeholder="" required="">
+                <span>Senha</span>
+            </label>
+            {% endif %}
+            {% if session['papel'] == 'admin' %}
+            <label for="cargo">Cargo:</label>
+            <select id="cargo" name="cargo">
+                <option value="garcom">Garçom</option>
+                <option value="cozinha">Cozinha</option>
+                <option value="admin" selected>Admnistrador</option>
+            </select>
+            <label>
+                <input name="salario" class="inputt" type="number" placeholder="" required="">
+                <span>Salário</span>
+            </label>
+                {%if session['user_id'] != pessoa['id_pessoa'] %}
+                <label for="">
+
+                </label>
+                {%endif%}
+            {% endif %}
+        </div>
+
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('pessoas')}}">Cancelar</a>
+        <p class="signin">Já tem uma conta <a href="{{url_for('login')}}">Logar</a></p>
+    </form>
+</div>
+{% endblock %}
