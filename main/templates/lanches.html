@@ -2,8 +2,7 @@
 
 {% block content %}
     <main>
-        <h1 style="color: white">valor {{valor_}} </h1>
-        <h1 style="color: white"> exibir {{exibir}}</h1>
+
         <form method="get" action="{{ url_for('lanches') }}">
             <input type="hidden" name="form_id" value="valor">  <!-- identifica qual foi alterado -->
             <input type="hidden" name="valor_" value="{{ valor_ }}">
@@ -50,20 +49,26 @@
                 >
             {% endif %}
         </form>
-        {% if not exibir or exibir == 'False' %}
+
+        {% if not valor_ or valor_ == 'False' %}
             {% for l in lanches %}
                 {% if exibir in ['True', True] %}
-                    {% if l['status'] in ['True', True] %}
+                    {% if l['disponivel'] in ['True', True] %}
                         <div class="card">
+                            <h1>#{{l['id_lanche']}}</h1>
+                            <h2>{{l['nome_lanche']}}</h2>
+                            <p>{{l['valor_lanches']}}</p>
+                        </div>
                     {% else %}
                         <div class="card-user">
-                    {% endif %}
-                        <h1>#{{l['id_lanche']}}</h1>
-                        <h2>{{l['nome_lanche']}}</h2>
-                        <p>{{l['valor_lanches']}}</p>
+                            <h1>#{{l['id_lanche']}}</h1>
+                            <h2>{{l['nome_lanche']}}</h2>
+                            <p>{{l['valor_lanches']}}</p>
                         </div>
+                    {% endif %}
+
                 {% else %}
-                    {% if l['status'] in [True, 'True'] %}
+                    {% if l['disponivel'] in [True, 'True'] %}
                         <div class="card">
                             <h1>#{{l['id_lanche']}}</h1>
                             <h2>{{l['nome_lanche']}}</h2>
@@ -77,37 +82,38 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>DATA</th>
-                        <th>QUANTIDADE</th>
+                        <th>NOME</th>
                         <th>VALOR</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for l in lanches %}
                         {% if exibir in ['True', True] %}
-                            {%  if l['status'] in ['True', True] %}
+                            {%  if l['disponivel'] in ['True', True] %}
                                 <tr>
+                                    <th>#{{l['id_lanche']}}</th>
+                                    <th>{{l['nome_lanche']}}</th>
+                                    <th>{{l['valor_lanche']}}</th>
+                                </tr>
                             {% else %}
                                 <tr class="tr-desativado">
-                                    <th>#{{l['id_entrada']}}</th>
-                                    <th>{{l['data_entrada']}}</th>
-                                    <th>{{l['qtd_entrada']}}</th>
-                                    <th>{{l['valor_entrada']}}</th>
+                                    <th>#{{l['id_lanche']}}</th>
+                                    <th>{{l['nome_lanche']}}</th>
+                                    <th>{{l['valor_lanche']}}</th>
                                 </tr>
                             {% endif %}
                         {% else %}
-                            {% if l['status'] in ['True', True] %}
-                                <tr class="tr-desativado">
-                                    <th>#{{l['id_entrada']}}</th>
-                                    <th>{{l['data_entrada']}}</th>
-                                    <th>{{l['qtd_entrada']}}</th>
-                                    <th>{{l['valor_entrada']}}</th>
+                            {% if l['disponivel'] in ['True', True] %}
+                                <tr>
+                                    <th>#{{l['id_lanche']}}</th>
+                                    <th>{{l['nome_lanche']}}</th>
+                                    <th>{{l['valor_lanche']}}</th>
                                 </tr>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
                 </tbody>
-            </table>]
+            </table>
         {% endif %}
     </main>
 {% endblock %}
