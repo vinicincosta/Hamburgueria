@@ -23,14 +23,24 @@ header {
 /*    display: inline;*/
 /*}*/
 /* From Uiverse.io by joe-watson-sbf */
-.main_vendas{
-    padding-top: 10vh;
-    max-height: 99vh; /* altura visível */
-    overflow-y: auto; /* scroll vertical */
-    padding-right: 8px; /* opcional — evita cortar sombra do card */
-    background-color: #161E25;
+.flip-card {
+  flex: 0 0 auto;   /* impede que ele estique */
+}
+.main_vendas {
+    /*padding-top: 10vh;*/
+
+    /* SCROLL */
+
+
+    /* LAYOUT DOS CARDS */
+    display: flex;
+    flex-wrap: wrap;        /* 👉 quebra para baixo */
+    gap: 20px;
+
+    background-color: rgba(11, 12, 13, 0.25);
     color: white;
-    scrollbar-color: #000000 #161E25;
+    padding-top: 10vh;
+    /*padding: 20px;*/
 }
 .flip-card {
   background-color: transparent;
@@ -70,20 +80,21 @@ header {
   height: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  border: 1px solid #9d00ff;
+  border: 2px solid #9d00ff;
   border-radius: 1rem;
 }
 
 .flip-card-front {
-  background: linear-gradient(120deg, #000000 60%, rgba(0, 0, 0, 0.09) 88%,
-  rgb(97, 0, 154) 40%, rgb(118, 0, 192) 48%);
-  color: #ffffff;
+  background: linear-gradient(120deg, rgba(255, 183, 0, 0.19) 30%, rgba(255, 206, 0, 0.09) 88%,
+  #e17900 40%, rgb(255, 206, 0) 78%);
+  color: black;
+
 }
 
 .flip-card-back {
-  background: linear-gradient(120deg, rgb(255, 174, 145) 30%, coral 88%,
-     bisque 40%, rgb(255, 185, 160) 78%);
-  color: white;
+  background: linear-gradient(120deg, rgba(255, 183, 0, 0.12) 30%, #b69600 88%,
+  rgba(225, 121, 0, 0.06) 40%, rgba(255, 206, 0, 0.27) 78%);
+  color: black;
   transform: rotateY(180deg);
 }
 #menu-button {
@@ -457,7 +468,7 @@ main {
     transform: translate(-50%, -50%);
     width: 20px;
     height: 20px;
-    background-color:gold;
+    /*background-color:gold;*/
     border-radius: 50%;
     opacity: 0;
     transition: all 0.8s cubic-bezier(0.23, 1, 0.320, 1);

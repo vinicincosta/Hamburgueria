@@ -256,19 +256,50 @@ def vendas():
     retorno = verificar_token()
     if retorno:
         return retorno
+
     if session['papel'] == "cliente":
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
+    # ===== PAGINAÇÃO =====
+    page = request.args.get("page", 1, type=int)  # página atual
+    per_page = 12                                 # quantidade por página
+
     var_vendas = routes_web.get_vendas(session['token'])
-    # print(var_vendas['vendas']['data_venda'])
+
     data_hoje = datetime.date.today()
+
     if 'vendas' not in var_vendas:
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
+    # Lista completa recebida da API
+    vendas = var_vendas['vendas']
+
+    # Total de itens
+    total = len(vendas)
+
+    # Cálculo do intervalo
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    # Fatia apenas os itens da página atual
+    vendas_pagina = vendas[start:end]
+
+    # Flags para botões do template
+    has_prev = page > 1
+    has_next = end < total
+
     session['funcao_rota_anterior'] = 'vendas'
-    return render_template('vendas.html', vendas=var_vendas['vendas'], data_de_hoje=data_hoje)
+
+    return render_template(
+        'vendas.html',
+        vendas=vendas_pagina,
+        data_de_hoje=data_hoje,
+        page=page,
+        has_prev=has_prev,
+        has_next=has_next
+    )
 
 
 @app.route('/pessoas/cadastrar', methods=['GET', 'POST'])
