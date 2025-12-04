@@ -1,0 +1,237 @@
+{% extends 'inicio.html' %}
+
+{% block content %}
+
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+<form class="form" method="POST" action="{{ url_for('cadastrar_lanche_insumos') }}">
+    <p class="title">Cadastrar Receita</p>
+    <p class="message">Vincule um insumo a um lanche.</p>
+
+    <!-- SELECT LANCHE -->
+    <label class="custom-select-label">
+        <select class="input custom-select" name="lanche_id" required>
+            <option value="" disabled selected></option>
+            {% for lanche in lanches %}
+                <option value="{{ lanche.id_lanche }}">{{ lanche.nome_lanche }}</option>
+            {% endfor %}
+        </select>
+        <span>Lanche</span>
+    </label>
+
+    <!-- SELECT INSUMO -->
+    <label class="custom-select-label">
+        <select class="input custom-select" name="insumo_id" required>
+            <option value="" disabled selected></option>
+            {% for insumo in insumos %}
+                <option value="{{ insumo.id_insumo }}">{{ insumo.nome_insumo }}</option>
+            {% endfor %}
+        </select>
+        <span>Insumo</span>
+    </label>
+
+    <!-- QUANTIDADE -->
+    <label style="margin-right: 20px;" >
+        <input class="input" type="number" name="qtd_insumo" min="1" required>
+        <span>Quantidade (g)</span>
+    </label>
+
+    <button class="submit">Salvar</button>
+</form>
+</div>
+<style>
+    .form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 350px;
+  padding: 20px;
+  border-radius: 20px;
+  position: relative;
+  background-color: #1a1a1a;
+  color: #fff;
+  border: 1px solid #333;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -1px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 30px;
+  color: #ffd700;
+}
+
+.title::before {
+  width: 18px;
+  height: 18px;
+}
+
+.title::after {
+  width: 18px;
+  height: 18px;
+  animation: pulse 1s linear infinite;
+}
+
+.title::before,
+.title::after {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  left: 0px;
+  background-color: #ffd700;
+}
+
+.message,
+.signin {
+  font-size: 14.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.signin {
+  text-align: center;
+}
+
+.signin a:hover {
+  text-decoration: underline #ae9200;
+}
+
+.signin a {
+  color: #ffd700;
+}
+
+.flex {
+  display: flex;
+  width: 100%;
+  gap: 6px;
+}
+
+.form label {
+  position: relative;
+}
+
+.form label .input {
+  background-color: #333;
+  color: #fff;
+  width: 100%;
+  padding: 20px 5px 5px 10px;
+  outline: 0;
+  border: 1px solid rgba(105, 105, 105, 0.397);
+  border-radius: 10px;
+}
+
+.form label .input + span {
+  color: rgba(255, 255, 255, 0.5);
+  position: absolute;
+  left: 25px;
+  top: 25px;
+  font-size: 0.9em;
+  cursor: text;
+  transition: 0.3s ease;
+}
+
+.form label .input:placeholder-shown + span {
+  top: 12.5px;
+  font-size: 0.9em;
+}
+
+.form label .input:focus + span,
+.form label .input:valid + span {
+  color: #ffd700;
+  left: 15px;
+  top: -5px;
+  font-size: 0.7em;
+  font-weight: 600;
+}
+
+.input {
+  font-size: medium;
+}
+
+.submit {
+  border: none;
+  outline: none;
+  padding: 10px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  transform: .3s ease;
+  background-color: #ffd700;
+}
+
+.submit:hover {
+  background-color: #a18607;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+
+  to {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* =============================== */
+/*           SELECT BONITO         */
+/* =============================== */
+
+.custom-select-label {
+  position: relative;
+  margin-right: 20px
+}
+
+.custom-select {
+  background-color: #333;
+  color: #cccccc;
+  border: 1px solid rgba(105,105,105,0.4);
+  border-radius: 10px;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  font-size: medium;
+}
+
+/* seta minimalista */
+.custom-select-label::after {
+  content: "▼";
+  position: absolute;
+  right: 8px;
+  top: 18px;
+  font-size: 14px;
+  color: rgba(237, 237, 237, 0.5);
+  pointer-events: none;
+  transition: 0.3s ease;
+}
+
+/* animação quando abre */
+.custom-select:focus ~ span,
+.custom-select:valid ~ span {
+  color: #ffd700;
+  top: 0px;
+  font-size: 0.7em;
+  font-weight: 600;
+}
+
+/* girar seta ao abrir */
+.custom-select:focus + span ~ .custom-select-label::after {
+  transform: rotate(180deg);
+}
+
+/* opções do dropdown */
+.custom-select option {
+  background-color: #1a1a1a;
+  color: #d8d8d8;
+  padding: 10px;
+}
+
+</style>
+{% endblock %}

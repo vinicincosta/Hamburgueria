@@ -237,15 +237,22 @@ def post_entradas_bebidas(token_, bebida_id, qtd_entrada, data_entrada, nota_fis
         return {'erro':response.status_code}
 
 def post_lanche_insumos(token_, lanche_id, insumo_id, qtd_insumo):
-    response = requests.post(f"{url}/lanche_insumos",
-                             json={"lanche_id":lanche_id, "insumo_id":insumo_id, "qtd_insumo":qtd_insumo},
-                             headers={'Authorization': f'Bearer {token_}'})
+    response = requests.post(
+        f"{url}/lanche_insumos",
+        json={"lanche_id": lanche_id, "insumo_id": insumo_id, "qtd_insumo": qtd_insumo},
+        headers={'Authorization': f'Bearer {token_}'}
+    )
+
+    # sucesso
     if response.status_code == 201:
         return response.json()
-    else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+
+    # erro → retorna a mensagem do backend
+    try:
+        return response.json()
+    except:
+        return {"error": f"Erro inesperado ({response.status_code})"}
+
 
 # def post_vendas(token_, data_venda, lanche_id, pessoa_id, qtd_lanche, detalhamento):
 #     response = requests.post(f"{url}/vendas", json={
@@ -359,6 +366,23 @@ def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha
         print(response.status_code)
         print(response.json())
         return {'erro':response.status_code}
+
+def delete_lanche_insumo(token_, lanche_id, insumo_id):
+    response = requests.delete(
+        f"{url}/lanche_insumo",
+        json={"lanche_id": lanche_id, "insumo_id": insumo_id},
+        headers={'Authorization': f'Bearer {token_}'}
+    )
+
+    # deu bom
+    if response.status_code == 200:
+        return response.json()
+
+    try:
+        return response.json()
+    except:
+        return {"error": f"Erro inesperado ({response.status_code})"}
+
 
 
 

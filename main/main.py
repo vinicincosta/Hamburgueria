@@ -301,6 +301,100 @@ def vendas():
         has_next=has_next
     )
 
+@app.route('/lanche_insumos', methods=['GET'])
+def lanche_insumos():
+    try:
+        retorno = verificar_token()
+        if retorno:
+            return retorno
+
+        if session['papel'] in ["cliente", "garcom"]:
+            flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+            return redirect(url_for(session['funcao_rota_anterior']))
+
+        form = request.args.get('form', None)
+        exibir_todos = request.args.get('exibir_todos', False)
+        exibir_tabela = request.args.get('exibir_tabela', False)
+
+        # Pega dados principais
+        lista_lanches = routes_web.get_lanches(session['token'])['lanches']
+        lista_insumos = routes_web.get_insumos(session['token'])['insumos']
+        lista_relacao = routes_web.get_lanche_insumos(session['token'])['lanche_insumos']
+
+        # Dicionários de lookup
+        dict_lanches = {l['id_lanche']: l['nome_lanche'] for l in lista_lanches}
+        dict_insumos = {i['id_insumo']: i['nome_insumo'] for i in lista_insumos}
+
+        # Adiciona nomes na relação
+        for item in lista_relacao:
+            item['lanche_nome'] = dict_lanches.get(item['lanche_id'], "Desconhecido")
+            item['insumo_nome'] = dict_insumos.get(item['insumo_id'], "Desconhecido")
+
+        # Controle dos filtros
+        if form is not None:
+            if form == 'exibir_todos':
+                exibir_todos = not (exibir_todos in ['True', True])
+            else:
+                exibir_tabela = not (exibir_tabela in ['True', True])
+
+        session['funcao_rota_anterior'] = 'lanche_insumos'
+
+        return render_template(
+            'lanche_insumos.html',
+            lanche_insumos=lista_relacao,
+            exibir_todos=exibir_todos,
+            exibir_tabela=exibir_tabela
+        )
+
+    except ValueError:
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+@app.route('/lanche_insumos/cadastrar', methods=['GET','POST'])
+def cadastrar_lanche_insumos():
+    retorno = verificar_token()
+    if retorno:
+        return retorno
+
+    if session['papel'] != "admin":
+        flash('Você não tem acesso, entre com uma conta autorizada', 'info')
+        return redirect(url_for(session['funcao_rota_anterior']))
+
+    if request.method == 'POST':
+        lanche_id = request.form['lanche_id']
+        insumo_id = request.form['insumo_id']
+        qtd_insumo = request.form['qtd_insumo']
+
+        salvar_lanche_insumo = routes_web.post_lanche_insumos(
+            session['token'], lanche_id, insumo_id, qtd_insumo
+        )
+
+        # SUCESSO
+        if 'success' in salvar_lanche_insumo:
+            flash('Receita adicionada com sucesso', 'success')
+            return redirect(url_for('cadastrar_lanche_insumos'))
+
+        # ERRO 409
+        if salvar_lanche_insumo.get("error") == "Esse insumo já está vinculado a esse lanche":
+            flash("Esse insumo já está vinculado a esse lanche", "danger")
+            return redirect(url_for('cadastrar_lanche_insumos'))
+
+        # QUALQUER OUTRO ERRO
+        flash("Erro ao inserir receita", "danger")
+        return redirect(url_for('cadastrar_lanche_insumos'))
+
+    else:
+        session['funcao_rota_anterior'] = 'cadastrar_lanche_insumos'
+
+        lanches = routes_web.get_lanches(session['token'])
+        insumos = routes_web.get_insumos(session['token'])
+
+        return render_template(
+            'cadastrar_lanche_insumo.html.html',
+            lanches=lanches.get('lanches', []),
+            insumos=insumos.get('insumos', [])
+        )
+
 
 @app.route('/pessoas/cadastrar', methods=['GET', 'POST'])
 def cadastrar_pessoas():
