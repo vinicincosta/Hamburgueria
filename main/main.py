@@ -330,7 +330,7 @@ def cadastrar_pessoas():
         session['funcao_rota_anterior'] = 'cadastrar_pessoas'
         return render_template('cadastrar_pessoa.html')
 
-@app.route('/lanches/cadastrar', methods=['POST'])
+@app.route('/lanches/cadastrar', methods=['POST', 'GET'])
 def cadastrar_lanches():
     retorno = verificar_token()
     if retorno:
@@ -353,7 +353,7 @@ def cadastrar_lanches():
         session['funcao_rota_anterior'] = 'cadastrar_lanches'
         return render_template('cadastrar_lanches.html')
 
-@app.route('/insumos/cadastrar', methods=['POST'])
+@app.route('/insumos/cadastrar', methods=['POST', 'GET'])
 def cadastrar_insumos():
     retorno = verificar_token()
     if retorno:
@@ -373,11 +373,15 @@ def cadastrar_insumos():
         # Verificar na documentação possiveis erros para tratar
         return redirect(url_for('cadastrar_insumos'))
     else:
-        session['funcao_rota_anterior'] = 'cadastrar_insumos'
-        return render_template('cadastrar_insumo.html')
+        categorias = routes_web.get_categorias(session['access_token'])
+        if 'categorias' in categorias:
+            session['funcao_rota_anterior'] = 'cadastrar_insumos'
+            return render_template('cadastrar_insumos.html', categorias=categorias['categorias'])
+        flash('Parece que algo ocorreu errado', 'error')
+        return redirect(url_for('insumos'))
 
 
-@app.route('/entradas/cadastrar_entradas', methods=['POST'])
+@app.route('/entradas/cadastrar_entradas', methods=['POST', 'GET'])
 def cadastrar_entradas():
     retorno = verificar_token()
     if retorno:
@@ -402,7 +406,7 @@ def cadastrar_entradas():
         session['funcao_rota_anterior'] = 'cadastrar_entradas'
         return render_template('cadastrar_entradas.html')
 
-@app.route('/categorias/cadastrar', methods=['POST'])
+@app.route('/categorias/cadastrar', methods=['POST', 'GET'])
 def cadastrar_categorias():
     retorno = verificar_token()
     if retorno:
