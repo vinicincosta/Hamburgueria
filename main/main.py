@@ -345,7 +345,7 @@ def cadastrar_lanches():
         salvar_lanche = routes_web.post_lanches(session['token'], nome_lanche, descricao_lanche, valor_lanche)
         if 'success' in salvar_lanche:
             flash('Pessoa adicionada com sucesso', 'success')
-            return redirect(url_for('pessoas'))
+            return redirect(url_for('lanches'))
 
         # Verificar na documentação possiveis erros para tratar
         return redirect(url_for('cadastrar_pessoas'))
@@ -498,7 +498,7 @@ def editar_categoria(id_categoria):
             routes_web.put_editar_categoria(session['access_token'], id_categoria, nome)
         else:
             session['funcao_rota_anterior'] = 'editar_pessoa'
-            return render_template('editar_pessoas.html', categoria=categoria)
+            return render_template('editar_categoria.html', categoria=categoria)
 
     except Exception as erro:
         print(erro)
