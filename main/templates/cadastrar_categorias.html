@@ -1,0 +1,19 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('cadastrar_categorias') }}">
+        <p class="title">Register </p>
+        <p class="message">Cadastrar Categorias </p>
+        <label>
+            <input name="nome_categoria" class="inputt" type="text" placeholder="" required>
+            <span>Nome:</span>
+        </label>
+
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('categorias')}}">Cancelar</a>
+
+    </form>
+</div>
+{% endblock %}
