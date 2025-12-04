@@ -7,7 +7,9 @@ function openNav() {
 function closeNav() {
   document.getElementById("nav").style.width = "0";
 }
-
+function apareceInsumo() {
+  document.getElementById("insumoLabel").style.display = "0";
+}
 // function testeCheckbox(){
 //   renderTabela(checkboxTabela.checked);
 // }

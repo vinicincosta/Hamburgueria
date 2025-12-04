@@ -373,7 +373,7 @@ def cadastrar_insumos():
         # Verificar na documentação possiveis erros para tratar
         return redirect(url_for('cadastrar_insumos'))
     else:
-        categorias = routes_web.get_categorias(session['access_token'])
+        categorias = routes_web.get_categorias(session['token'])
         if 'categorias' in categorias:
             session['funcao_rota_anterior'] = 'cadastrar_insumos'
             return render_template('cadastrar_insumos.html', categorias=categorias['categorias'])
@@ -403,8 +403,13 @@ def cadastrar_entradas():
 
         return redirect(url_for('cadastrar_entradas'))
     else:
-        session['funcao_rota_anterior'] = 'cadastrar_entradas'
-        return render_template('cadastrar_entradas.html')
+        insumos = routes_web.get_insumos(session['token'])
+        bebidas = routes_web.get_bebidas(session['token'])
+        if 'insumos' in insumos and 'bebidas' in bebidas:
+            session['funcao_rota_anterior'] = 'cadastrar_entradas'
+            return render_template('cadastrar_entradas.html', insumos=insumos['insumos'], bebidas=bebidas['bebidas'])
+        flash('Parece que algo ocorreu errado', 'error')
+        return redirect(url_for('entradas'))
 
 @app.route('/categorias/cadastrar', methods=['POST', 'GET'])
 def cadastrar_categorias():
@@ -457,7 +462,7 @@ def editar_pessoa(id_pessoa):
         if session['papel'] != "admin" and session['user_id'] != id_pessoa:
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
-        pessoa = routes_web.get_pessoa_by_id(session['access_token'], id_pessoa)
+        pessoa = routes_web.get_pessoa_by_id(session['token'], id_pessoa)
         pessoa = pessoa['pessoa']
         if request.method == 'POST':
             if session['papel'] == "admin":
@@ -467,15 +472,15 @@ def editar_pessoa(id_pessoa):
                 if session['user_id'] == id_pessoa:
                     senha = request.form.get('senha')
                     email = request.form.get('email')
-                    routes_web.put_editar_pessoa(session['access_token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], salario, papel, generate_password_hash(senha), email, pessoa['status'])
+                    routes_web.put_editar_pessoa(session['token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], salario, papel, generate_password_hash(senha), email, pessoa['status'])
                 else:
                     status = request.form.get('status')
-                    routes_web.put_editar_pessoa(session['access_token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], salario, papel, pessoa['senha_hash'], pessoa['email'], status)
+                    routes_web.put_editar_pessoa(session['token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], salario, papel, pessoa['senha_hash'], pessoa['email'], status)
 
             else:
                 email = request.form.get('email')
                 senha = request.form.get('senha')
-                routes_web.put_editar_pessoa(session['access_token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], pessoa['salario'], pessoa['papel'], generate_password_hash(senha), email, pessoa['status'])
+                routes_web.put_editar_pessoa(session['token'], id_pessoa, pessoa['nome_pessoa'], pessoa['cpf'], pessoa['salario'], pessoa['papel'], generate_password_hash(senha), email, pessoa['status'])
         else:
             session['funcao_rota_anterior'] = 'editar_pessoa'
             return render_template('editar_pessoa.html', pessoa=pessoa)
@@ -494,12 +499,12 @@ def editar_categoria(id_categoria):
         if session['papel'] != "admin":
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
-        categoria = routes_web.get_categoria_by_id_categoria(session['access_token'], id_categoria)
+        categoria = routes_web.get_categoria_by_id_categoria(session['token'], id_categoria)
         categoria = categoria['categoria']
         if request.method == 'POST':
             nome = request.form.get('nome_categoria')
 
-            routes_web.put_editar_categoria(session['access_token'], id_categoria, nome)
+            routes_web.put_editar_categoria(session['token'], id_categoria, nome)
         else:
             session['funcao_rota_anterior'] = 'editar_pessoa'
             return render_template('editar_categoria.html', categoria=categoria)
@@ -518,14 +523,14 @@ def editar_insumo(id_insumo):
         if session['papel'] != "admin":
             flash('Você não tem acesso, entre com uma conta autorizada', 'info')
             return redirect(url_for(session['funcao_rota_anterior']))
-        insumo = routes_web.get_insumo_by_id_insumo(session['access_token'], id_insumo)
+        insumo = routes_web.get_insumo_by_id_insumo(session['token'], id_insumo)
         insumo = insumo['insumo']
-        categorias = routes_web.get_categorias(session['access_token'])
+        categorias = routes_web.get_categorias(session['token'])
         if request.method == 'POST':
             nome = request.form.get('nome_insumo')
             categoria_id = request.form.get('categoria_id')
 
-            routes_web.put_editar_insumo(session['access_token'], id_insumo, nome, categoria_id)
+            routes_web.put_editar_insumo(session['token'], id_insumo, nome, categoria_id)
         else:
             if 'insumo' in insumo and 'categorias' in categorias:
                 session['funcao_rota_anterior'] = 'editar_pessoa'

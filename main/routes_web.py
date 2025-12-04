@@ -4,6 +4,16 @@ import requests
 url = "http://10.135.232.23:5002"
 
 
+def get_bebidas(token_):
+    base_url = f"{url}/bebidas"
+    response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(response.status_code)
+        print(response.json())
+        return {'erro': response.status_code}
+
 def get_lanches(token_): # Feito
     base_url = f"{url}/lanches"
     response = requests.get(base_url, headers={'Authorization': f'Bearer {token_}'})
