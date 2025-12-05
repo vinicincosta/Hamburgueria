@@ -37,13 +37,21 @@
                     <a href="{{ url_for('pessoas') }}">FUNCIONÁRIOS</a>
                     <a href="{{ url_for('cadastrar_pessoas') }}">CADASTRAR FUNCIONÁRIOS</a>
                     <a href="{{url_for('entradas')}}">ENTRADAS</a>
+                    <a style="font-size: 15px" href="{{url_for('cadastrar_entradas')}}">Cadastrar entradas</a>
                     <a href="{{url_for('vendas')}}">VENDAS</a>
                     <a href="{{url_for('cadastrar_lanche_insumos')}}">CADASTRAR RECEITA</a>
                     <a href="{{url_for('lanche_insumos')}}">RECEITA</a>
+                    <a style="font-size: 15px" href="{{url_for('cadastrar_lanche_insumos')}}">cadastrar ingredientes do lanche</a>
+                    <a style="font-size: 15px" href="{{url_for('cadastrar_lanches')}}">Cadastrar lanche</a>
+                    <a style="font-size: 15px" href="{{url_for('cadastrar_insumos')}}">Cadastrar insumos</a>
+                    <a href="{{url_for('cadastrar_categorias')}}">Cadastrar categoria</a>
+                    <a href="{{url_for('cadastrar_bebidas')}}">Cadastrar bebida</a>
+
                 {% endif %}
                 <a href="{{url_for('pedidos')}}">PEDIDOS</a>
                 <a href="{{url_for('lanches')}}">CARDÁPIO</a>
-                <a href="{{url_for('insumos')}}">INSUMOS</a>
+<!--                <a href="{{url_for('insumos')}}">INSUMOS</a>-->
+                <a href="{{url_for('bebidas')}}">Bebidas</a>
             </div>
         </div>
     </nav>
@@ -172,7 +180,7 @@
                 <canvas id="graficoVendas"></canvas>
             </div>
 
-<!--        {{ session['user_id']['sucesso']}}-->
+
         </main>
 
     {% endblock %}
@@ -184,7 +192,7 @@
 <script>
     async function carregarDados() {
         try {
-            const resposta = await fetch("http://192.168.1.238:5002/dados_grafico");
+            const resposta = await fetch("http://10.135.232.24:5002/dados_grafico");
             const dados = await resposta.json();
 
             const ctx = document.getElementById("graficoVendas").getContext("2d");

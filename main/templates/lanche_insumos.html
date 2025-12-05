@@ -3,12 +3,13 @@
 {% block content %}
 
 <style>
+    /* ------------------------  FILTROS  ------------------------ */
     .filtros-container {
         display: flex;
         justify-content: center;
         gap: 25px;
         align-items: center;
-        margin: 20px 0 30px 0;
+        margin: 25px 0 40px 0;
         width: 100%;
     }
 
@@ -16,102 +17,144 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        background: rgba(0, 0, 0, 0.35);
-        padding: 10px 15px;
-        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(6px);
+        padding: 12px 18px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        transition: 0.25s ease-in-out;
+    }
+
+    .filtro-item:hover {
+        transform: translateY(-2px);
     }
 
     .filtro-item label {
-        color: white;
-        font-size: 16px;
-        font-weight: 500;
+        color: #fff;
+        font-size: 17px;
+        font-weight: 600;
         cursor: pointer;
     }
 
     .filtro-item input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
+        width: 20px;
+        height: 20px;
         cursor: pointer;
+        accent-color: #006aff;
     }
 
-    .card,
-    .card-user {
-        background: #222;
-        border-radius: 10px;
-        padding: 18px 20px;
+    /* ------------------------  CARDS  ------------------------ */
+    .card {
+        background: rgba(34, 34, 34, 0.83);
+        border-radius: 12px;
+        padding: 20px 22px;
         color: white;
+        backdrop-filter: blur(4px);
+        margin: 14px 20px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+        transition: 0.25s ease;
+        border: 1px solid rgba(255,255,255,0.07);
 
-        /* Flexbox para alinhar conteúdo verticalmente (e o botão no final) */
         display: flex;
         flex-direction: column;
         gap: 10px;
-        box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
     }
 
-    .card-user {
-        opacity: 0.5;
-        background: #333;
+    .card:hover {
+        transform: translateY(-4px);
+        background: rgba(40, 40, 40, 0.9);
     }
 
+    .card h1 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        color: #7ab8ff;
+    }
+
+    .card p {
+        font-size: 17px;
+        opacity: 0.9;
+    }
+
+    /* ------------------------  BOTÃO  ------------------------ */
     .btn-delete {
-        background: #002baa;
+        background: linear-gradient(120deg, #0051c9, #003a91);
         border: none;
-        padding: 6px 10px;
+        padding: 8px 12px;
         border-radius: 6px;
         cursor: pointer;
         color: white;
-        font-size: 16px;
-        margin-top: auto; /* Empurra o botão para o fundo */
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: auto;
+        transition: 0.25s ease;
     }
 
     .btn-delete:hover {
-        background: #0047cc;
+        background: linear-gradient(120deg, #006aff, #0047cc);
+        transform: scale(1.05);
     }
 
+    /* ------------------------  TABELA  ------------------------ */
     table {
-        width: 100%;
+        width: 96%;
+        margin: 0 auto;
         border-collapse: collapse;
-        margin-top: 10px;
-        background: #222;
+        background: rgba(34,34,34,0.85);
         color: white;
-        border-radius: 10px;
+        border-radius: 12px;
         overflow: hidden;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.35);
     }
 
-    table th, table td {
+    th {
+        background: #0051c9;
         padding: 15px;
-        text-align: left;
+        font-size: 17px;
+        letter-spacing: .5px;
     }
 
-    table tr:nth-child(even) {
-        background: #2b2b2b;
+    td {
+        padding: 15px;
+        font-size: 16px;
     }
 
-    /* Estilos para paginação */
+    tr:nth-child(even) {
+        background: rgba(255,255,255,0.05);
+    }
+
+    tr:hover {
+        background: rgba(255,255,255,0.08);
+    }
+
+    /* ------------------------  PAGINAÇÃO  ------------------------ */
     .pagination {
         display: flex;
         justify-content: center;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 12px;
+        margin-top: 25px;
         align-items: center;
     }
 
     .pagination a {
         color: white;
-        background: #444;
-        padding: 8px 12px;
+        background: rgba(255,255,255,0.15);
+        padding: 8px 14px;
         text-decoration: none;
-        border-radius: 5px;
+        border-radius: 8px;
         font-size: 16px;
+        font-weight: 500;
+        transition: 0.25s ease;
     }
 
     .pagination a:hover {
-        background: #666;
+        background: #006aff;
     }
 
     .pagination a.active {
-        background: #002baa;
-        color: white;
+        background: #0051c9;
+        font-weight: 700;
     }
 </style>
 
@@ -123,7 +166,8 @@
                 <input type="hidden" name="form" value="exibir_tabela">
                 <input type="hidden" name="page" value="1">
                 <label for="exibir_tabela">Exibir tabela</label>
-                <input type="checkbox" id="exibir_tabela" name="tabela" onchange="this.form.submit()" {% if exibir_tabela in ['True', True] %}checked{% endif %}>
+                <input type="checkbox" id="exibir_tabela" name="tabela" onchange="this.form.submit()"
+                       {% if exibir_tabela in ['True', True] %}checked{% endif %}>
             </form>
         </div>
     </div>
@@ -142,7 +186,8 @@
         {% endfor %}
 
     {% else %}
-    <table style="margin: 0 20px">
+
+    <table>
         <thead>
             <tr>
                 <th>ID</th>
@@ -169,6 +214,7 @@
             {% endfor %}
         </tbody>
     </table>
+
     {% endif %}
 
     {% if total_pages > 1 %}
@@ -178,7 +224,8 @@
         {% endif %}
 
         {% for p in range(1, total_pages+1) %}
-        <a href="{{ url_for('lanche_insumos', page=p, exibir_tabela=exibir_tabela) }}" {% if p== page %}class="active" {% endif %}>{{ p }}</a>
+        <a href="{{ url_for('lanche_insumos', page=p, exibir_tabela=exibir_tabela) }}"
+           {% if p == page %}class="active"{% endif %}>{{ p }}</a>
         {% endfor %}
 
         {% if page < total_pages %}

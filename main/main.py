@@ -540,9 +540,9 @@ def cadastrar_insumos():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
-        nome_insumo = request.form['nome_insumo']
-        custo_insumo = request.form['custo_insumo']
-        categoria_id = request.form['categoria_id']
+        nome_insumo = request.form.get('nome_insumo')
+        custo_insumo = request.form.get('custo_insumo')
+        categoria_id = request.form.get('categoria_id')
         salvar_insumo = routes_web.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
         if 'success' in salvar_insumo:# 201
             flash('Insumo adicionada com sucesso', 'success')
