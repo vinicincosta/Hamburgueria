@@ -648,10 +648,14 @@ def cadastrar_bebidas():
             return redirect(url_for('cadastrar_bebidas'))
 
         salvar_bebida = routes_web.post_bebidas(session['token'], nome_bebida, valor, categoria_id, descricao)
+        print('salvou')
+        print(salvar_bebida)
         if 'success' in salvar_bebida:
+
+            print('entrou em sucesso')
             flash('Bebida adicionada com sucesso', 'success')
             return redirect(url_for('bebidas'))
-        print(salvar_bebida)
+
         flash('Parece que algo ocorreu errado', 'error')
         return redirect(url_for('cadastrar_bebidas'))
     else:
