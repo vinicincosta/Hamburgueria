@@ -1,0 +1,46 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('cadastrar_insumos') }}">
+        <p class="title">Register </p>
+        <p class="message">Cadastrar Insumos </p>
+
+        <label>
+
+            <label for="insumo">Insumo</label>
+            <input onclick="apareceInsumo()" id="insumo" name="insumo_bebida" class="inputt" value="insumo" type="radio" placeholder="" checked required>
+            <label for="bebida">Bebida</label>
+            <input onclick="apareceBebida()" id="bebida" name="insumo_bebida" class="inputt" value="bebida" type="radio" placeholder="" required>
+        </label>
+        <label id="insumoLabel">
+            <select name="categoria_id" class="inputt">
+                {% for i in insumos %}
+                    <option value="{{i['id_insumo']}}">{{i['nome_insumo']}}</option>
+                {% endfor %}
+            </select>
+            <span>Insumo (ID):</span>
+        </label>
+        <label style="display: none" id="bebidaLabel" class="inputt">
+            <select name="categoria_id" class="inputt">
+                {% for b in bebidas %}
+                    <option value="{{b['id_bebida']}}">{{b['nome_bebida']}}</option>
+                {% endfor %}
+            </select>
+            <span>Bebida (ID):</span>
+        </label>
+
+        <label>
+            <input name="valor_entrada" class="inputt" type="number" placeholder="" required>
+            <span>Valor:</span>
+        </label>
+        <label>
+            <input name="nota_fiscal" class="inputt" type="text" placeholder="" required>
+            <span>Nota fiscal:</span>
+        </label>
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('insumos')}}">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

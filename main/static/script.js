@@ -7,7 +7,14 @@ function openNav() {
 function closeNav() {
   document.getElementById("nav").style.width = "0";
 }
-
+function apareceInsumo() {
+  document.getElementById("insumoLabel").style.display = "block";
+  document.getElementById("bebidaLabel").style.display = "none";
+}
+function apareceBebida(){
+  document.getElementById("insumoLabel").style.display = "none";
+  document.getElementById("bebidaLabel").style.display = "block";
+}
 // function testeCheckbox(){
 //   renderTabela(checkboxTabela.checked);
 // }

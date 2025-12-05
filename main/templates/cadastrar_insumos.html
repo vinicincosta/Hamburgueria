@@ -1,0 +1,30 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('cadastrar_insumos') }}">
+        <p class="title">Register </p>
+        <p class="message">Cadastrar Insumos </p>
+        <label>
+            <input name="nome_insumo" class="inputt" type="text" placeholder="" required>
+            <span>Nome:</span>
+        </label>
+        <label>
+            <select name="categoria_id" class="inputt">
+                {% for c in categorias %}
+                    <option name="categoria_id" value="{{c['id_categoria']}}">{{c['nome_categoria']}}</option>
+                {% endfor %}
+            </select>
+            <span>Categoria (ID)</span>
+        </label>
+        <label>
+            <input name="custo_insumo" class="inputt" type="number" placeholder="" required>
+            <span>Custo:</span>
+        </label>
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('insumos')}}">Cancelar</a>
+
+    </form>
+</div>
+{% endblock %}

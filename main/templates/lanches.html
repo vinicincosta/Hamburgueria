@@ -1,113 +1,225 @@
 {% extends 'inicio.html' %}
 
 {% block content %}
-    <main>
-        <h1 style="color: white">valor {{valor_}} </h1>
-        <h1 style="color: white"> exibir {{exibir}}</h1>
-        <form method="get" action="{{ url_for('lanches') }}">
-            <input type="hidden" name="form_id" value="valor">  <!-- identifica qual foi alterado -->
+
+<main class="menu-container">
+
+    <h1  class="titulo-cardapio">🍔 Cardápio Royal Burger</h1>
+
+    <!-- Controles -->
+    <div class="menu-controls">
+
+        <!-- Toggle Tabela -->
+        <form method="get" action="{{ url_for('lanches') }}" class="toggle-form">
+            <input type="hidden" name="form_id" value="valor">
             <input type="hidden" name="valor_" value="{{ valor_ }}">
             <input type="hidden" name="exibir" value="{{ exibir }}">
 
-            {% if valor_ in ['True', True] %}
-                <label for="tabela" style="color: white">Tabela</label>
-                <input type="checkbox"
-                       id="tabela"
-                       name="tabela"
-                       onchange="this.form.submit()"
-                       checked
-                >
-            {% else %}
-                <label for="tabela2" style="color: white">Tabela</label>
-                <input type="checkbox"
-                       id="tabela2"
-                       name="tabela"
-                       onchange="this.form.submit()"
-                >
-            {% endif %}
+            <label class="toggle">
+                <span>Modo Tabela</span>
+                <input type="checkbox" onchange="this.form.submit()"
+                       {% if valor_ in ['True', True] %}checked{% endif %}>
+                <span class="slider"></span>
+            </label>
         </form>
 
-        <!-- Checkbox "Exibir ocultos" -->
-        <form method="get" action="{{ url_for('lanches') }}">
-            <input type="hidden" name="form_id" value="exibir">  <!-- identifica qual foi alterado -->
+        <!-- Toggle Exibir Ocultos -->
+        <form method="get" action="{{ url_for('lanches') }}" class="toggle-form">
+            <input type="hidden" name="form_id" value="exibir">
             <input type="hidden" name="valor_" value="{{ valor_ }}">
             <input type="hidden" name="exibir" value="{{ exibir }}">
-            {% if exibir in ['True', True] %}
-                <label for="oculto" style="color: white">Exibir ocultos</label>
-                <input type="checkbox"
-                       id="oculto"
-                       name="tabela"
-                       onchange="this.form.submit()"
-                       checked
-                >
-            {% else %}
-                <label for="oculto2" style="color: white">Exibir ocultos</label>
-                <input type="checkbox"
-                       id="oculto2"
-                       name="tabela"
-                       onchange="this.form.submit()"
 
-                >
-            {% endif %}
+            <label class="toggle">
+                <span>Exibir indisponíveis</span>
+                <input type="checkbox" onchange="this.form.submit()"
+                       {% if exibir in ['True', True] %}checked{% endif %}>
+                <span class="slider"></span>
+            </label>
         </form>
-        {% if not exibir or exibir == 'False' %}
+
+    </div>
+
+    <!-- CARDS -->
+    {% if not valor_ or valor_ == 'False' %}
+        <div class="cards-area">
+
+        {% for l in lanches %}
+            {% set ativo = (l['disponivel'] in ['True', True]) %}
+            {% if ativo or exibir in ['True', True] %}
+
+            <div class="card-lanche {% if not ativo %}card-desativado{% endif %}">
+                <div class="card-id">#{{ l['id_lanche'] }}</div>
+
+                <div class="card-nome">{{ l['nome_lanche'] }}</div>
+
+                {% if l['descricao_lanche'] %}
+                    <div class="card-desc">{{ l['descricao_lanche'] }}</div>
+                {% endif %}
+
+                <div class="card-preco">R$ {{ "%.2f"|format(l['valor_lanche']) }}</div>
+            </div>
+
+            {% endif %}
+        {% endfor %}
+
+        </div>
+
+    {% else %}
+
+    <!-- TABELA -->
+    <table class="menu-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>NOME</th>
+                <th>VALOR</th>
+            </tr>
+        </thead>
+        <tbody>
             {% for l in lanches %}
-                {% if exibir in ['True', True] %}
-                    {% if l['status'] in ['True', True] %}
-                        <div class="card">
-                    {% else %}
-                        <div class="card-user">
-                    {% endif %}
-                        <h1>#{{l['id_lanche']}}</h1>
-                        <h2>{{l['nome_lanche']}}</h2>
-                        <p>{{l['valor_lanches']}}</p>
-                        </div>
-                {% else %}
-                    {% if l['status'] in [True, 'True'] %}
-                        <div class="card">
-                            <h1>#{{l['id_lanche']}}</h1>
-                            <h2>{{l['nome_lanche']}}</h2>
-                            <p>{{l['valor_lanches']}}</p>
-                        </div>
-                    {% endif %}
+                {% set ativo = (l['disponivel'] in ['True', True]) %}
+                {% if ativo or exibir in ['True', True] %}
+                <tr class="{% if not ativo %}linha-desativada{% endif %}">
+                    <td>#{{l['id_lanche']}}</td>
+                    <td>{{l['nome_lanche']}}</td>
+                    <td>R$ {{ "%.2f"|format(l['valor_lanche']) }}</td>
+                </tr>
                 {% endif %}
             {% endfor %}
-        {% else %}
-            <table class="tabela">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>DATA</th>
-                        <th>QUANTIDADE</th>
-                        <th>VALOR</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for l in lanches %}
-                        {% if exibir in ['True', True] %}
-                            {%  if l['status'] in ['True', True] %}
-                                <tr>
-                            {% else %}
-                                <tr class="tr-desativado">
-                                    <th>#{{l['id_entrada']}}</th>
-                                    <th>{{l['data_entrada']}}</th>
-                                    <th>{{l['qtd_entrada']}}</th>
-                                    <th>{{l['valor_entrada']}}</th>
-                                </tr>
-                            {% endif %}
-                        {% else %}
-                            {% if l['status'] in ['True', True] %}
-                                <tr class="tr-desativado">
-                                    <th>#{{l['id_entrada']}}</th>
-                                    <th>{{l['data_entrada']}}</th>
-                                    <th>{{l['qtd_entrada']}}</th>
-                                    <th>{{l['valor_entrada']}}</th>
-                                </tr>
-                            {% endif %}
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>]
-        {% endif %}
-    </main>
+        </tbody>
+    </table>
+
+    {% endif %}
+
+</main>
+
+
+<style>
+/* === OVERRIDE PARA CONFLITOS GLOBAIS - COLE ESTE BLOCO === */
+
+/* força container principal como coluna (sobrepõe flexes vindos de outros arquivos) */
+.menu-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  width: 100% !important;
+  /*max-width: 1200px !important;*/
+  margin: 12px auto 60px auto !important;
+  padding: 12px 18px !important;
+  color: #fff !important;
+  box-sizing: border-box !important;
+
+}
+
+/* título centralizado sempre */
+.titulo-cardapio {
+    position: absolute;
+  top: 8vh;
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  color: #d8a72f !important;
+  font-size: 36px !important;
+  margin: 18px 0 18px 0 !important;
+  font-family: 'Poppins', sans-serif !important;
+  letter-spacing: 1px !important;
+  text-shadow: 0 0 12px #000 !important;
+}
+
+/* controles: ficam abaixo do título, centralizados; não flutuarão mais ao lado */
+.menu-controls {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 20px !important;
+  width: 100% !important;
+  max-width: 900px !important;
+  margin: 6px 0 24px 0 !important;
+  align-items: center !important;
+}
+
+/* cada form toggle compacto */
+.toggle-form { margin: 0 !important; }
+
+/* toggle styles (mantém aparência) */
+.toggle { display: inline-flex !important; align-items: center !important; gap: 10px !important; font-size: 16px !important; white-space: nowrap !important; }
+.toggle input { display: none !important; }
+.slider {
+  width: 46px !important;
+  height: 24px !important;
+  background-color: #2f2f2f !important;
+  border-radius: 20px !important;
+  position: relative !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(255,255,255,0.04) !important;
+}
+.slider::after {
+  content: "" !important;
+  width: 20px !important;
+  height: 20px !important;
+  background: #fff !important;
+  border-radius: 50% !important;
+  position: absolute !important;
+  top: 1.8px !important;
+  left: 2px !important;
+  transition: .25s ease !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.6) !important;
+}
+.toggle input:checked + .slider { background-color: #d8a72f !important; }
+.toggle input:checked + .slider::after { transform: translateX(22px) !important; }
+
+/* grid de cards - garante colunas responsivas e cards centralizados */
+.cards-area {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+  gap: 28px !important;
+  justify-items: center !important;
+  align-items: start !important;
+  padding: 30px 12px !important;
+  width: 100% !important;
+}
+
+/* card */
+.card-lanche {
+  width: 100% !important;
+  max-width: 520px !important;
+  background: linear-gradient(145deg, #151515, #0e0e0e) !important;
+  border: 2px solid #d8a72f !important;
+  border-radius: 14px !important;
+  padding: 22px 26px !important;
+  text-align: center !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
+  transition: transform .28s ease, box-shadow .28s ease !important;
+}
+.card-lanche:hover { transform: translateY(-6px) scale(1.02) !important; box-shadow: 0 18px 40px rgba(216,167,47,0.12) !important; }
+.card-desativado { opacity: .45 !important; border-color: #555 !important; }
+
+/* tipografia do card */
+.card-id { color: #d8a72f !important; font-size: 18px !important; font-weight: 700 !important; }
+.card-nome { font-size: 22px !important; font-weight: 800 !important; margin-top: 10px !important; text-transform: capitalize !important; }
+.card-desc { margin-top: 10px !important; font-size: 15px !important; opacity: .9 !important; line-height: 1.45 !important; }
+.card-preco { margin-top: 18px !important; font-size: 24px !important; font-weight: 900 !important; color: #d8a72f !important; }
+
+/* tabela */
+.menu-table { width: 100% !important; border-collapse: collapse !important; background: #0f0f0f !important; border-radius: 10px !important; overflow: hidden !important; margin-top: 10px !important; }
+.menu-table th { background: #d8a72f !important; padding: 14px !important; font-size: 16px !important; color: #111 !important; text-align: left !important; }
+.menu-table td { padding: 14px !important; border-bottom: 1px solid #222 !important; color: #ddd !important; }
+.menu-table tr:hover { background: #161616 !important; }
+.linha-desativada { opacity: .5 !important; }
+
+/* responsivo */
+@media (max-width: 900px) {
+  .titulo-cardapio { font-size: 30px !important; margin-bottom: 12px !important; }
+  .card-preco { font-size: 20px !important; }
+}
+@media (max-width: 520px) {
+  .titulo-cardapio { font-size: 22px !important; }
+  .menu-controls { gap: 10px !important; padding: 0 6px !important; }
+  .cards-area { grid-template-columns: 1fr !important; padding: 18px 6px !important; }
+  .card-lanche { padding: 18px !important; }
+}
+
+/* fim override */
+</style>
+
 {% endblock %}

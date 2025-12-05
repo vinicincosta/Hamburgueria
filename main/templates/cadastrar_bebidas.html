@@ -1,0 +1,34 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('cadastrar_bebidas') }}">
+        <p class="title">Register </p>
+        <p class="message">Cadastrar Bebidas </p>
+        <label>
+            <input name="nome_bebida" class="inputt" type="text" placeholder="" required>
+            <span>Nome:</span>
+        </label>
+        <label>
+            <input name="valor" class="inputt" type="text" placeholder="" required>
+            <span>Valor:</span>
+        </label>
+        <label>
+            <textarea name="descricao" class="inputt"  cols="5" placeholder="Descreva a bebida..." rows="3"></textarea>
+            <span>Descrição:</span>
+        </label>
+        <label>
+            <select name="categoria_id" class="inputt">
+                {% for c in categorias %}
+                    <option name="categoria_id" value="{{c['id_categoria']}}">{{c['nome_categoria']}}</option>
+                {% endfor %}
+            </select>
+            <span>Categoria (ID)</span>
+        </label>
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('bebidas')}}">Cancelar</a>
+
+    </form>
+</div>
+{% endblock %}

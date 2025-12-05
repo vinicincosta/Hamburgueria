@@ -1,0 +1,28 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('editar_insumo') }}">
+        <p class="title">Register </p>
+        <p class="message">Editar Insumo </p>
+        <label>
+            <input name="nome_insumo" value="{{insumo['nome_insumo']}}" class="inputt" type="text" placeholder="" required>
+            <span>Nome:</span>
+        </label>
+        <label>
+            <select name="categoria_id" class="inputt">
+                {% for c in categorias %}
+                    {% if insumo['categoria_id'] == c['id_categoria'] %}
+                        <option value="{{c['id_categoria']}}" selected>{{c['nome_categoria']}}</option>
+                    {% else %}
+                        <option value="{{c['id_categoria']}}">{{c['nome_categoria']}}</option>
+                    {% endif %}
+            </select>
+        </label>
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('insumos')}}">Cancelar</a>
+
+    </form>
+</div>
+{% endblock %}

@@ -1,43 +1,67 @@
 {% extends 'inicio.html' %}
 
 {% block content %}
-<div class="main_vendas" >
-{% for vendas in vendas %}
-<!-- From Uiverse.io by joe-watson-sbf -->
-<div class="flip-card">
-    <div class="flip-card-inner">
-        <div class="flip-card-front">
-<!--            <p class="titulo_card_venda">data da venda: </p>-->
-<!--            <p>teste</p>-->
+<div class="main_vendas">
 
-<!--            <p>Hover Me</p>-->
-            <div class="titulo_card_venda"><p class="titulo_venda" >Data venda:</p><p>{{ vendas['data_venda'] }}</p></div>
-            <div><p>valor_venda: {{ vendas['valor_venda'] }}</p></div>
-        </div>
-        <div class="flip-card-back">
-            <p class="titulo_venda"> venda: {{vendas['lanche']}}</p>
-            <p>vendedor: {{vendas['pessoa']}}</p>
+    <video autoplay muted loop id="bg-video">
+        <source src="../static/hamburguer.mp4" type="video/mp4">
+    </video>
 
+    {% for vendas in vendas %}
+
+    <div class="flip-card">
+        <div class="flip-card-inner">
+            <div class="flip-card-front">
+                <p>id venda: {{ vendas['id_venda'] }}</p>
+                <div class="titulo_card_venda">
+                    <p class="titulo_venda">Data venda:</p>
+                    <p>{{ vendas['data_venda'] }}</p>
+                </div>
+                <div><p>valor_venda: {{ vendas['valor_venda'] }}</p></div>
+            </div>
+
+            <div class="flip-card-back">
+                {% if vendas['lanche'] %}
+                <p style="font-size: 15px" class="titulo_venda">item vendido: {{ vendas['lanche'] }}</p>
+                {% else %}
+                <p style="font-size: 15px" class="titulo_venda">item vendido: {{ vendas['bebida'] }}</p>
+                {% endif %}
+                <p>vendedor: {{ vendas['pessoa'] }}</p>
+
+                {% if vendas['status_venda'] %}
+                <p>Venda finalizada</p>
+                {% endif %}
+
+                <p style="font-size: 12px">Forma de pagamento: {{ vendas['forma_pagamento'] }}</p>
+
+                {% if 'Presencial' in vendas['endereco'] %}
+                <p>venda realizada local</p>
+                {% else %}
+                <p>endereço: {{ vendas['endereco'] }}</p>
+                {% endif %}
+            </div>
         </div>
     </div>
+
+    {% endfor %}
 </div>
-<p>id da venda: {{ vendas['id_venda'] }}</p>
-<p>data da venda: {{ vendas['data_venda'] }}</p>
-
-<p>status_venda: {{ vendas['status_venda'] }}</p>
-<p>detalhamento: {{ vendas['detalhamento'] }}</p>
-<p>lanche_id: {{ vendas['lanche'] }}</p>
-{% if not vendas['bebida'] %}
-<p>sem bebida</p>
-{% else %}
-<p>{{vendas['bebida']}}</p>
-{% endif %}
-<p>pessoa_id: {{ vendas['pessoa_id'] }}</p>
-<p>forma_pagamento: {{ vendas['forma_pagamento'] }}</p>
-<p>endereco: {{ vendas['endereco'] }}</p> <br>
 
 
+<!-- 🔥 PAGINAÇÃO AQUI !!! -->
+<div style="width: 100%; display: flex; justify-content: center; gap: 20px; margin: 30px 0;">
 
-{% endfor %}
+    {% if has_prev %}
+    <a href="{{ url_for('vendas', page=page-1) }}" class="animated-button">
+        <span>Anterior</span><span></span>
+    </a>
+    {% endif %}
+
+    {% if has_next %}
+    <a href="{{ url_for('vendas', page=page+1) }}" class="animated-button">
+        <span>Próximo</span><span></span>
+    </a>
+    {% endif %}
+
 </div>
+
 {% endblock %}

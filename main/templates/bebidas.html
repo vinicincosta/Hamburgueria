@@ -1,0 +1,281 @@
+{% extends 'inicio.html' %}
+
+{% block content %}
+<style>
+:root{
+  --bg: #0f1724;
+  --card: rgba(255,255,255,0.03);
+  --glass: rgba(255,255,255,0.06);
+  --accent: #48a6ff;
+  --accent-2: #7b61ff;
+  --muted: #bfc7d6;
+}
+html,body{height:100%;}
+main{
+  min-height:calc(100vh - 120px);
+  padding:28px 24px;
+  background: linear-gradient(180deg, rgba(6,10,19,0.6) 0%, rgba(10,14,25,0.9) 100%);
+  color: #e6eef8;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+}
+.container{
+  max-width:1200px;
+  margin:0 auto;
+}
+
+/* ----- HEADER / CONTROLS ----- */
+.header-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:20px;
+}
+.title-area h1{margin:0;font-size:20px;color:var(--accent);letter-spacing:0.2px}
+.title-area p{margin:2px 0 0 0;color:var(--muted);font-size:13px}
+
+.controls{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.search {
+  display:flex;align-items:center;gap:8px;background:var(--glass);padding:8px 12px;border-radius:12px;box-shadow:0 6px 18px rgba(11,14,20,0.6);
+}
+.search input{background:transparent;border:0;color:inherit;outline:none;width:220px}
+
+.switch {
+  --w:44px;--h:26px;
+  display:inline-flex;align-items:center;gap:8px;background:transparent;padding:0 6px;
+}
+.switch input{display:none}
+.switch .track{width:var(--w);height:var(--h);background:rgba(255,255,255,0.08);border-radius:999px;position:relative;transition: all .25s;box-shadow: inset 0 1px 0 rgba(255,255,255,0.02)}
+.switch .knob{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;transform:translateX(0);transition:all .22s;box-shadow:0 6px 14px rgba(12,16,22,0.6)}
+.switch input:checked + .track{background:linear-gradient(90deg,var(--accent),var(--accent-2));}
+.switch input:checked + .track .knob{transform:translateX(18px)}
+.switch label{font-size:14px;color:var(--muted);}
+
+/* ----- FILTERS BAR (small chips) ----- */
+.filters-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.filter-chip{background:var(--card);padding:8px 12px;border-radius:999px;font-weight:600;color:var(--muted);font-size:13px;box-shadow:0 6px 18px rgba(2,4,9,0.6)}
+.filter-chip.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white}
+
+/* ----- GRID CARDS ----- */
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap:18px;
+}
+.card{
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border:1px solid rgba(255,255,255,0.04);
+  padding:14px;
+  border-radius:14px;
+  box-shadow: 0 10px 30px rgba(2,6,12,0.6);
+  transform:translateY(0) scale(1);
+  transition: transform .35s cubic-bezier(.2,.9,.3,1), box-shadow .35s;
+  overflow:hidden;position:relative;
+}
+.card:hover{transform: translateY(-10px) scale(1.02);box-shadow:0 20px 40px rgba(4,8,20,0.7)}
+.card .top{display:flex;align-items:center;gap:12px}
+.avatar{
+  width:58px;height:58px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;font-size:18px;flex-shrink:0;box-shadow:inset 0 -8px 40px rgba(0,0,0,0.12);
+}
+.card h3{margin:0;font-size:16px;color:#fff}
+.card .subtitle{font-size:12px;color:var(--muted);margin-top:6px}
+.card .meta{display:flex;gap:10px;align-items:center;margin-top:12px}
+.badge{padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px;background:rgba(0,0,0,0.2);color:var(--muted)}
+.count{font-weight:800;font-size:16px;color:var(--accent)}
+.price{font-weight:800;font-size:15px;color:var(--accent-2)}
+
+/* ----- DESATIVADO ----- */
+.card.inactive{opacity:0.55;filter:grayscale(.2)}
+
+/* ----- TABELA MODERNA ----- */
+.table-wrap{margin-top:8px;background:var(--card);padding:12px;border-radius:12px}
+table{width:100%;border-collapse:collapse;color:inherit}
+thead th{background:transparent;text-align:left;padding:12px 10px;font-size:13px;color:var(--muted);font-weight:700}
+tbody td{padding:12px 10px;border-top:1px solid rgba(255,255,255,0.03)}
+tr:hover td{background:rgba(255,255,255,0.02)}
+.status-chip{padding:6px 10px;border-radius:999px;font-weight:700;font-size:12px}
+.status-on{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white}
+.status-off{background:rgba(255,255,255,0.04);color:var(--muted)}
+
+/* ----- ENTRANCE ANIMATION ----- */
+@keyframes floatUp{from{opacity:0;transform:translateY(18px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.card.in-view{animation:floatUp .5s cubic-bezier(.2,.9,.3,1) both}
+
+/* RESPONSIVE */
+@media (max-width:720px){
+  .search input{width:120px}
+  .title-area h1{font-size:18px}
+}
+</style>
+
+<main>
+  <div class="container">
+    <div class="header-row">
+      <div class="title-area">
+        <h1>Bebidas</h1>
+        <p>Visualize e gerencie o estoque — moderno, rápido e responsivo.</p>
+      </div>
+
+      <div class="controls">
+        <div class="search" role="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <input type="search" placeholder="Buscar bebida..." aria-label="Buscar bebida" id="searchInput" oninput="filterCards()">
+        </div>
+
+        <!-- Exibir todos (switch) -->
+        <form method="get" action="{{url_for('bebidas')}}" class="switch" title="Exibir itens desativados">
+            <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+            <input type="hidden" name="form" value="exibir_todos">
+            <label for="exibir_todos" style="font-size:13px;color:var(--muted)">Todos</label>
+            <input type="checkbox" name="todos" id="exibir_todos" onchange="this.form.submit()" {% if exibir_todos in ['True', True] %}checked{% endif %}>
+            <span class="track"><span class="knob"></span></span>
+        </form>
+
+        <!-- Exibir tabela (switch) -->
+        <form method="get" action="{{url_for('bebidas')}}" class="switch" title="Alternar tabela">
+            <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
+            <input type="hidden" name="form" value="exibir_tabela">
+            <label for="exibir_tabela" style="font-size:13px;color:var(--muted)">Tabela</label>
+            <input type="checkbox" name="tabela" id="exibir_tabela" onchange="this.form.submit()" {% if exibir_tabela in ['True', True] %}checked{% endif %}>
+            <span class="track"><span class="knob"></span></span>
+        </form>
+      </div>
+    </div>
+
+    <!-- FILTER CHIPS (opcional, visual only) -->
+    <div class="filters-row" style="margin-bottom:14px">
+      {% for c in categorias %}
+        <button class="filter-chip" type="button" onclick="filterByCategory('{{c['id_categoria']}}')">{{c['nome_categoria']}}</button>
+      {% endfor %}
+    </div>
+
+    <!-- CARDS OR TABLE -->
+    {% if exibir_tabela in ['False', False] %}
+      <div class="grid" id="cardsGrid">
+
+        {% if exibir_todos in ['False', False] %}
+          {% for b in bebidas %}
+            {% if b['status_bebida'] in ['True', True] %}
+              <article class="card" data-nome="{{ b['nome_bebida']|lower }}" data-categoria="{{ b['categoria'] }}">
+                <div class="top">
+                  <div class="avatar">{{ b['nome_bebida'][:2]|upper }}</div>
+                  <div>
+                    <h3>#{{b['id_bebida']}} — {{b['nome_bebida']}}</h3>
+                    {% for c in categorias %}
+                      {% if c['id_categoria'] == b['categoria'] %}
+                        <div class="subtitle">{{c['nome_categoria']}}</div>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <div class="meta">
+                  <div class="badge">Qtd <div style="display:inline-block;margin-left:8px" class="count">{{b['quantidade']}}</div></div>
+                  <div style="flex:1"></div>
+                  <div class="price">{{b['valor']}} R$</div>
+                </div>
+              </article>
+            {% endif %}
+          {% endfor %}
+
+        {% else %}
+          {% for b in bebidas %}
+            <article class="card {% if b['status_bebida'] in ['False', False] %}inactive{% endif %}" data-nome="{{ b['nome_bebida']|lower }}" data-categoria="{{ b['categoria'] }}">
+              <div class="top">
+                <div class="avatar">{{ b['nome_bebida'][:2]|upper }}</div>
+                <div>
+                  <h3>#{{b['id_bebida']}} — {{b['nome_bebida']}}</h3>
+                  {% for c in categorias %}
+                    {% if c['id_categoria'] == b['categoria'] %}
+                      <div class="subtitle">{{c['nome_categoria']}}</div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+
+              <div class="meta">
+                <div class="badge">Qtd <div style="display:inline-block;margin-left:8px" class="count">{{b['quantidade']}}</div></div>
+                <div style="flex:1"></div>
+                <div class="price">{{b['valor']}} R$</div>
+              </div>
+            </article>
+          {% endfor %}
+        {% endif %}
+
+      </div>
+
+    {% else %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nome</th>
+              <th>Categoria</th>
+              <th>Qtd</th>
+              <th>Valor</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for b in bebidas %}
+              {% set active = b['status_bebida'] in ['True', True] %}
+              <tr class="{% if not active %}tr-desativado{% endif %}">
+                <td>{{ b['id_bebida'] }}</td>
+                <td>{{ b['nome_bebida'] }}</td>
+                <td>
+                  {% for c in categorias %}
+                    {% if c['id_categoria'] == b['categoria'] %}
+                      {{ c['nome_categoria'] }}
+                    {% endif %}
+                  {% endfor %}
+                </td>
+                <td>{{ b['quantidade'] }}</td>
+                <td>{{ b['valor'] }}</td>
+                <td>
+                  <span class="status-chip {% if active %}status-on{% else %}status-off{% endif %}">{% if active %}ATIVO{% else %}DESATIVADO{% endif %}</span>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</main>
+
+<script>
+// Simple client-side search + category filter (progressive enhancement)
+function filterCards(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const cards = document.querySelectorAll('#cardsGrid .card');
+  cards.forEach(c => {
+    const nome = c.getAttribute('data-nome') || '';
+    const visible = nome.includes(q);
+    c.style.display = visible ? '' : 'none';
+  })
+}
+
+function filterByCategory(cat){
+  const cards = document.querySelectorAll('#cardsGrid .card');
+  cards.forEach(c => {
+    if(!cat) return c.style.display='';
+    c.style.display = c.getAttribute('data-categoria') === String(cat) ? '' : 'none';
+  })
+}
+
+// Entrance animation using IntersectionObserver
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); }
+  })
+},{threshold:0.12});
+document.querySelectorAll('.card').forEach(c=>io.observe(c));
+</script>
+
+{% endblock %}

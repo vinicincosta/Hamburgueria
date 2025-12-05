@@ -1,0 +1,26 @@
+{% extends 'inicio.html' %}
+{% block content %}
+<!--<div></div>-->
+<!-- From Uiverse.io by ammarsaa -->
+<div style="padding-top: 10vh" class="div_pai_cadastrar_pessoa">
+    <form class="form" method="post" action="{{ url_for('cadastrar_lanches') }}">
+        <p class="title">Register </p>
+        <p class="message">Cadastrar Lanches </p>
+        <label>
+            <input name="nome_lanche" class="inputt" type="text" placeholder="" required>
+            <span>Nome:</span>
+        </label>
+        <label>
+            <input class="inputt" name="descricao_lanche"></input>
+            <span>Descrição:</span>
+        </label>
+        <label>
+            <input name="valor_lanche" class="inputt" type="number" placeholder="" required>
+            <span>Valor:</span>
+        </label>
+        <button class="submit">Salvar</button>
+        <a href="{{url_for('lanches')}}">Cancelar</a>
+
+    </form>
+</div>
+{% endblock %}
