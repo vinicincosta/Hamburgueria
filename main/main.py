@@ -744,11 +744,13 @@ def editar_pessoa(id_pessoa):
             return redirect(url_for(session.get('funcao_rota_anterior', 'index')))
 
         # Busca pessoa (verifica retorno)
+        print("a: ",id_pessoa_int)
         resposta = routes_web.get_pessoa_by_id(session['token'], id_pessoa_int)
         if not resposta or 'pessoa' not in resposta:
             flash('Não foi possível obter dados da pessoa', 'error')
             return redirect(url_for(session.get('funcao_rota_anterior', 'index')))
         pessoa = resposta['pessoa']
+        print(pessoa)
 
         if request.method == 'POST':
             # Nome do campo no HTML é "cargo" — primeiro tenta esse, depois 'papel' (compatibilidade)
