@@ -1,100 +1,236 @@
 {% extends 'inicio.html' %}
 
 {% block content %}
-    <main>
-
-        <span style="display: block">
-            <form method="get" action="{{url_for('insumos')}}">
-                <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
-                <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
-                <input type="hidden" name="form" value="exibir_todos">
-                {% if exibir_todos in ['True', True] %}
-                    <label for="exibir_todos" style="color: white">Exibir todos</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos" checked>
-                {% else %}
-                    <label for="exibir_todos2" style="color: white">Exibir todos</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos2">
-                {% endif %}
-            </form>
-        </span>
-        <span style="display: block">
-            <form method="get" action="{{url_for('insumos')}}">
-                <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
-                <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
-                <input type="hidden" name="form" value="exibir_tabela">
-                {% if exibir_tabela in ['True', True] %}
-                    <label for="exibir_tabela" style="color: white">Exibir tabela</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela" checked>
-                {% else %}
-                    <label for="exibir_tabela2" style="color: white">Exibir tabela</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela2">
-                {% endif %}
-            </form>
-        </span>
-        {% if exibir_tabela in ['False', False] %}
-            {% if exibir_todos in ['False', False] %}
-                {% for i in insumos %}
-                    {% if i['qtd_insumo'] != 0 %}
-                        <div class="card">
-                            <h1>#{{i['id_insumo']}}-{{i['nome_insumo']}}</h1>
-                            <!--Categoria-->
-                            <p>{{i['custo_insumo']}}R$</p>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
-                {% for i in insumos %}
-                    {% if i['qtd_insumo'] != 0 %}
-                        <div class="card">
+    <main class="insumos-container">
+        <div class="view-controls">
+            <span class="control-toggle">
+                <form method="get" action="{{url_for('insumos')}}">
+                    <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
+                    <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+                    <input type="hidden" name="form" value="exibir_todos">
+                    {% if exibir_todos in ['True', True] %}
+                        <label for="exibir_todos" class="toggle-label">Exibir todos (Incluir Esgotados)</label>
+                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos" checked>
                     {% else %}
-                        <div class="card-user"> <!--Mudar nome para card-desativado-->
+                        <label for="exibir_todos2" class="toggle-label">Exibir todos (Incluir Esgotados)</label>
+                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos2">
                     {% endif %}
-                            <h1>#{{i['id_insumo']}}-{{i['nome_insumo']}}</h1>
-                            <!--Categoria-->
-                            <p>{{i['custo_insumo']}}R$</p>
-                        </div>
-                {% endfor %}
-            {% endif %}
-        
-        {% else %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>NOME</th>
-                        <th>QTD</th>
-                        <th>CUSTO</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for i in insumos %}
-                        {% if exibir_todos in ['False', False] and i['qtde_insumo'] != 0 %}
-                            <tr>
-                                <th>{{i['id_insumo']}}</th>
-                                <th>{{i['nome_insumo']}}</th>
-                                <th>{{i['qtd_insumo']}}</th>
-                                <th>{{i['custo']}}</th>
-                            </tr>
-                        {% elif exibir_todos in ['True', True] and i['qtd_insumo'] == 0 %}
-                            <tr class="tr-desativado">
-                                <th>{{i['id_insumo']}}</th>
-                                <th>{{i['nome_insumo']}}</th>
-                                <th>{{i['qtd_insumo']}}</th>
-                                <th>{{i['custo']}}</th>
-                            </tr>
-                        {% elif exibir_todos in ['True', True] and i['qtd_insumo'] != 0 %}
-                            <tr>
-                                <th>{{i['id_insumo']}}</th>
-                                <th>{{i['nome_insumo']}}</th>
-                                <th>{{i['qtd_insumo']}}</th>
-                                <th>{{i['custo']}}</th>
-                            </tr>
-                        {% endif %}
+                </form>
+            </span>
+            <span class="control-toggle">
+                <form method="get" action="{{url_for('insumos')}}">
+                    <input type="hidden" name="exibir_todos" value="{{exibir_todos}}">
+                    <input type="hidden" name="exibir_tabela" value="{{exibir_tabela}}">
+                    <input type="hidden" name="form" value="exibir_tabela">
+                    {% if exibir_tabela in ['True', True] %}
+                        <label for="exibir_tabela" class="toggle-label">Exibir em Tabela</label>
+                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela" checked>
+                    {% else %}
+                        <label for="exibir_tabela2" class="toggle-label">Exibir em Tabela</label>
+                        <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_tabela2">
+                    {% endif %}
+                </form>
+            </span>
+        </div>
 
-                        
-                    {% endfor %}
-                </tbody>
-            </table>
+        {% if exibir_tabela in ['False', False] %}
+            <section class="insumos-grid">
+                {% for i in insumos %}
+                    {% set is_active = i['qtd_insumo'] != 0 %}
+                    {% set display_card = exibir_todos in ['True', True] or is_active %}
+
+                    {% if display_card %}
+                        <div class="burger-card {% if not is_active %}card-esgotado{% endif %}">
+                            <h2 class="card-title">#{{i['id_insumo']}} - {{i['nome_insumo']}}</h2>
+                            <p class="card-quantity">
+                                **Estoque:** {{i['qtd_insumo']}}
+                                {% if not is_active %}
+                                    <span class="status-badge status-esgotado">ESGOTADO</span>
+                                {% else %}
+                                    <span class="status-badge status-disponivel">DISPONÍVEL</span>
+                                {% endif %}
+                            </p>
+                            <p class="card-cost">
+                                **Custo:** <span class="cost-value">{{i['custo_insumo']}} R$</span>
+                            </p>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </section>
+
+        {% else %}
+            <div class="table-responsive">
+                <table class="insumos-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>NOME</th>
+                            <th>QTD</th>
+                            <th>CUSTO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for i in insumos %}
+                            {% set is_active = i['qtd_insumo'] != 0 %}
+
+                            {% set display_row = False %}
+                            {% if exibir_todos in ['False', False] and is_active %}
+                                {% set display_row = True %}
+                            {% elif exibir_todos in ['True', True] %}
+                                {% set display_row = True %}
+                            {% endif %}
+
+                            {% if display_row %}
+                                <tr class="{% if not is_active %}row-esgotado{% endif %}">
+                                    <td>{{i['id_insumo']}}</td>
+                                    <td>{{i['nome_insumo']}}</td>
+                                    <td>{{i['qtd_insumo']}}</td>
+                                    <td>{{i['custo']}}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% endif %}
     </main>
+<style>
+/* 🔑 CORREÇÃO: Estilo do container principal adicionado para centralizar e limitar a largura */
+
+
+
+.view-controls {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding: 15px;
+    background-color: #333; /* Fundo escuro */
+    border-radius: 8px;
+    color: white;
+}
+
+.control-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+/* Estilo para os checkboxes (se usar um estilo de toggle customizado, melhor ainda) */
+input[type="checkbox"] {
+    transform: scale(1.2);
+    cursor: pointer;
+}
+.insumos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.burger-card {
+    background: #fff; /* Fundo branco */
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.burger-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+.card-title {
+    color: #a30000; /* Vermelho bordô, cor da hamburgueria */
+    margin-top: 0;
+    font-size: 1.5em;
+    border-bottom: 2px solid #ffc107; /* Amarelo mostarda */
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.card-quantity, .card-cost {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.cost-value {
+    font-weight: bold;
+    color: #007bff; /* Um azul para o valor (opcional) */
+}
+
+/* Estilo para o Card Esgotado */
+.card-esgotado {
+    opacity: 0.6; /* Deixa um pouco transparente */
+    border: 1px dashed #dc3545; /* Borda vermelha pontilhada */
+    background: #f8f9fa; /* Fundo levemente cinza */
+}
+
+/* Badges de Status */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.status-disponivel {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+
+.status-esgotado {
+    background-color: #dc3545; /* Vermelho */
+    color: white;
+}
+.table-responsive {
+    overflow-x: auto; /* Garante que a tabela é responsiva */
+}
+
+.insumos-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.insumos-table thead {
+    background-color: #a30000; /* Cabeçalho vermelho da hamburgueria */
+    color: white;
+}
+
+.insumos-table th, .insumos-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.insumos-table tbody tr:hover {
+    background-color: #fff3cd; /* Fundo amarelo claro ao passar o mouse */
+    cursor: default;
+}
+
+/* Estilo para a linha (tr) esgotada */
+.row-esgotado {
+    background-color: #f8d7da; /* Fundo rosa claro de alerta */
+    color: #721c24; /* Texto escuro de alerta */
+    opacity: 0.7;
+}
+
+.row-esgotado:hover {
+    background-color: #f5c6cb; /* Cor um pouco mais escura ao passar o mouse */
+}
+</style>
+
 {% endblock %}

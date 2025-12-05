@@ -10,11 +10,11 @@
         <label>
 
             <label for="insumo">Insumo</label>
-            <input onclick="apareceInsumo()" id="insumo" name="insumo_bebida" class="inputt" value="insumo" type="radio" placeholder="" required>
+            <input onclick="apareceInsumo()" id="insumo" name="insumo_bebida" class="inputt" value="insumo" type="radio" placeholder="" checked required>
             <label for="bebida">Bebida</label>
             <input onclick="apareceBebida()" id="bebida" name="insumo_bebida" class="inputt" value="bebida" type="radio" placeholder="" required>
         </label>
-        <label style="display: none" id="insumoLabel">
+        <label id="insumoLabel">
             <select name="categoria_id" class="inputt">
                 {% for i in insumos %}
                     <option value="{{i['id_insumo']}}">{{i['nome_insumo']}}</option>
@@ -37,7 +37,7 @@
         </label>
         <label>
             <input name="nota_fiscal" class="inputt" type="text" placeholder="" required>
-            <span>NF:</span>
+            <span>Nota fiscal:</span>
         </label>
         <button class="submit">Salvar</button>
         <a href="{{url_for('insumos')}}">Cancelar</a>

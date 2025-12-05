@@ -362,7 +362,6 @@ def lanche_insumos():
             return redirect(url_for(session['funcao_rota_anterior']))
 
         form = request.args.get('form', None)
-        exibir_todos = request.args.get('exibir_todos', False)
         exibir_tabela = request.args.get('exibir_tabela', False)
 
         # Pega dados principais
@@ -381,18 +380,36 @@ def lanche_insumos():
 
         # Controle dos filtros
         if form is not None:
-            if form == 'exibir_todos':
-                exibir_todos = not (exibir_todos in ['True', True])
-            else:
+            if form == 'exibir_tabela':
                 exibir_tabela = not (exibir_tabela in ['True', True])
+
+        # Lógica de paginação
+        page = int(request.args.get('page', 1))  # Página atual (padrão: 1)
+        per_page = 5  # Itens por página (ajuste conforme necessário)
+        total_items = len(lista_relacao)
+        total_pages = (total_items + per_page - 1) // per_page  # Calcula total de páginas
+
+        # Garante que a página esteja dentro dos limites
+        if page < 1:
+            page = 1
+        if page > total_pages and total_pages > 0:
+            page = total_pages
+
+        # Fatia a lista para a página atual
+        start = (page - 1) * per_page
+        end = start + per_page
+        lista_relacao_paginada = lista_relacao[start:end]
+        print("pagina: ",page)
 
         session['funcao_rota_anterior'] = 'lanche_insumos'
 
         return render_template(
             'lanche_insumos.html',
-            lanche_insumos=lista_relacao,
-            exibir_todos=exibir_todos,
-            exibir_tabela=exibir_tabela
+            lanche_insumos=lista_relacao_paginada,  # Agora usa a lista paginada
+            exibir_tabela=exibir_tabela,
+            page=page,
+            total_pages=total_pages,
+            per_page=per_page
         )
 
     except ValueError:
@@ -523,9 +540,9 @@ def cadastrar_insumos():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
-        nome_insumo = request.form['nome_insumo']
-        custo_insumo = request.form['custo_insumo']
-        categoria_id = request.form['categoria_id']
+        nome_insumo = request.form.get('nome_insumo')
+        custo_insumo = request.form.get('custo_insumo')
+        categoria_id = request.form.get('categoria_id')
         salvar_insumo = routes_web.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
         if 'success' in salvar_insumo:# 201
             flash('Insumo adicionada com sucesso', 'success')
