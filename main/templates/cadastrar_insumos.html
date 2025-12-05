@@ -13,7 +13,7 @@
         <label>
             <select name="categoria_id" class="inputt">
                 {% for c in categorias %}
-                    <option value="{{c['id_categoria']}}">{{c['nome_categoria']}}</option>
+                    <option name="categoria_id" value="{{c['id_categoria']}}">{{c['nome_categoria']}}</option>
                 {% endfor %}
             </select>
             <span>Categoria (ID)</span>

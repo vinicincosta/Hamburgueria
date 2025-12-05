@@ -1,6 +1,6 @@
 import requests
 
-url = "http://192.168.1.238:5002"
+url = "http://10.135.232.24:5002"
 
 
 def get_bebidas(token_):
@@ -167,7 +167,7 @@ def post_bebidas(token_, nome_bebida, valor, categoria_id):
     response = requests.post(f"{url}/bebidas", json={
         "nome_bebida":nome_bebida,
         "valor":valor,
-        "categoria_id":categoria_id
+        "id_categoria":categoria_id
     }, headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 201:
         return response.json()

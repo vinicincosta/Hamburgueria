@@ -10,10 +10,10 @@
                 <input type="hidden" name="form" value="exibir_todos">
                 {% if exibir_todos in ['True', True] %}
                     <label for="exibir_todos" style="color: white">Exibir todos</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos" checked>
+                    <input type="checkbox" name="todos" onchange="this.form.submit()" id="exibir_todos" checked>
                 {% else %}
                     <label for="exibir_todos2" style="color: white">Exibir todos</label>
-                    <input type="checkbox" name="tabela" onchange="this.form.submit()" id="exibir_todos2">
+                    <input type="checkbox" name="todos" onchange="this.form.submit()" id="exibir_todos2">
                 {% endif %}
             </form>
         </span>
@@ -36,25 +36,43 @@
                 {% for b in bebidas %}
                     {% if b['status_bebida'] in ['True', True] %}
                         <div class="card">
-                            <h1>#{{b['id_bebida']}}-{{b['nome_bebida']}}</h1>
-                            <!--Categoria-->
+                            <h3>#{{b['id_bebida']}}-{{b['nome_bebida']}}</h3>
+                            {% for c in categorias %}
+                                {% if c['id_categoria'] == b['categoria'] %}
+                                    <h3>{{c['nome_categoria']}}</h3>
+                                {% endif %}
+                            {% endfor %}
                             <p>{{b['valor']}}R$</p>
                             <p>Qtd.:{{b['quantidade']}}</p>
                         </div>
                     {% endif %}
                 {% endfor %}
             {% else %}
-                {% for i in insumos %}
+                {% for b in bebidas %}
                     {% if b['status_bebida'] in ['True', True] %}
                         <div class="card">
-                    {% else %}
-                        <div class="card-user"> <!--Mudar nome para card-desativado-->
-                    {% endif %}
-                            <h1>#{{b['id_bebida']}}-{{b['nome_bebida']}}</h1>
-                            <!--Categoria-->
+                            <h3>#{{b['id_bebida']}}-{{b['nome_bebida']}}</h3>
+                            {% for c in categorias %}
+                                {% if c['id_categoria'] == b['categoria'] %}
+                                    <h3>{{c['nome_categoria']}}</h3>
+                                {% endif %}
+                            {% endfor %}
                             <p>{{b['valor']}}R$</p>
                             <p>Qtd.:{{b['quantidade']}}</p>
                         </div>
+                    {% else %}
+                        <div class="card-user"> <!--Mudar nome para card-desativado-->
+                            <h3>#{{b['id_bebida']}}-{{b['nome_bebida']}}</h3>
+                            {% for c in categorias %}
+                                {% if c['id_categoria'] == b['categoria'] %}
+                                    <h3>{{c['nome_categoria']}}</h3>
+                                {% endif %}
+                            {% endfor %}
+                            <p>{{b['valor']}}R$</p>
+                            <p>Qtd.:{{b['quantidade']}}</p>
+                        </div>
+                    {% endif %}
+
                 {% endfor %}
             {% endif %}
         
@@ -64,30 +82,35 @@
                     <tr>
                         <th>ID</th>
                         <th>NOME</th>
+                        <th>CATEGORIA</th>
                         <th>QTD</th>
                         <th>VALOR</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for b in bebidas %}
-                        {% if exibir_todos in ['False', False] and i['qtde_insumo'] != 0 %}
+                        {% if b['status_bebida'] in ['True', True] %}
                             <tr>
-                                <th>{{b['id_insumo']}}</th>
-                                <th>{{b['nome_insumo']}}</th>
+                                <th>{{b['id_bebida']}}</th>
+                                <th>{{b['nome_bebida']}}</th>
+                                {% for c in categorias %}
+                                {% if c['id_categoria'] == b['categoria'] %}
+                                    <th>{{c['nome_categoria']}}</th>
+                                {% endif %}
+                            {% endfor %}
                                 <th>{{b['quantidade']}}</th>
                                 <th>{{b['valor']}}</th>
                             </tr>
-                        {% elif exibir_todos in ['True', True] and b['status_bebida'] in ['True', True] %}
+                        {% endif %}
+                        {% if exibir_todos in ['True', True] and b['status_bebida'] in ['False', False] %}
                             <tr class="tr-desativado">
                                 <th>{{b['id_bebida']}}</th>
                                 <th>{{b['nome_bebida']}}</th>
-                                <th>{{b['quantidade']}}</th>
-                                <th>{{b['valor']}}</th>
-                            </tr>
-                        {% elif exibir_todos in ['True', True] and b['status_bebida'] in ['True', True] %}
-                            <tr>
-                                <th>{{b['id_bebida]}}</th>
-                                <th>{{b['nome_bebida]}}</th>
+                                {% for c in categorias %}
+                                    {% if c['id_categoria'] == b['categoria'] %}
+                                        <th>{{c['nome_categoria']}}</th>
+                                    {% endif %}
+                                {% endfor %}
                                 <th>{{b['quantidade']}}</th>
                                 <th>{{b['valor']}}</th>
                             </tr>
