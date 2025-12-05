@@ -273,14 +273,14 @@ def bebidas():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
 
-    var_bebidas = routes_web.get_pedidos(session['token'])
+    var_bebidas = routes_web.get_bebidas(session['token'])
     if 'bebidas' not in var_bebidas:
-        flash('Parece que algo ocorreu errado :/', 'error')
+        flash('Parece que algo ocorreu errado :/1', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
     
     exibir_tabela = request.args.get('exibir_tabela', False)
     form = request.args.get('form', None)
-    exibir_concluidos = request.args.get('exibir_concluidos', False)
+    exibir_todos = request.args.get('exibir_todos', False)
 
     if form is not None:
         if form == 'exibir_tabela':
@@ -289,14 +289,16 @@ def bebidas():
             else:
                 exibir_tabela = False
         else:
-            if exibir_concluidos in ['False', False]:
-                exibir_concluidos = True
+            if exibir_todos in ['False', False]:
+                exibir_todos = True
             else:
-                exibir_concluidos = False
-
-    session['funcao_rota_anterior'] = 'bebidas'
-    return render_template('bebidas.html', bebidas=var_bebidas['bebidas'], exibir_tabela=exibir_tabela, exibir_concluidos=exibir_concluidos)
-
+                exibir_todos = False
+    categorias = routes_web.get_categorias(session['token'])
+    if 'categorias' in categorias:
+        session['funcao_rota_anterior'] = 'bebidas'
+        return render_template('bebidas.html', bebidas=var_bebidas['bebidas'], exibir_tabela=exibir_tabela, exibir_todos=exibir_todos, categorias=categorias['categorias'])
+    flash('Parece que algo ocorreu errado :/', 'error')
+    return redirect(url_for('bebidas'))
 
 @app.route('/vendas', methods=['GET'])
 def vendas():
@@ -603,8 +605,8 @@ def cadastrar_bebidas():
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
         nome_bebida = request.form['nome_bebida']
-        valor = request.form.get['valor']
-        categoria_id = request.form.get['categoria_id']
+        valor = request.form['valor']
+        categoria_id = request.form['categoria_id']
         if not nome_bebida or not valor or not categoria_id:
             flash('Preencha todos os campos!', 'error')
             return redirect(url_for('cadastrar_bebidas'))
@@ -616,9 +618,12 @@ def cadastrar_bebidas():
         flash('Parece que algo ocorreu errado', 'error')
         return redirect(url_for('cadastrar_bebidas'))
     else:
-        session['funcao_rota_anterior'] = 'cadastrar_categorias'
-        return render_template('cadastrar_categorias.html')
-
+        categorias = routes_web.get_categorias(session['token'])
+        if 'categorias' in categorias:
+            session['funcao_rota_anterior'] = 'cadastrar_bebidas'
+            return render_template('cadastrar_bebidas.html', categorias=categorias['categorias'])
+        flash('Parece que algo ocorreu errado :/', 'error')
+        return redirect(url_for('bebidas'))
 #
 @app.route("/faturamento")
 def faturamento():
