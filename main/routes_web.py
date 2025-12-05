@@ -1,7 +1,6 @@
 import requests
 
-# url = "http://10.135.232.30:5002"
-url = "http://10.135.232.23:5002"
+url = "http://192.168.1.238:5002"
 
 
 def get_bebidas(token_):
@@ -117,15 +116,16 @@ def get_pessoas(token_): # Feito
         print(response.status_code)
         print(response.json())
         return {'erro':response.status_code}
-
+# original
 def get_pessoa_by_id(token_, id_pessoa):
-    response = requests.get(f"{url}/pessoas/pessoa{id_pessoa}", headers={'Authorization': f'Bearer {token_}'})
+    response = requests.get(f"{url}/id_pessoa/{id_pessoa}", headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
         return response.json()
     else:
         print(response.status_code)
         print(response.json())
         return {'erro': response.status_code}
+
 
 def get_categoria_by_id_categoria(token_, id_categoria): # Feito
     base_url = f"{url}/categorias/categoria{id_categoria}"
@@ -151,12 +151,13 @@ def get_insumo_by_id_insumo(token_, id_insumo): # Feito
 def get_id_pessoa_by_token(token_):
     response = requests.get(f"{url}/teste", headers={'Authorization': f'Bearer {token_}'})
     if response.status_code == 200:
-        return response.json()
+        return response.json().get("sucesso")
     else:
         print(response.status_code)
-        # print({'erro':response.json()})
+        print({'erro':response.json()})
         return {'erro':response.status_code}
-
+# a = get_id_pessoa_by_token('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc2NDg4NzMyOCwianRpIjoiN2QwNGFmZmEtYzUwOC00NjllLTk4NWItYzNiNGI0MDhiOTE3IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImRAIiwibmJmIjoxNzY0ODg3MzI4LCJjc3JmIjoiMDE5NjczMmEtODE0Yi00MTllLTlhMjktOTAwMTA5NDM0YmQ4IiwiZXhwIjoxNzY0ODg4MjI4fQ.hcEh3jGtF3vssxcouVYTnMKQB5vHhaMJRqOpzl_zL3g')
+# print(a)
 ########################
 ########################
 
@@ -364,22 +365,36 @@ def put_editar_categoria(token_, id_categoria, nome_categoria):
         return {'erro':response.status_code}
 
 def put_editar_pessoa(token_, id_pessoa, nome_pessoa, cpf, salario, papel, senha_hash, email, status):
-    response = requests.put(f"{url}/pessoas/{id_pessoa}", json={
-        "nome_pessoa":nome_pessoa,
-        "cpf":cpf,
-        "salario":salario,
-        "papel":papel,
-        "senha_hash":senha_hash,
-        "email":email,
-        "status_pessoa":status
+    payload = {
+        "nome_pessoa": nome_pessoa,
+        "cpf": cpf,
+        "salario": salario,
+        "papel": papel,
+        "senha_hash": senha_hash,
+        "email": email,
+        "status_pessoa": status
+    }
 
-    }, headers={'Authorization': f'Bearer {token_}'})
+    try:
+        response = requests.put(f"{url}/pessoas/{id_pessoa}", json=payload,
+                                headers={'Authorization': f'Bearer {token_}'})
+    except Exception as e:
+        print("Erro ao chamar API (requests.put):", e)
+        return {"erro": "request_exception", "mensagem": str(e)}
+
+    print("PUT /pessoas/{} -> status: {}".format(id_pessoa, response.status_code))
+    print("Payload enviado:", payload)
+    try:
+        resp_json = response.json()
+        print("Resposta JSON:", resp_json)
+    except ValueError:
+        resp_json = {"raw_text": response.text}
+        print("Resposta (não-JSON):", response.text)
+
     if response.status_code == 200:
-        return response.json()
+        return resp_json
     else:
-        print(response.status_code)
-        print(response.json())
-        return {'erro':response.status_code}
+        return {"erro": response.status_code, "resposta": resp_json}
 
 def delete_lanche_insumo(token_, lanche_id, insumo_id):
     response = requests.delete(
