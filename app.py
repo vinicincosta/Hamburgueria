@@ -420,8 +420,9 @@ def main(page: ft.Page):
             # Cor baseada no status
             if status == 0:
                 card_color = Colors.GREEN_300
-            elif status == 1:
-                card_color = Colors.ORANGE_300
+            elif status == 1\
+                    :
+                card_color = Colors.RED_300
             else:
                 card_color = Colors.BLUE_300
 

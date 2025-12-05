@@ -723,7 +723,12 @@ def venda():
 
 
 
+@app.route('/mudar_status/<id_pedido>', methods=['GET', 'POST'])
+def mudar_status( id_pedido):
 
+    a = routes_web.put_editar_status_pedidos(session['token'],id_pedido)
+    flash(f'pedido#{id_pedido} editado com sucesso', 'success')
+    return redirect(url_for('pedidos'))
 
 
 @app.route('/editar_pessoa/<id_pessoa>', methods=['GET', 'POST'])
