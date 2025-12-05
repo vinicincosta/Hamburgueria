@@ -540,9 +540,9 @@ def cadastrar_insumos():
         flash('Você não tem acesso, entre com uma conta autorizada', 'info')
         return redirect(url_for(session['funcao_rota_anterior']))
     if request.method == 'POST':
-        nome_insumo = request.form['nome_insumo']
-        custo_insumo = request.form['custo_insumo']
-        categoria_id = request.form['categoria_id']
+        nome_insumo = request.form.get('nome_insumo')
+        custo_insumo = request.form.get('custo_insumo')
+        categoria_id = request.form.get('categoria_id')
         salvar_insumo = routes_web.post_insumos(session['token'], nome_insumo, custo_insumo, categoria_id)
         if 'success' in salvar_insumo:# 201
             flash('Insumo adicionada com sucesso', 'success')
@@ -642,19 +642,23 @@ def cadastrar_bebidas():
         nome_bebida = request.form['nome_bebida']
         valor = request.form['valor']
         categoria_id = request.form['categoria_id']
+        descricao = request.form['descricao']
         if not nome_bebida or not valor or not categoria_id:
             flash('Preencha todos os campos!', 'error')
             return redirect(url_for('cadastrar_bebidas'))
 
-        salvar_bebida = routes_web.post_bebidas(session['token'], nome_bebida, valor, categoria_id)
+        salvar_bebida = routes_web.post_bebidas(session['token'], nome_bebida, valor, categoria_id, descricao)
         if 'success' in salvar_bebida:
             flash('Bebida adicionada com sucesso', 'success')
             return redirect(url_for('bebidas'))
+        print(salvar_bebida)
         flash('Parece que algo ocorreu errado', 'error')
         return redirect(url_for('cadastrar_bebidas'))
     else:
         categorias = routes_web.get_categorias(session['token'])
+
         if 'categorias' in categorias:
+            # print()
             session['funcao_rota_anterior'] = 'cadastrar_bebidas'
             return render_template('cadastrar_bebidas.html', categorias=categorias['categorias'])
         flash('Parece que algo ocorreu errado :/', 'error')

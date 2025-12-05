@@ -2,7 +2,7 @@
 {% block content %}
 <!--<div></div>-->
 <!-- From Uiverse.io by ammarsaa -->
-<div class="div_pai_cadastrar_pessoa">
+<div style="padding-top: 10vh" class="div_pai_cadastrar_pessoa">
     <form class="form" method="post" action="{{ url_for('cadastrar_lanches') }}">
         <p class="title">Register </p>
         <p class="message">Cadastrar Lanches </p>
@@ -11,7 +11,7 @@
             <span>Nome:</span>
         </label>
         <label>
-            <textarea name="descricao_lanche" cols="30" rows="10"></textarea>
+            <input class="inputt" name="descricao_lanche"></input>
             <span>Descrição:</span>
         </label>
         <label>
