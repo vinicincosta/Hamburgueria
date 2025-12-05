@@ -397,6 +397,22 @@ def lanche_insumos():
         flash('Parece que algo ocorreu errado :/', 'error')
         return redirect(url_for(session['funcao_rota_anterior']))
 
+@app.route('/deletar_lanche_insumo/<int:lanche_id>/<int:insumo_id>', methods=['POST'])
+def deletar_lanche_insumo(lanche_id, insumo_id):
+    retorno = verificar_token()
+    if retorno:
+        return retorno
+
+    resultado = routes_web.delete_lanche_insumo(session['token'], lanche_id, insumo_id)
+
+    if not resultado or "error" in resultado:
+        flash(resultado.get("error", "Erro ao deletar relação!"), "error")
+    else:
+        flash("Relação deletada com sucesso!", "success")
+
+    return redirect(url_for('lanche_insumos'))
+
+
 @app.route('/lanche_insumos/cadastrar', methods=['GET','POST'])
 def cadastrar_lanche_insumos():
     retorno = verificar_token()
@@ -416,6 +432,7 @@ def cadastrar_lanche_insumos():
             session['token'], lanche_id, insumo_id, qtd_insumo
         )
 
+        print(f"log: {salvar_lanche_insumo}")
         # SUCESSO
         if 'success' in salvar_lanche_insumo:
             flash('Receita adicionada com sucesso', 'success')
@@ -423,11 +440,11 @@ def cadastrar_lanche_insumos():
 
         # ERRO 409
         if salvar_lanche_insumo.get("error") == "Esse insumo já está vinculado a esse lanche":
-            flash("Esse insumo já está vinculado a esse lanche", "danger")
+            flash("Esse insumo já está vinculado a esse lanche", "error")
             return redirect(url_for('cadastrar_lanche_insumos'))
 
         # QUALQUER OUTRO ERRO
-        flash("Erro ao inserir receita", "danger")
+        flash("Erro ao inserir receita", "error")
         return redirect(url_for('cadastrar_lanche_insumos'))
 
     else:
@@ -437,10 +454,11 @@ def cadastrar_lanche_insumos():
         insumos = routes_web.get_insumos(session['token'])
 
         return render_template(
-            'cadastrar_lanche_insumo.html.html',
+            'cadastrar_lanche_insumo.html',
             lanches=lanches.get('lanches', []),
             insumos=insumos.get('insumos', [])
         )
+
 
 
 @app.route('/pessoas/cadastrar', methods=['GET', 'POST'])
