@@ -261,6 +261,7 @@ def pedidos():
                 exibir_concluidos = False
 
     session['funcao_rota_anterior'] = 'pedidos'
+    print(f'teste do bagui{var_pedidos['pedidos']}')
     return render_template('pedidos.html', pedidos=var_pedidos['pedidos'], exibir_tabela=exibir_tabela, exibir_concluidos=exibir_concluidos)
 
 @app.route('/bebidas', methods=['GET', 'POST'])

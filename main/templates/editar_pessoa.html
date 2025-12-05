@@ -10,7 +10,7 @@
     <div class="card-photo"></div>
     <div class="card-title">{{pessoa['nome_pessoa']}} <br>
         <span style="color: white; text-shadow: 2px 2px 2px black" >{{pessoa['papel']}}</span> <br>
-        <span  style="color: white; text-shadow: 2px 2px 2px black" >{{pessoa['salario']}} Reais</span>
+        <span  style="color: white; text-shadow: 2px 2px 2px black" >Salario: {{pessoa['salario']}} Reais</span>
     </div>
     <div class="card-socials" >
         <form style="gap: 6px; width: 100%" class="form" method="post" action="{{ url_for('editar_pessoa',id_pessoa=pessoa['id_pessoa']) }}">
