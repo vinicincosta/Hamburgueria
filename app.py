@@ -1,25 +1,11 @@
-import token
-import urllib
-import uuid
-from cmath import e
-from http.client import responses
-from idlelib.browser import is_browseable_extension
-from tkinter.constants import CENTER
-
 import flet as ft
 from flet import AppBar, Text, View
-from flet.core.alignment import top_left, bottom_center
-from flet.core.border_radius import horizontal
-from flet.core.box import BoxDecoration
-from flet.core.buttons import ButtonStyle, RoundedRectangleBorder
 from flet.core.colors import Colors
 from flet.core.dropdown import Option
 from flet.core.elevated_button import ElevatedButton
 from flet.core.icons import Icons
 from flet.core.text_style import TextStyle, TextThemeStyle
-from flet.core.theme import TextTheme
-from flet.core.types import FontWeight, MainAxisAlignment, CrossAxisAlignment
-import ast
+from flet.core.types import FontWeight
 from urllib.parse import urlparse, parse_qs
 
 
@@ -192,14 +178,14 @@ def main(page: ft.Page):
                         content=ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Image(src="istockphoto-459361585-170667a.jpg", height=100),
+                                    ft.Image(src="istockphoto-459361585-170667a.jpg", height=90),
                                     ft.Column(
                                         [
-                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial", size=18),
-                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", size=18),
+                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial",weight="bold", size=18),
+                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", weight="bold",size=18),
 
                                             ft.Text(f'{bebida["descricao"]}',
-                                                    color=Colors.YELLOW_800, width=200, font_family="Aharoni", size=13),
+                                                    color=Colors.YELLOW_800, width=200, font_family="Arial",weight="bold", size=14),
                                             ft.ElevatedButton(
                                                 "Finalizar Pedido",
                                                 on_click=lambda e: page.open(dlg_modal),
@@ -207,7 +193,7 @@ def main(page: ft.Page):
                                                     bgcolor=Colors.ORANGE_700,
                                                     color=Colors.BLACK,
                                                     padding=15,
-                                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                                                    shape={"": ft.RoundedRectangleBorder(radius=20)}
                                                 )
                                             )
                                         ]
@@ -215,7 +201,7 @@ def main(page: ft.Page):
                                 ]
                             ),
                             bgcolor=Colors.BLACK,
-                            height=180,
+                            height=200,
                             border_radius=10,
                             border=ft.Border(
                                 top=ft.BorderSide(2, color=Colors.WHITE),
@@ -247,13 +233,13 @@ def main(page: ft.Page):
                         content=ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Image(src="imagemdolanche.png", height=100),
+                                    ft.Image(src="imagemdolanche.png", height=70),
                                     ft.Column(
                                         [
-                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900, font_family="Arial", size=18),
-                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", size=18),
+                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900,weight="bold", font_family="Arial", size=18),
+                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900,weight="bold", font_family="Arial", size=18),
                                             ft.Text(f'{lanche["descricao_lanche"]}',
-                                                    color=Colors.YELLOW_800, width=200, font_family="Aharoni", size=13),
+                                                    color=Colors.YELLOW_800, width=260, font_family="Arial", size=13 ,weight="bold"),
                                             ft.ElevatedButton(
                                                 "Finalizar Pedido",
                                                 on_click=lambda e: page.open(dlg_modal),
@@ -261,7 +247,7 @@ def main(page: ft.Page):
                                                     bgcolor=Colors.ORANGE_700,
                                                     color=Colors.BLACK,
                                                     padding=15,
-                                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                                                    shape={"": ft.RoundedRectangleBorder(radius=20)}
                                                 )
                                             )
                                         ]
@@ -269,7 +255,7 @@ def main(page: ft.Page):
                                 ]
                             ),
                             bgcolor=Colors.BLACK,
-                            height=180,
+                            height=200,
                             border_radius=10,
                             border=ft.Border(
                                 top=ft.BorderSide(2, color=Colors.WHITE),
@@ -566,11 +552,11 @@ def main(page: ft.Page):
                                     ft.Image(src="imagemdolanche.png", height=70),
                                     ft.Column(
                                         [
-                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900, font_family="Arial", size=18),
-                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", size=18),
+                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900, font_family="Arial", size=18, weight="bold"),
+                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900, font_family="Arial",weight="bold", size=18),
 
                                             ft.Text(f'{lanche["descricao_lanche"]}',
-                                                    color=Colors.YELLOW_800, width=200, font_family="Aharoni", size=13),
+                                                    color=Colors.YELLOW_800, width=200, font_family="Arial",weight="bold", size=13),
                                             ft.ElevatedButton(
                                                 "Adicionar ao Carrinho",
                                                 on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
@@ -578,7 +564,7 @@ def main(page: ft.Page):
                                                     bgcolor=Colors.ORANGE_700,
                                                     color=Colors.BLACK,
                                                     padding=15,
-                                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                                                    shape={"": ft.RoundedRectangleBorder(radius=20)}
                                                 )
                                             ),
                                         ]
@@ -586,7 +572,7 @@ def main(page: ft.Page):
                                 ]
                             ),
                             bgcolor=Colors.BLACK,
-                            height=180,
+                            height=200,
                             border_radius=10,
                             border=ft.Border(
                                 top=ft.BorderSide(2, color=Colors.WHITE),
@@ -668,14 +654,14 @@ def main(page: ft.Page):
                         content=ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Image(src="ChatGPT Image 14 de nov. de 2025, 15_44_16.png", height=70),
+                                    ft.Image(src="ChatGPT Image 14 de nov. de 2025, 15_44_16.png", height=85),
                                     ft.Column(
                                         [
-                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial", size=17),
-                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", size=15),
+                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial", weight="bold", size=17),
+                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", weight="bold", size=15),
 
                                             ft.Text(f'{bebida["descricao"]}',
-                                                    color=Colors.YELLOW_800, width=200, font_family="Aharoni", size=13),
+                                                    color=Colors.YELLOW_800, width=260, font_family="Aharoni", weight="bold", size=14),
 
                                             ft.ElevatedButton(
                                                 "Adicionar ao Carrinho",
@@ -684,7 +670,7 @@ def main(page: ft.Page):
                                                     bgcolor=Colors.ORANGE_700,
                                                     color=Colors.BLACK,
                                                     padding=15,
-                                                    shape={"": ft.RoundedRectangleBorder(radius=10)}
+                                                    shape={"": ft.RoundedRectangleBorder(radius=20)}
                                                 )
                                             ),
                                         ]
@@ -692,7 +678,7 @@ def main(page: ft.Page):
                                 ]
                             ),
                             bgcolor=Colors.BLACK,
-                            height=180,
+                            height=200,
                             border_radius=10,
                             border=ft.Border(
                                 top=ft.BorderSide(2, color=Colors.WHITE),
@@ -705,7 +691,6 @@ def main(page: ft.Page):
                 )
                 page.update()
     # ***********************************************/***************
-
 
     # Função para remover item do carrinho
     def remover_item(index):
@@ -914,8 +899,6 @@ def main(page: ft.Page):
             enviar_pedidos_delivery(page, e)
         else:
             enviar_pedidos_cozinha_garcom(page, e)
-
-
 
     def confirmar_venda_delivery_e_enviar_cozinha(e):
         try:
@@ -1254,9 +1237,9 @@ def main(page: ft.Page):
                                 ft.Image(src="imagemdolanche.png", height=80),
                                 ft.Column(
                                     [
-                                        ft.Text(item["nome_lanche"], color=Colors.ORANGE_900, size=16),
-                                        ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900),
-                                        ft.Text(f"Mesa {mesa_num}", color=Colors.PURPLE_200),
+                                        ft.Text(item["nome_lanche"], color=Colors.ORANGE_900, size=16, weight="bold", ),
+                                        ft.Text(f'R$ {item["valor_lanche"]:.2f}', color=Colors.YELLOW_900,  weight="bold"),
+                                        ft.Text(f"Mesa {mesa_num}", color=Colors.PURPLE_200,  weight="bold",),
                                         ft.Text(status_icon, color=status_color, size=15, weight=ft.FontWeight.BOLD),
                                         ft.Row(botoes, spacing=10)
                                     ]
@@ -1303,9 +1286,9 @@ def main(page: ft.Page):
                                 ft.Image(src="istockphoto-459361585-170667a.jpg", height=80),
                                 ft.Column(
                                     [
-                                        ft.Text(item["nome_bebida"], color=Colors.ORANGE_900, size=16),
-                                        ft.Text(f'R$ {item["valor"]:.2f}', color=Colors.YELLOW_900),
-                                        ft.Text(f"Mesa {mesa_num}", color=Colors.PURPLE_200),
+                                        ft.Text(item["nome_bebida"], color=Colors.ORANGE_900, size=16, weight="bold"),
+                                        ft.Text(f'R$ {item["valor"]:.2f}', color=Colors.YELLOW_900,  weight="bold",),
+                                        ft.Text(f"Mesa {mesa_num}", color=Colors.PURPLE_200,  weight="bold",),
                                         ft.Text(status_icon, color=status_color, size=15, weight=ft.FontWeight.BOLD),
                                         ft.Row(botoes, spacing=10)
                                     ]
@@ -1446,7 +1429,6 @@ def main(page: ft.Page):
 
         page.go("/mesa")
         page.update()
-
 
     # apenas injeta o número da mesa
     def confirmar_pedido_cozinha_mesa(e, mesa_num):
@@ -1760,9 +1742,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/mesa":
-            # numero_mesa.value = ""
-            # lanche_dropdown.value = ""
-            # bebidas_dropdow.value = ""
+
             # Containers, ícones e botões
             icone_mesa = ft.Icon(ft.Icons.TABLE_RESTAURANT, color=Colors.ORANGE_800, size=30)
             icone_lanche = ft.Icon(ft.Icons.FASTFOOD, color=Colors.ORANGE_800, size=30)
@@ -1789,7 +1769,7 @@ def main(page: ft.Page):
                             ft.Row([icone_bebida, bebidas_dropdow], alignment=ft.MainAxisAlignment.CENTER),
                             ft.Row([btn_salvar_carrinho], alignment=ft.MainAxisAlignment.CENTER),
                             ft.Divider(height=20, color=Colors.PURPLE),
-                            ft.Text("Mesas Abertas", size=20, color=Colors.BLACK),
+                            ft.Text("Mesas Abertas", size=20, color=Colors.BLACK, weight="bold"),
                             ft.Row([mesa_dropdown_aberta], alignment=ft.MainAxisAlignment.CENTER),
                         ], )
                     ],
@@ -2150,7 +2130,7 @@ def main(page: ft.Page):
                         ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Text(f"🍔 {nome_lanche}", color=Colors.ORANGE_900, size=16),
+                                    ft.Text(f"🍔 {nome_lanche}", color=Colors.ORANGE_900, size=16, weight="bold"),
                                     ft.Text(f"R$ {float(item.get('valor_lanche', 0)):.2f}", color=Colors.YELLOW_800,
                                             size=16),
                                 ],
@@ -2166,7 +2146,7 @@ def main(page: ft.Page):
                         ft.Container(
                             content=ft.Row(
                                 [
-                                    ft.Text(f"🍹{nome_bebida}", color=Colors.BLUE_900, size=16),
+                                    ft.Text(f"🥤{nome_bebida}", color=Colors.BLUE_900, size=16, weight="bold"),
                                     ft.Text(f"R$ {float(item.get('valor', 0)):.2f}", color=Colors.YELLOW_800, size=16),
                                 ],
                                 alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -2250,7 +2230,6 @@ def main(page: ft.Page):
 
                     ),
 
-
                     controls=[
                         ft.Text(f"Olá {nome}, o que você deseja hoje?", size=20, color=Colors.ORANGE_700,
                                 weight=ft.FontWeight.BOLD, text_align=ft.alignment.center),
@@ -2270,8 +2249,6 @@ def main(page: ft.Page):
                                         alignment=ft.alignment.center,
                                         content=ft.Column(
                                             [
-
-
 
                                                 ft.ElevatedButton(
                                                     "Presencial",
@@ -2316,7 +2293,8 @@ def main(page: ft.Page):
                             ),
                         ),
                     ],
-                    bgcolor="#000000000",
+                    bgcolor=Colors.BLACK,
+
                 )
             )
 
@@ -2736,7 +2714,7 @@ def main(page: ft.Page):
                     )
                 )
 
-            total_label = ft.Text(f"Total do Pedido: R$ {total:.2f}", color=Colors.ORANGE_700, size=20)
+            total_label = ft.Text(f"Total do Pedido: R$ {total:.2f}", color=Colors.ORANGE_700, size=20, weight="bold")
 
             # --- Exibe tela ---
             page.views.append(
@@ -2752,7 +2730,7 @@ def main(page: ft.Page):
                         ),
                         ft.Column(
                             [
-                                ft.Text("Resumo do Pedido", size=22, color=Colors.BLACK, font_family="Arial"),
+                                ft.Text("Resumo do Pedido", size=22, color=Colors.BLACK, font_family="Arial", weight="bold"),
                                 ft.Column([
                                     ft.ListView(controls=lista_itens, expand=True),
                                     ft.ListView(controls=lista_itens_bebida, expand=True),
@@ -2810,7 +2788,7 @@ def main(page: ft.Page):
                             actions=[btn_logout_acompanhar_pedido]
                         ),
 
-                        ft.Text("Acompanhar Pedido", size=22, color=Colors.BLACK),
+                        ft.Text("Acompanhar Pedido", size=22, color=Colors.BLACK, font_family="Arial", weight="bold"),
                         lv_pedidos
                     ],
                     bgcolor=Colors.ORANGE_100,
@@ -2819,7 +2797,7 @@ def main(page: ft.Page):
             page.update()
 
         if page.route == "/historico_pedido":
-            historico_pedidos(None)  # ← Carrega ANTES de montar a view
+            historico_pedidos(None)
 
             page.views.append(
                 View(
@@ -2834,7 +2812,7 @@ def main(page: ft.Page):
                             leading=logo,
                             actions=[btn_logout_historico_pedido]
                         ),
-                        ft.Text("Histórico de Pedidos", size=22, color=Colors.BLACK),
+                        ft.Text("Histórico de Pedidos", size=22, color=Colors.BLACK, font_family="Arial", weight="bold"),
                         lv_pedidos_geral  # ← Agora já está preenchido
                     ],
                     bgcolor=Colors.ORANGE_100,
@@ -3074,34 +3052,6 @@ def main(page: ft.Page):
         ]
     )
 
-    # Cardápios
-    # t = ft.Tabs(
-    #
-    #     selected_index=1,
-    #     animation_duration=300,
-    #
-    #     tabs=[
-    #
-    #         ft.Tab(
-    #             text="Bebidas",
-    #             icon=ft.Icons.LOCAL_DRINK,
-    #             content=ft.Container(
-    #                 lv_bebidas,
-    #             ),
-    #         ),
-    #
-    #         ft.Tab(
-    #             text="Lanches",
-    #             icon=ft.Icons.FOOD_BANK,
-    #             content=ft.Container(
-    #                 lv_lanches,
-    #
-    #             ),
-    #         ),
-    #     ],
-    #     expand=1,
-    # )
-
     t = ft.Tabs(
         selected_index=1,
         animation_duration=300,
@@ -3200,8 +3150,6 @@ def main(page: ft.Page):
         ]
     )
 
-
-
     cliente_dropdown = ft.Dropdown(
         label="Selecione o Cliente",
         width=250,
@@ -3211,13 +3159,6 @@ def main(page: ft.Page):
         options=[ft.dropdown.Option(str(c["id_pessoa"]), c["nome_pessoa"]) for c in clientes_disponiveis]
     )
 
-    # mesa_dropdown_aberta = ft.Dropdown(
-    #     label="Mesas Abertas",
-    #     width=200,
-    #     bgcolor=Colors.DEEP_ORANGE_100,
-    #     options=[ft.dropdown.Option(m, f"Mesa {m}") for m in mesas_disponiveis],
-    #     on_change=lambda e: page.go(f"/carrinho_garcom?mesa={mesa_dropdown_aberta.value}")
-    # )
 
     mesa_dropdown_aberta = ft.Dropdown(
         label="Mesas Abertas",

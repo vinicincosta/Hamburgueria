@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://10.135.232.30:5002"
+base_url = "http://10.135.232.15:5002"
 
 
 # LOGIN
