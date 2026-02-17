@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://192.168.0.181:5002"
+base_url = "http://192.168.0.17:5002"
 
 
 # LOGIN
@@ -111,7 +111,7 @@ def listar_pedidos(token):
         STATUS_MAP = {
             0: "Aprovado",
             1: "Sendo preparado",
-            2: "Entregue"
+            2: "Saindo para Entrega"
         }
 
         for p in pedidos:

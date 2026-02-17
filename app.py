@@ -8,6 +8,8 @@ from flet.core.text_style import TextStyle, TextThemeStyle
 from flet.core.types import FontWeight
 from urllib.parse import urlparse, parse_qs
 
+from collections import defaultdict
+
 
 from routes import *
 
@@ -412,10 +414,30 @@ def main(page: ft.Page):
 
         lv_pedidos_geral.controls.clear()
 
-        for pedido in pedidos:
+        # 🔹 AGRUPAR PEDIDOS PELO MESMO HORÁRIO (ANO-MÊS-DIA HORA:MINUTO)
+        pedidos_agrupados = defaultdict(list)
 
-            status = pedido.get("status", 0)
-            status_text = pedido.get("status_texto", "Desconhecido")
+        for pedido in pedidos:
+            data_str = pedido.get("data_pedido")
+
+            try:
+                dt = datetime.strptime(data_str, "%Y-%m-%d %H:%M:%S")
+                chave = dt.strftime("%Y-%m-%d %H:%M")  # Agrupa até minuto
+            except:
+                chave = data_str  # fallback
+
+            pedidos_agrupados[chave].append(pedido)
+
+        lv_pedidos_geral.controls.clear()
+
+        # 🔹 Agora cria 1 card por horário
+        for chave_data, lista_pedidos in pedidos_agrupados.items():
+
+            # Usa o primeiro pedido do grupo como base de status
+            pedido_base = lista_pedidos[0]
+
+            status = pedido_base.get("status", 0)
+            status_text = pedido_base.get("status_texto", "Desconhecido")
 
             # Cor baseada no status
             if status == 0:
@@ -426,14 +448,24 @@ def main(page: ft.Page):
                 card_color = Colors.RED_300
 
             # Formatar data
-            data_formatada = pedido["data_pedido"]
             try:
-                dt = datetime.strptime(data_formatada, "%Y-%m-%d %H:%M:%S")
+                dt = datetime.strptime(chave_data, "%Y-%m-%d %H:%M")
                 data_formatada = dt.strftime("%d/%m/%Y - %H:%M")
             except:
-                pass
+                data_formatada = chave_data
 
-            # Card grande e estilizado
+            # 🔹 Criar lista de itens do mesmo horário
+            itens = []
+            for pedido in lista_pedidos:
+                itens.append(
+                    ft.Text(
+                        f"• {pedido['detalhamento']}",
+                        size=16,
+                        color=Colors.BLACK,
+                        weight="bold"
+                    )
+                )
+
             card = ft.Container(
                 padding=15,
                 bgcolor=card_color,
@@ -452,7 +484,7 @@ def main(page: ft.Page):
                             [
                                 ft.Icon(ft.Icons.RECEIPT_LONG, size=32, color=Colors.BLACK),
                                 ft.Text(
-                                    f"Pedido #{pedido['id_pedido']}",
+                                    f"Pedido(s) - {data_formatada}",
                                     size=22,
                                     weight="bold",
                                     color=Colors.BLACK,
@@ -460,26 +492,11 @@ def main(page: ft.Page):
                             ]
                         ),
 
-                        ft.Text(
+                        ft.Divider(),
 
-                            size=17,
-                            weight="bold",
-                            color=Colors.BLACK,
-                        ),
+                        ft.Column(itens, spacing=5),
 
-                        ft.Text(
-                            data_formatada,
-                            size=16,
-                            color=Colors.BLACK,
-                        ),
-
-                        ft.Text(
-                            pedido["detalhamento"],
-                            size=17,
-                            color=Colors.BLACK,
-                            weight="bold",
-                            max_lines=3
-                        ),
+                        ft.Divider(),
 
                         ft.Text(
                             f"Status: {status_text}",
