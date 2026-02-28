@@ -919,6 +919,9 @@ def main(page: ft.Page):
 
     def confirmar_venda_delivery_e_enviar_cozinha(e):
         try:
+            # ==============================
+            # 🔐 VALIDA USUÁRIO
+            # ==============================
             pessoa_id = page.client_storage.get("pessoa_id")
             if not pessoa_id:
                 snack_error("Usuário não logado!")
@@ -937,7 +940,9 @@ def main(page: ft.Page):
                 page.update()
                 return
 
-            # --- Carrinho ---
+            # ==============================
+            # 🛒 CARRINHO
+            # ==============================
             carrinho = page.client_storage.get("carrinho") or []
             if isinstance(carrinho, str):
                 try:
@@ -949,221 +954,90 @@ def main(page: ft.Page):
                 snack_error("Carrinho vazio!")
                 return
 
-            token = page.client_storage.get("token")
-            insumos = listar_insumos(token)
-            preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
-
-            # 🔥 LISTA PARA SALVAR TODOS OS PEDIDOS DESSA VENDA
             pedidos_da_venda = []
 
-            # --- REGISTRA VENDA ---
+            # ==============================
+            # 🔁 PROCESSA CADA ITEM
+            # ==============================
             for item in carrinho:
+
                 id_lanche = item.get("id_lanche")
                 id_bebida = item.get("id_bebida")
                 qtd = int(item.get("qtd", 1))
-                observacoes = {"adicionar": [], "remover": []}
-                valor_final = 0
 
-                # LANCHE
+                # 🔥 USA DIRETO AS OBSERVAÇÕES JÁ SALVAS
+                observacoes = item.get("observacoes", {"adicionar": [], "remover": []})
+
+                # ==============================
+                # 🍔 LANCHE
+                # ==============================
                 if id_lanche:
-                    receita_original = carregar_receita_base(id_lanche) or {}
-                    ingredientes_item = item.get("ingredientes", {}) or {}
+                    valor_final = float(item.get("valor_lanche", 0)) * qtd
 
-                    for ing_id, qtd_ajustada in ingredientes_item.items():
-                        qtd_base = receita_original.get(ing_id, 0)
-
-                        if qtd_ajustada > qtd_base:
-                            extra_qtd = qtd_ajustada - qtd_base
-                            observacoes["adicionar"].append({
-                                "insumo_id": ing_id,
-                                "qtd": extra_qtd,
-                                "valor": preco_ingredientes.get(ing_id, 0) * extra_qtd
-                            })
-                        elif qtd_ajustada < qtd_base:
-                            observacoes["remover"].append({
-                                "insumo_id": ing_id,
-                                "qtd": qtd_base - qtd_ajustada
-                            })
-
-                    valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche", 0)))
-                    valor_extra = sum(a["valor"] for a in observacoes["adicionar"])
-                    valor_final = (valor_base + valor_extra) * qtd
-
-                    detalhamento = f"Lanche: {item.get('nome_lanche')} | Obs: {item.get('observacoes_texto', 'Nenhuma')}"
-
-                    resp = cadastrar_venda_app(
-                        lanche_id=id_lanche,
-                        pessoa_id=pessoa_id,
-                        bebida_id=None,
-                        qtd_lanche=qtd,
-                        forma_pagamento=forma_pagamento_valor,
-                        endereco=endereco_valor,
-                        detalhamento=detalhamento,
-                        observacoes=observacoes,
-                        valor_venda=valor_final
-                    )
-
-                # BEBIDA
+                # ==============================
+                # 🥤 BEBIDA
+                # ==============================
                 elif id_bebida:
-                    valor_final = float(item.get("valor", 0)) * qtd
-                    detalhamento = f"Bebida: {item.get('nome_bebida')}"
-
-                    resp = cadastrar_venda_app(
-                        lanche_id=None,
-                        pessoa_id=pessoa_id,
-                        bebida_id=id_bebida,
-                        qtd_lanche=qtd,
-                        forma_pagamento=forma_pagamento_valor,
-                        endereco=endereco_valor,
-                        detalhamento=detalhamento,
-                        observacoes={},
-                        valor_venda=valor_final
-                    )
+                    observacoes = {"adicionar": [], "remover": []}
+                    valor_final = float(item.get("valor_bebida", 0)) * qtd
 
                 else:
                     snack_error("Item inválido no carrinho!")
-                    page.update()
                     return
 
-                if "error" in resp:
-                    snack_error(f"Erro ao registrar venda: {resp['error']}")
+                # ==============================
+                # 📝 DETALHAMENTO
+                # ==============================
+                obs_texto = item.get("observacoes_texto", "Nenhuma")
+
+                detalhamento = (
+                    f"Lanche: {item.get('nome_lanche', '---')} | "
+                    f"Bebida: {item.get('nome_bebida', '---')} | "
+                    f"Obs: {obs_texto}"
+                )
+
+                # ==============================
+                # 🚀 CADASTRA PEDIDO NA API
+                # ==============================
+                response = cadastrar_pedido_app(
+                    id_lanche=id_lanche,
+                    id_bebida=id_bebida,
+                    qtd_lanche=qtd,
+                    detalhamento=detalhamento,
+                    numero_mesa="",  # DELIVERY NÃO TEM MESA
+                    observacoes=observacoes,
+                    id_pessoa=pessoa_id
+                )
+
+                if not response or "error" in response:
+                    snack_error(f"Erro ao cadastrar pedido: {response.get('error')}")
                     return
 
-                #  AQUI ADICIONA CADA PEDIDO RETORNADO PELA API
-                if "pedidos" in resp:
-                    pedidos_da_venda.extend(resp["pedidos"])
-                else:
-                    pedidos_da_venda.append(resp)
+                pedidos_da_venda.append(response)
 
-            print("Venda registrada com sucesso!")
-
-            # SALVA SOMENTE OS PEDIDOS DESSA VENDA
-            page.client_storage.set("pedidos_venda_atual", pedidos_da_venda)
-
-            #  AGORA SIM — ENVIA PARA COZINHA
-            enviar_pedidos_delivery(page, e)
-
-            # LIMPA O CARRINHO
+            # ==============================
+            # 🧹 LIMPA CARRINHO
+            # ==============================
             page.client_storage.set("carrinho", [])
             input_endereco.value = ""
             input_forma_pagamento.value = ""
 
-            snack_sucesso("Venda realizada e pedido enviado à cozinha!")
+            # ==============================
+            # 💾 SALVA PEDIDOS DA VENDA
+            # ==============================
+            page.client_storage.set("pedidos_venda_atual", pedidos_da_venda)
 
-            #  LEVA PARA A ROTA QUE MOSTRA SOMENTE ESSES PEDIDOS
+            snack_sucesso(
+                "Venda realizada e pedido enviado à cozinha!\n"
+                "Tempo médio de espera: 1h"
+            )
+
             page.go("/acompanhar_pedido")
             page.update()
 
         except Exception as err:
             print("❌ ERRO EM confirmar_venda_delivery_e_enviar_cozinha:", err)
             snack_error("Erro ao confirmar venda + enviar cozinha.")
-
-    def enviar_pedidos_delivery(page, e):
-        id_pessoa = page.client_storage.get("pessoa_id")
-        if not id_pessoa:
-            snack_error("Usuário não logado!")
-            page.go("/login")
-            return
-
-        # --- Carrinho delivery ---
-        carrinho = page.client_storage.get("carrinho") or []
-        if isinstance(carrinho, str):
-            try:
-                carrinho = json.loads(carrinho)
-            except:
-                carrinho = []
-
-        if not carrinho:
-            snack_error("Nenhum item no carrinho para enviar!")
-            page.update()
-            return
-
-        # Itens não enviados ainda
-        itens_pendentes = [item for item in carrinho if not item.get("enviado")]
-        if not itens_pendentes:
-            snack_error("Todos os itens desse pedido delivery já foram enviados!")
-            page.update()
-            return
-
-        # --- Insumos ---
-        token = page.client_storage.get("token")
-        insumos = listar_insumos(token)
-        preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
-
-        # --- Processa cada item ---
-        for item in itens_pendentes:
-
-            id_lanche = item.get("id_lanche")
-            id_bebida = item.get("id_bebida")
-            qtd = int(item.get("qtd", 1))
-            valor_final = 0
-
-            observacoes = {"adicionar": [], "remover": []}
-
-            # ===== LANCHES =====
-            if id_lanche:
-                receita_original = carregar_receita_base(id_lanche) or {}
-                ingredientes_item = item.get("ingredientes", {})
-
-                # Ajuste de ingredientes
-                for ing_id, qtd_ajustada in ingredientes_item.items():
-                    qtd_base = receita_original.get(ing_id, 0)
-
-                    if qtd_ajustada > qtd_base:
-                        observacoes["adicionar"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_ajustada - qtd_base,
-                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_ajustada - qtd_base)
-                        })
-
-                    elif qtd_ajustada < qtd_base:
-                        observacoes["remover"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_base - qtd_ajustada
-                        })
-
-                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche")))
-                valor_extra = sum(a["valor"] for a in observacoes["adicionar"])
-                valor_final += (valor_base + valor_extra) * qtd
-
-            # ===== BEBIDAS =====
-            if id_bebida:
-                valor_bebida = float(item.get("valor", 0))
-                valor_final += valor_bebida * qtd
-
-            obs_texto = item.get("observacoes_texto", "Nenhuma")
-
-            detalhamento = (
-                f"Lanche: {item.get('nome_lanche', '---')} | "
-                f"Bebida: {item.get('nome_bebida', '---')} | "
-                f"Obs: {obs_texto}"
-            )
-
-            # ===== CADASTRA PEDIDO =====
-            response = cadastrar_pedido_app(
-                id_lanche=id_lanche,
-                id_bebida=id_bebida,
-                qtd_lanche=qtd,
-                detalhamento=detalhamento,
-                numero_mesa="",  # DELIVERY NÃO TEM MESA
-                observacoes=observacoes,
-                id_pessoa=id_pessoa
-            )
-
-            if "error" in response:
-                snack_error(f"Erro ao cadastrar pedido: {response['error']}")
-                return
-
-            # Marca como enviado
-            item["enviado"] = True
-
-        # Atualiza carrinho
-        page.client_storage.set("carrinho", carrinho)
-        snack_sucesso("Pedido realizados com sucesso! \n"
-                      "Tempo médio de espera: 1h ")
-
-        page.go("/")
-        page.update()
 
     # FUNÇÕES GARCOM
     def carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num):
@@ -1347,6 +1221,7 @@ def main(page: ft.Page):
         page.update()
 
     def enviar_pedidos_cozinha_garcom(page, e):
+
         id_pessoa = page.client_storage.get("pessoa_id")
         if not id_pessoa:
             snack_error("Garçom não logado!")
@@ -1373,46 +1248,32 @@ def main(page: ft.Page):
             page.update()
             return
 
-        token = page.client_storage.get("token")
-        insumos = listar_insumos(token)
-        preco_ingredientes = {i["id_insumo"]: i["custo"] for i in insumos}
+        # ======================================================
+        # 🔥 PROCESSA ITENS (VERSÃO CORRIGIDA)
+        # ======================================================
 
         for item in itens_pendentes:
+
             id_lanche = item.get("id_lanche")
             id_bebida = item.get("id_bebida")
             qtd = int(item.get("qtd", 1))
-            valor_final = 0
 
-            observacoes = {"adicionar": [], "remover": []}
+            # 🔥 ALTERAÇÃO 1:
+            # Usa diretamente as observações já salvas na tela de observações_garcom
+            observacoes = item.get("observacoes", {"adicionar": [], "remover": []})
 
-            # --- Ajuste de ingredientes (lanches)
+            # 🔥 ALTERAÇÃO 2:
+            # NÃO recalcula receita, NÃO compara com base
             if id_lanche:
-                receita_original = carregar_receita_base(id_lanche) or {}
-                ingredientes_item = item.get("ingredientes", {})
+                valor_final = float(item.get("valor_lanche", 0)) * qtd
 
-                for ing_id, qtd_ajustada in ingredientes_item.items():
-                    qtd_base = receita_original.get(ing_id, 0)
+            elif id_bebida:
+                observacoes = {"adicionar": [], "remover": []}
+                valor_final = float(item.get("valor_bebida", 0)) * qtd
 
-                    if qtd_ajustada > qtd_base:
-                        observacoes["adicionar"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_ajustada - qtd_base,
-                            "valor": preco_ingredientes.get(ing_id, 0) * (qtd_ajustada - qtd_base)
-                        })
-                    elif qtd_ajustada < qtd_base:
-                        observacoes["remover"].append({
-                            "insumo_id": ing_id,
-                            "qtd": qtd_base - qtd_ajustada
-                        })
-
-                valor_base = float(item.get("valor_original_lanche", item.get("valor_lanche")))
-                valor_extra = sum(a["valor"] for a in observacoes["adicionar"])
-                valor_final += (valor_base + valor_extra) * qtd
-
-            # --- Bebidas
-            if id_bebida:
-                valor_bebida = float(item.get("valor", 0))
-                valor_final += valor_bebida * qtd
+            else:
+                snack_error("Item inválido!")
+                return
 
             obs_texto = item.get("observacoes_texto", "Nenhuma")
 
@@ -1421,6 +1282,10 @@ def main(page: ft.Page):
                 f"Bebida: {item.get('nome_bebida', '---')} | "
                 f"Obs: {obs_texto}"
             )
+
+            # ======================================================
+            # 🚀 ENVIA PARA API
+            # ======================================================
 
             response = cadastrar_pedido_app(
                 id_lanche=id_lanche,
@@ -1432,11 +1297,15 @@ def main(page: ft.Page):
                 id_pessoa=id_pessoa
             )
 
-            if "error" in response:
-                snack_error(f"Erro ao cadastrar pedido: {response['error']}")
+            if not response or "error" in response:
+                snack_error(f"Erro ao cadastrar pedido: {response.get('error')}")
                 return
 
             item["enviado"] = True
+
+        # ======================================================
+        # 💾 ATUALIZA STORAGE
+        # ======================================================
 
         carrinhos[str(numero_mesa)] = carrinho
         page.client_storage.set("carrinhos_por_mesa", carrinhos)
@@ -2437,10 +2306,30 @@ def main(page: ft.Page):
                     valor_base_original = lanche["valor_lanche"]
 
             # Mantém alterações salvas ou receita original
-            ingredientes_salvos_raw = item.get("ingredientes") or {}
-            ingredientes_salvos = {int(k): v for k, v in ingredientes_salvos_raw.items()}
-            item["ingredientes"] = {ing_id: ingredientes_salvos.get(ing_id, receita_original.get(ing_id, 0))
-                                    for ing_id in ingredientes_disponiveis}
+            # ==========================
+            # ==========================
+            # Agora, se já existir ingrediente salvo, usa ele diretamente.
+            # Se não existir, usa a receita original.
+            # NÃO recria a estrutura baseada em ingredientes_disponiveis
+            # para evitar duplicação da receita.
+
+            ingredientes_salvos_raw = item.get("ingredientes")
+
+            ingredientes_iniciais = {}
+
+            if ingredientes_salvos_raw:
+                # Se já foi editado antes, usa exatamente o que estava salvo
+                ingredientes_iniciais = {int(k): v for k, v in ingredientes_salvos_raw.items()}
+            else:
+                # Primeira vez abrindo → usa receita original
+                ingredientes_iniciais = receita_original.copy()
+
+            # Agora garantimos que TODOS os ingredientes disponíveis apareçam
+            for ing_id in ingredientes_disponiveis:
+                if ing_id not in ingredientes_iniciais:
+                    ingredientes_iniciais[ing_id] = 0  # ingrediente fora da receita começa com 0
+
+            item["ingredientes"] = ingredientes_iniciais
 
             # ==========================
             # UI e funções de controle
@@ -2551,7 +2440,7 @@ def main(page: ft.Page):
 
                     preco_total = atualizar_preco()
 
-                    print("ANTES DE SALVAR:", ingredientes_salvos)
+                    print("ANTES DE SALVAR:", item.get("ingredientes"))
                     print("RECEITA ORIGINAL:", receita_original)
                     print("INGREDIENTES SALVOS:", valores_atualizados)
 
@@ -2586,10 +2475,12 @@ def main(page: ft.Page):
 
                     item_copy.update({
                         "observacoes_texto": obs_input.value or "Nenhuma",
-                        "ingredientes": valores_atualizados,
+                        # 🔥 REMOVIDO: não salvar receita completa
+                        # "ingredientes": valores_atualizados,
+
                         "valor_lanche": preco_total,
                         "valor_venda": preco_total,
-                        "observacoes": observacoes,
+                        "observacoes": observacoes,  # <-- ISSO já tem adicionar/remover
                         "adicionados": adicionados,
                         "removidos": removidos
                     })
