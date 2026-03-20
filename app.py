@@ -560,46 +560,64 @@ def main(page: ft.Page):
 
         # renderiza cada lanche
         for lanche in resultado_lanches:
-            if lanche["disponivel"] == True:
-                lv_lanches.controls.append(
-                    ft.Card(
-                        content=ft.Container(
-                            content=ft.Row(
-                                [
-                                    ft.Image(src="imagemdolanche.png", height=70),
-                                    ft.Column(
-                                        [
-                                            ft.Text(f'{lanche["nome_lanche"]}', color=Colors.ORANGE_900, font_family="Arial", size=18, weight="bold"),
-                                            ft.Text(f'R$ {lanche["valor_lanche"]:.2f}', color=Colors.YELLOW_900, font_family="Arial",weight="bold", size=18),
+            disponivel = lanche.get("disponivel", False)
 
-                                            ft.Text(f'{lanche["descricao_lanche"]}',
-                                                    color=Colors.YELLOW_800, width=200, font_family="Arial",weight="bold", size=13),
-                                            ft.ElevatedButton(
-                                                "Adicionar ao Carrinho",
-                                                on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
-                                                style=ft.ButtonStyle(
-                                                    bgcolor=Colors.ORANGE_700,
-                                                    color=Colors.BLACK,
-                                                    padding=15,
-                                                    shape={"": ft.RoundedRectangleBorder(radius=20)}
-                                                )
-                                            ),
-                                        ]
-                                    ),
-                                ]
-                            ),
-                            bgcolor=Colors.BLACK,
-                            height=200,
-                            border_radius=10,
-                            border=ft.Border(
-                                top=ft.BorderSide(2, color=Colors.WHITE),
-                                bottom=ft.BorderSide(2, color=Colors.WHITE)
-                            ),
+            lv_lanches.controls.append(
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Row(
+                            [
+                                ft.Image(src="imagemdolanche.png", height=70),
+                                ft.Column(
+                                    [
+                                        ft.Text(
+                                            lanche["nome_lanche"],
+                                            color=Colors.ORANGE_900,
+                                            size=18,
+                                            weight="bold"
+                                        ),
+
+                                        ft.Text(
+                                            f'R$ {lanche["valor_lanche"]:.2f}',
+                                            color=Colors.YELLOW_900,
+                                            weight="bold",
+                                            size=18
+                                        ),
+
+                                        ft.Text(
+                                            lanche["descricao_lanche"],
+                                            color=Colors.YELLOW_800,
+                                            width=200,
+                                            size=13
+                                        ),
+
+                                        ft.ElevatedButton(
+                                            "Indisponível" if not disponivel else "Adicionar ao Carrinho",
+                                            disabled=not disponivel,
+                                            on_click=lambda e, l=lanche: adicionar_ao_carrinho(l),
+                                            style=ft.ButtonStyle(
+                                                bgcolor=Colors.GREY_700 if not disponivel else Colors.ORANGE_700,
+                                                color=Colors.BLACK,
+                                                padding=15,
+                                                shape={"": ft.RoundedRectangleBorder(radius=20)}
+                                            )
+                                        ),
+                                    ]
+                                ),
+                            ]
                         ),
-                        shadow_color=Colors.YELLOW_900
-                    )
-
+                        bgcolor=Colors.GREY_900 if not disponivel else Colors.BLACK,
+                        height=200,
+                        border_radius=10,
+                        border=ft.Border(
+                            top=ft.BorderSide(2, color=Colors.WHITE),
+                            bottom=ft.BorderSide(2, color=Colors.WHITE)
+                        ),
+                        opacity=0.6 if not disponivel else 1
+                    ),
+                    shadow_color=Colors.YELLOW_900
                 )
+            )
 
         # Botão "Ver Carrinho" no final da tela
         lv_lanches.controls.append(
@@ -665,7 +683,8 @@ def main(page: ft.Page):
 
         # renderiza cada lanche
         for bebida in resultado_bebidas:
-            if bebida["status_bebida"] == True:
+                status_bebida = bebida.get("status_bebida", False)
+
                 lv_bebidas.controls.append(
                     ft.Card(
                         content=ft.Container(
@@ -680,11 +699,13 @@ def main(page: ft.Page):
                                             ft.Text(f'{bebida["descricao"]}',
                                                     color=Colors.YELLOW_800, width=260, font_family="Aharoni", weight="bold", size=14),
 
+
                                             ft.ElevatedButton(
-                                                "Adicionar ao Carrinho",
+                                                "Indisponível" if not status_bebida else "Adicionar ao Carrinho",
+                                                disabled=not status_bebida,
                                                 on_click=lambda e, b=bebida: adicionar_ao_carrinho(b),
                                                 style=ft.ButtonStyle(
-                                                    bgcolor=Colors.ORANGE_700,
+                                                    bgcolor=Colors.GREY_700 if not status_bebida else Colors.ORANGE_700,
                                                     color=Colors.BLACK,
                                                     padding=15,
                                                     shape={"": ft.RoundedRectangleBorder(radius=20)}
@@ -694,7 +715,7 @@ def main(page: ft.Page):
                                     ),
                                 ]
                             ),
-                            bgcolor=Colors.BLACK,
+                            bgcolor=Colors.GREY_900 if not status_bebida else Colors.BLACK,
                             height=200,
                             border_radius=10,
                             border=ft.Border(
