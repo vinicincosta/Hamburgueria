@@ -978,6 +978,37 @@ def main(page: ft.Page):
             pedidos_da_venda = []
 
             # ==============================
+            # 💰 CALCULAR TOTAL (ANTES)
+            # ==============================
+            total = 0
+            for item in carrinho:
+                qtd = int(item.get("qtd", 1))
+
+                if item.get("id_lanche"):
+                    total += float(item.get("valor_lanche", 0)) * qtd
+
+                elif item.get("id_bebida"):
+                    total += float(item.get("valor_bebida", 0)) * qtd
+
+            # ==============================
+            # 🚀 CRIAR VENDA (ANTES)
+            # ==============================
+            response_venda = cadastrar_venda_app(
+                pessoa_id=pessoa_id,
+                detalhamento=f"Delivery com {len(carrinho)} itens",
+                endereco=endereco_valor,
+                forma_pagamento=forma_pagamento_valor,
+                valor_venda=total
+            )
+
+            if not response_venda or "error" in response_venda:
+                snack_error(f"Erro ao cadastrar venda: {response_venda.get('error')}")
+                return
+
+            # 🔥 AGORA EXISTE
+            id_venda = response_venda["venda"]["id_venda"]
+
+            # ==============================
             # 🔁 PROCESSA CADA ITEM
             # ==============================
             for item in carrinho:
@@ -986,29 +1017,18 @@ def main(page: ft.Page):
                 id_bebida = item.get("id_bebida")
                 qtd = int(item.get("qtd", 1))
 
-                # 🔥 USA DIRETO AS OBSERVAÇÕES JÁ SALVAS
                 observacoes = item.get("observacoes", {"adicionar": [], "remover": []})
 
-                # ==============================
-                # 🍔 LANCHE
-                # ==============================
                 if id_lanche:
-                    valor_final = float(item.get("valor_lanche", 0)) * qtd
+                    pass
 
-                # ==============================
-                # 🥤 BEBIDA
-                # ==============================
                 elif id_bebida:
                     observacoes = {"adicionar": [], "remover": []}
-                    valor_final = float(item.get("valor_bebida", 0)) * qtd
 
                 else:
                     snack_error("Item inválido no carrinho!")
                     return
 
-                # ==============================
-                # 📝 DETALHAMENTO
-                # ==============================
                 obs_texto = item.get("observacoes_texto", "Nenhuma")
 
                 detalhamento = (
@@ -1018,16 +1038,17 @@ def main(page: ft.Page):
                 )
 
                 # ==============================
-                # 🚀 CADASTRA PEDIDO NA API
+                # 🚀 CADASTRA PEDIDO
                 # ==============================
                 response = cadastrar_pedido_app(
                     id_lanche=id_lanche,
                     id_bebida=id_bebida,
                     qtd_lanche=qtd,
                     detalhamento=detalhamento,
-                    numero_mesa="",  # DELIVERY NÃO TEM MESA
+                    numero_mesa="delivery",
                     observacoes=observacoes,
-                    id_pessoa=pessoa_id
+                    id_pessoa=pessoa_id,
+                    id_venda=id_venda  # 🔥 AGORA CORRETO
                 )
 
                 if not response or "error" in response:
@@ -1044,7 +1065,7 @@ def main(page: ft.Page):
             input_forma_pagamento.value = ""
 
             # ==============================
-            # 💾 SALVA PEDIDOS DA VENDA
+            # 💾 SALVA PEDIDOS
             # ==============================
             page.client_storage.set("pedidos_venda_atual", pedidos_da_venda)
 
@@ -1059,6 +1080,8 @@ def main(page: ft.Page):
         except Exception as err:
             print("❌ ERRO EM confirmar_venda_delivery_e_enviar_cozinha:", err)
             snack_error("Erro ao confirmar venda + enviar cozinha.")
+
+
 
     # FUNÇÕES GARCOM
     def carrinho_view_garcom(page, lv_carrinho_garcom, mesa_num):

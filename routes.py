@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://192.168.0.44:5002"
+base_url = "http://192.168.0.72:5002"
 
 
 # LOGIN
@@ -154,7 +154,7 @@ def listar_pessoas():
 
 
 
-def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa):
+def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_mesa, observacoes, id_pessoa, id_venda=None):
     url = f"{base_url}/pedidos"
 
     # 🔧 Trata número da mesa / delivery
@@ -175,6 +175,7 @@ def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_
         "qtd_lanche": int(qtd_lanche),
         "detalhamento": detalhamento or "",
         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
+        "id_venda": int(id_venda),
     }
 
     #  Adiciona lanche se existir
@@ -210,15 +211,24 @@ def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_
 
 
 
-def cadastrar_venda_app(lanche_id, pessoa_id, bebida_id, qtd_lanche, forma_pagamento, endereco, detalhamento, observacoes=None,
-                        valor_venda=0.0):
+def cadastrar_venda_app(
+    pessoa_id,
+    detalhamento,
+    endereco,
+    forma_pagamento,
+    valor_venda=0.0,
+    lanche_id=None,
+    bebida_id=None,
+    qtd_lanche=1,
+    observacoes=None
+):
     url = f"{base_url}/vendas"  # rota da API
 
     payload = {
         "data_venda": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "lanche_id": lanche_id if lanche_id else None,
+        "lanche_id": lanche_id,
         "pessoa_id": pessoa_id,
-        "bebida_id": bebida_id if bebida_id else None,
+        "bebida_id": bebida_id,
         "qtd_lanche": qtd_lanche,
         "detalhamento": detalhamento,
         "endereco": endereco,
