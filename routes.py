@@ -3,8 +3,12 @@ from datetime import datetime
 
 import requests
 
-base_url = "https://hamburgueriaapi-x67m.onrender.com"
+import os
 
+base_url = os.environ.get(
+    "BASE_URL",
+    "https://hamburgueriaapi-x67m.onrender.com"
+)
 
 # LOGIN
 def post_login(email, senha):
