@@ -9,22 +9,29 @@ from flet.core.types import FontWeight
 from urllib.parse import urlparse, parse_qs
 
 from collections import defaultdict
-
+import os
 
 from routes import *
 
 
 def main(page: ft.Page):
     # Configurações
-    page.title = "Exemplo de Login"
-    page.theme_mode = ft.ThemeMode.LIGHT  # ou ft.ThemeMode.DARK
-    page.window.width = 375
-    page.window.height = 667
+    page.title = "Meu App"
+    page.add(ft.Text("Rodando no Render 🚀"))
+    page.theme_mode = ft.ThemeMode.LIGHT
+
+    # ⚠️ Essas configurações de janela NÃO funcionam na web
+    # (Render roda no navegador)
+    # page.window.width = 375
+    # page.window.height = 667
+
     page.fonts = {
         "Playfair Display": "https://fonts.googleapis.com/css2?family=Playfair+Display&display=swap"
     }
-    # Funções
 
+    # 👇 FORA da função
+
+    # Funções
     def click_login(e):
         loading_indicator.visible = True
         page.update()
@@ -1338,7 +1345,8 @@ def main(page: ft.Page):
                 detalhamento=detalhamento,
                 numero_mesa=numero_mesa,
                 observacoes=observacoes,
-                id_pessoa=id_pessoa
+                id_pessoa=id_pessoa,
+                id_venda=id_venda
             )
 
             if not response or "error" in response:
@@ -3138,4 +3146,6 @@ def main(page: ft.Page):
 
 # Comando que executa o aplicativo
 # Deve estar sempre colado na linha
-ft.app(main)
+port = int(os.environ.get("PORT", 10000))
+
+ft.app(target=main, port=port)

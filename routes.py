@@ -3,7 +3,7 @@ from datetime import datetime
 
 import requests
 
-base_url = "http://192.168.0.72:5002"
+base_url = "https://hamburgueriaapi-x67m.onrender.com"
 
 
 # LOGIN
@@ -175,7 +175,9 @@ def cadastrar_pedido_app(id_lanche, id_bebida, qtd_lanche, detalhamento, numero_
         "qtd_lanche": int(qtd_lanche),
         "detalhamento": detalhamento or "",
         "observacoes": observacoes if observacoes else {"adicionar": [], "remover": []},
-        "id_venda": int(id_venda),
+
+        #Apenas se existir
+        "id_venda": int(id_venda) if id_venda not in [None, "", "None"] else None,
     }
 
     #  Adiciona lanche se existir
