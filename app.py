@@ -1,11 +1,7 @@
 import flet as ft
-from flet import AppBar, Text, View
-from flet.core.colors import Colors
-from flet.core.dropdown import Option
-from flet.core.elevated_button import ElevatedButton
-from flet.core.icons import Icons
-from flet.core.text_style import TextStyle, TextThemeStyle
-from flet.core.types import FontWeight
+from flet import AppBar, Text,Icons, View, Colors, TextStyle, TextThemeStyle, FontWeight, ElevatedButton
+
+
 from urllib.parse import urlparse, parse_qs
 
 from collections import defaultdict
@@ -2863,8 +2859,8 @@ def main(page: ft.Page):
         width=300, bgcolor=Colors.ORANGE_800,
         fill_color=Colors.ORANGE_800, color=Colors.ORANGE_800, text_style=TextStyle(color=Colors.WHITE),
         options=[
-            Option(key="Ativo", text="Ativo"),
-            Option(key="Inativo", text="Inativo"),
+            ft.dropdown.Option(key="Ativo", text="Ativo"),
+            ft.dropdown.Option(key="Inativo", text="Inativo"),
 
         ]
     )
@@ -2874,10 +2870,10 @@ def main(page: ft.Page):
         width=300, bgcolor=Colors.ORANGE_800,
         fill_color=Colors.ORANGE_800, color=Colors.DEEP_ORANGE_800, text_style=TextStyle(color=Colors.BLACK),
         options=[
-            Option(key="Dinheiro", text="Dinheiro"),
-            Option(key="Credito", text="Crédito"),
-            Option(key="Debito", text="Débito"),
-            Option(key="Pix", text="Pix"),
+            ft.dropdown.Option(key="Dinheiro", text="Dinheiro"),
+            ft.dropdown.Option(key="Credito", text="Crédito"),
+            ft.dropdown.Option(key="Debito", text="Débito"),
+            ft.dropdown.Option(key="Pix", text="Pix"),
 
         ]
 
@@ -2939,7 +2935,7 @@ def main(page: ft.Page):
     )
 
     btn_logout_cardapio = ft.TextButton(
-        icon=Icons.LOGOUT,
+        icon=ft.Icons.LOGOUT,
         scale=1.5,
         icon_color=Colors.RED_700,
         on_click=lambda  _: page.go('/presencial_delivery')
@@ -3006,8 +3002,8 @@ def main(page: ft.Page):
         width=300, bgcolor=Colors.ORANGE_800,
         fill_color=Colors.ORANGE_800, color=Colors.ORANGE_800, text_style=TextStyle(color=Colors.WHITE),
         options=[
-            Option(key="Cliente", text="Cliente"),
-            Option(key="garcom", text="Garçom"),
+            ft.dropdown.Option(key="Cliente", text="Cliente"),
+            ft.dropdown.Option(key="garcom", text="Garçom"),
 
         ]
     )
