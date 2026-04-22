@@ -186,11 +186,11 @@ def main(page: ft.Page):
                                     ft.Image(src="istockphoto-459361585-170667a.jpg", height=90),
                                     ft.Column(
                                         [
-                                            ft.Text(f'{bebida["nome_bebida"]}', color=Colors.ORANGE_900, font_family="Arial",weight="bold", size=18),
-                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=Colors.YELLOW_900, font_family="Arial", weight="bold",size=18),
+                                            ft.Text(f'{bebida["nome_bebida"]}', color=ft.Colors.ORANGE_900, font_family="Arial",weight="bold", size=18),
+                                            ft.Text(f'R$ {bebida["valor"]:.2f}', color=ft.Colors.YELLOW_900, font_family="Arial", weight="bold",size=18),
 
                                             ft.Text(f'{bebida["descricao"]}',
-                                                    color=Colors.YELLOW_800, width=200, font_family="Arial",weight="bold", size=14),
+                                                    color=ft.Colors.YELLOW_800, width=200, font_family="Arial",weight="bold", size=14),
                                             ft.ElevatedButton(
                                                 "Finalizar Pedido",
                                                 on_click=lambda e: page.open(dlg_modal),
@@ -3144,4 +3144,4 @@ def main(page: ft.Page):
 # Deve estar sempre colado na linha
 port = int(os.environ.get("PORT", 10000))
 
-ft.app(target=main, port=port)
+ft.run(main)
